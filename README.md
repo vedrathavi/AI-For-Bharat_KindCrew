@@ -38,6 +38,7 @@ AI-For-Bharat_KindCrew/
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Next.js 16** - React framework with App Router
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
@@ -45,6 +46,7 @@ AI-For-Bharat_KindCrew/
 - **Zustand** - State management
 
 ### Backend
+
 - **Express.js** - Web framework
 - **ES6 Modules** - Modern JavaScript
 - **CORS** - Cross-origin support
@@ -53,23 +55,27 @@ AI-For-Bharat_KindCrew/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 20+
 - npm
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd AI-For-Bharat_KindCrew
    ```
 
 2. **Setup Backend**
+
    ```bash
    cd backend
    npm install
    npm run dev
    ```
+
    Backend runs on: http://localhost:5000
 
 3. **Setup Frontend**
@@ -85,23 +91,25 @@ AI-For-Bharat_KindCrew/
 ### Simple Usage
 
 ```typescript
-import apiClient from '@/lib/apiClient';
+import apiClient from "@/lib/apiClient";
 
 // GET request
-const { data } = await apiClient.get('/health');
+const { data } = await apiClient.get("/health");
 
 // POST request
-const { data } = await apiClient.post('/api/endpoint', { key: 'value' });
+const { data } = await apiClient.post("/api/endpoint", { key: "value" });
 ```
 
 ### Configuration
 
 Frontend `.env.local`:
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
 Backend `.env`:
+
 ```env
 PORT=5000
 NODE_ENV=development
@@ -116,12 +124,14 @@ NODE_ENV=development
 ## 🎯 Available Scripts
 
 ### Backend
+
 ```bash
 npm run dev    # Start with nodemon (auto-reload)
 npm start      # Start production server
 ```
 
 ### Frontend
+
 ```bash
 npm run dev    # Start development server
 npm run build  # Build for production
@@ -130,18 +140,20 @@ npm start      # Start production server
 
 ## ✅ API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Welcome message |
-| GET | `/health` | Health check |
+| Method | Endpoint  | Description     |
+| ------ | --------- | --------------- |
+| GET    | `/`       | Welcome message |
+| GET    | `/health` | Health check    |
 
 ## 🔐 Environment Variables
 
 ### Backend (.env)
+
 - `PORT` - Server port (default: 5000)
 - `NODE_ENV` - Environment (development/production)
 
 ### Frontend (.env.local)
+
 - `NEXT_PUBLIC_API_URL` - Backend API URL
 
 ## 🤝 Contributing

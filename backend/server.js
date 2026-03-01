@@ -1,5 +1,5 @@
-import app from './config/app.js';
-import dotenv from 'dotenv';
+import app from "./config/app.js";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -11,14 +11,14 @@ const server = app.listen(PORT, () => {
 });
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('🔴 Unhandled Rejection:', err);
+process.on("unhandledRejection", (err) => {
+  console.error("🔴 Unhandled Rejection:", err);
   server.close(() => process.exit(1));
 });
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('🔴 Uncaught Exception:', err);
+process.on("uncaughtException", (err) => {
+  console.error("🔴 Uncaught Exception:", err);
   process.exit(1);
 });
 

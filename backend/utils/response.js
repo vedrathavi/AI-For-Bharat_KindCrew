@@ -4,12 +4,12 @@
  * @param {any} data - Response data
  * @returns {object} Formatted response
  */
-export const successResponse = (message = 'Success', data = null) => {
+export const successResponse = (message = "Success", data = null) => {
   return {
     success: true,
     message,
     data,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 };
 
@@ -19,11 +19,11 @@ export const successResponse = (message = 'Success', data = null) => {
  * @param {any} error - Error details
  * @returns {object} Formatted response
  */
-export const errorResponse = (message = 'Error', error = null) => {
+export const errorResponse = (message = "Error", error = null) => {
   return {
     success: false,
     message,
     error,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 };
