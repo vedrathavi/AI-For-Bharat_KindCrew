@@ -13,7 +13,7 @@ async function listUsers() {
     const result = await docClient.send(
       new ScanCommand({
         TableName: usersTable,
-      })
+      }),
     );
 
     if (!result.Items || result.Items.length === 0) {
@@ -42,12 +42,13 @@ async function listUsers() {
       console.log(`   emailVerified: ${user.emailVerified || false}`);
       console.log(`   createdAt: ${user.createdAt || "N/A"}`);
       console.log(`   lastLogin: ${user.lastLogin || "N/A"}`);
-      console.log(`   loginHistory: ${user.loginHistory?.length || 0} login(s)`);
+      console.log(
+        `   loginHistory: ${user.loginHistory?.length || 0} login(s)`,
+      );
       console.log("");
     });
 
     console.log(`📊 Total users: ${result.Items.length}`);
-    
   } catch (error) {
     console.error("❌ Error reading from DynamoDB:");
     console.error(error.message);

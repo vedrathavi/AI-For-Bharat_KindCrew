@@ -72,7 +72,7 @@ export const getCognitoUser = async (idToken) => {
     if (payload.identities && Array.isArray(payload.identities)) {
       // User logged in via federated provider (Google, Facebook, etc.)
       const googleIdentity = payload.identities.find(
-        (id) => id.providerType === "Google"
+        (id) => id.providerType === "Google",
       );
       if (googleIdentity) {
         identityProvider = "google";
