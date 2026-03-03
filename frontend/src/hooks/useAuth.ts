@@ -7,9 +7,6 @@ export function useAuth() {
   const loading = useAppStore((state) => state.loading);
   const error = useAppStore((state) => state.error);
   const initializeAuth = useAppStore((state) => state.initializeAuth);
-  const handleCognitoCallback = useAppStore(
-    (state) => state.handleCognitoCallback,
-  );
   const logout = useAppStore((state) => state.logout);
   const isAuthenticated = useAppStore((state) => state.isAuthenticated);
   const setAuth = useAppStore((state) => state.setAuth);
@@ -21,7 +18,6 @@ export function useAuth() {
     loading,
     error,
     initializeAuth,
-    handleCognitoCallback,
     logout,
     isAuthenticated,
     setAuth,

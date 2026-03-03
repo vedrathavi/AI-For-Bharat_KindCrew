@@ -1,4 +1,3 @@
-import apiClient from "@/lib/apiClient";
 import { StateCreator } from "zustand";
 import { extractUserFromToken } from "@/lib/jwtDecode";
 
@@ -19,7 +18,6 @@ export type AuthSlice = {
   setAuth: (payload: { token: string; user: UserInfo }) => void;
   clearAuth: () => void;
   initializeAuth: () => Promise<void>;
-  handleCognitoCallback: (code: string, redirectUri: string) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: () => boolean;
 };
@@ -85,33 +83,6 @@ export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (
         loading: false,
         error: message,
       });
-    }
-  },
-
-  handleCognitoCallback: async (code, redirectUri) => {
-    set({ loading: true, error: null });
-
-    try {
-      const response = await apiClient.post("/api/auth/cognito", {
-        code,
-        redirectUri,
-      });
-
-      const token = response?.data?.data?.token;
-      const user = response?.data?.data?.user;
-
-      if (!token || !user) {
-        throw new Error("Invalid authentication response");
-      }
-
-      get().setAuth({ token, user });
-    } catch (error: unknown) {
-      const message =
-        typeof error === "object" && error !== null && "message" in error
-          ? (error as { message?: string }).message || "Login failed"
-          : "Login failed";
-      set({ loading: false, error: message });
-      throw error;
     }
   },
 

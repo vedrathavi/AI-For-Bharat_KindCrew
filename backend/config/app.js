@@ -3,7 +3,6 @@ import cors from "cors";
 import session from "express-session";
 import errorHandler from "../middleware/errorHandler.js";
 import authRoutes from "../routes/authRoutes.js";
-import userRoutes from "../routes/userRoutes.js";
 
 const app = express();
 
@@ -61,9 +60,6 @@ app.get("/", (req, res) => {
 
 // Auth routes
 app.use("/api/auth", authRoutes);
-
-// User routes (development only)
-app.use("/api/users", userRoutes);
 
 // 404 handler
 app.use((req, res) => {
