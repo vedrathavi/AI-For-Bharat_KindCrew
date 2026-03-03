@@ -32,22 +32,22 @@ export default function HomePage() {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen"
       style={{ backgroundColor: "var(--color-background)" }}
     >
       {/* Navigation */}
-      <nav 
+      <nav
         className="px-6 py-4"
         style={{ borderBottom: "1px solid var(--color-border)" }}
       >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <div 
+            <div
               className="w-8 h-8 rounded-lg"
               style={{ backgroundColor: "var(--color-surface-hover)" }}
             ></div>
-            <span 
+            <span
               className="text-xl font-bold"
               style={{ color: "var(--color-text)" }}
             >
@@ -73,25 +73,26 @@ export default function HomePage() {
         <div className="text-center space-y-8">
           {/* Main Heading */}
           <div className="space-y-4">
-            <h1 
+            <h1
               className="text-5xl md:text-7xl font-bold leading-tight"
               style={{ color: "var(--color-text)" }}
             >
               AI-Powered Content
               <br />
-              <span 
+              <span
                 className="font-bold"
-                style={{ 
-                  background: "linear-gradient(90deg, #60a5fa 0%, #a78bfa 100%)",
+                style={{
+                  background:
+                    "linear-gradient(90deg, #60a5fa 0%, #a78bfa 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
-                  backgroundClip: "text"
+                  backgroundClip: "text",
                 }}
               >
                 For Everyone
               </span>
             </h1>
-            <p 
+            <p
               className="text-xl md:text-2xl max-w-3xl mx-auto"
               style={{ color: "var(--color-text-secondary)" }}
             >
@@ -113,7 +114,7 @@ export default function HomePage() {
             >
               {loading ? "Connecting..." : "Get Started"}
             </button>
-            <button 
+            <button
               className="px-8 py-4 text-lg font-semibold rounded-lg transition-all"
               style={{
                 backgroundColor: "var(--color-surface)",
@@ -127,22 +128,33 @@ export default function HomePage() {
 
           {/* Features Grid */}
           <div className="grid md:grid-cols-3 gap-8 pt-20">
-            <div 
+            <div
               className="p-6 rounded-xl transition-colors"
               style={{
                 backgroundColor: "var(--color-surface)",
                 border: "1px solid var(--color-border)",
               }}
             >
-              <div 
+              <div
                 className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 mx-auto"
                 style={{ backgroundColor: "var(--color-surface-hover)" }}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#60a5fa" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  style={{ color: "#60a5fa" }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
                 </svg>
               </div>
-              <h3 
+              <h3
                 className="text-xl font-semibold mb-2"
                 style={{ color: "var(--color-text)" }}
               >
@@ -153,22 +165,33 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div 
+            <div
               className="p-6 rounded-xl transition-colors"
               style={{
                 backgroundColor: "var(--color-surface)",
                 border: "1px solid var(--color-border)",
               }}
             >
-              <div 
+              <div
                 className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 mx-auto"
                 style={{ backgroundColor: "var(--color-surface-hover)" }}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#a78bfa" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  style={{ color: "#a78bfa" }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
                 </svg>
               </div>
-              <h3 
+              <h3
                 className="text-xl font-semibold mb-2"
                 style={{ color: "var(--color-text)" }}
               >
@@ -179,22 +202,33 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div 
+            <div
               className="p-6 rounded-xl transition-colors"
               style={{
                 backgroundColor: "var(--color-surface)",
                 border: "1px solid var(--color-border)",
               }}
             >
-              <div 
+              <div
                 className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 mx-auto"
                 style={{ backgroundColor: "var(--color-surface-hover)" }}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#34d399" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  style={{ color: "#34d399" }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
                 </svg>
               </div>
-              <h3 
+              <h3
                 className="text-xl font-semibold mb-2"
                 style={{ color: "var(--color-text)" }}
               >
@@ -209,11 +243,11 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer 
+      <footer
         className="max-w-7xl mx-auto px-6 py-8 mt-20"
         style={{ borderTop: "1px solid var(--color-border)" }}
       >
-        <div 
+        <div
           className="text-center text-sm"
           style={{ color: "var(--color-text-muted)" }}
         >

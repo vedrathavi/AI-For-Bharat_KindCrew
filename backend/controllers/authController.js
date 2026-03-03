@@ -207,8 +207,6 @@ export const handleLogout = (req, res) => {
     res.redirect(cognitoLogoutUrl);
   } catch (error) {
     console.error("❌ Logout failed:", error.message);
-    res.redirect(
-      `${process.env.FRONTEND_URL || "http://localhost:3000"}`,
-    );
+    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:3000"}`);
   }
 };
