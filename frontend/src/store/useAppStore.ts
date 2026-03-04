@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AuthSlice, createAuthSlice } from "./slice/authSlice";
-import { CreatorProfileSlice, createCreatorProfileSlice } from "./slice/creatorProfileSlice";
+import {
+  CreatorProfileSlice,
+  createCreatorProfileSlice,
+} from "./slice/creatorProfileSlice";
 
 type AppState = AuthSlice & CreatorProfileSlice;
 

@@ -59,9 +59,7 @@ export default function AuthenticatedLayout({
         className="flex items-center justify-center min-h-screen"
         style={{ backgroundColor: "var(--color-background)" }}
       >
-        <div style={{ color: "var(--color-text-secondary)" }}>
-          Loading...
-        </div>
+        <div style={{ color: "var(--color-text-secondary)" }}>Loading...</div>
       </div>
     );
   }
@@ -71,10 +69,17 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    <div className="min-h-screen w-full max-w-full flex overflow-x-hidden" style={{ backgroundColor: "var(--color-background)" }}>
+    <div
+      className="min-h-screen w-full max-w-full flex overflow-x-hidden"
+      style={{ backgroundColor: "var(--color-background)" }}
+    >
       {/* Desktop Sidebar (Fixed) */}
       <div className="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 z-30">
-        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} onLogout={logout} />
+        <Sidebar
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          onLogout={logout}
+        />
       </div>
 
       {/* Mobile Menu Button */}
@@ -111,7 +116,12 @@ export default function AuthenticatedLayout({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <Sidebar collapsed={false} setCollapsed={() => {}} onLogout={logout} onCloseDrawer={closeDrawer} />
+            <Sidebar
+              collapsed={false}
+              setCollapsed={() => {}}
+              onLogout={logout}
+              onCloseDrawer={closeDrawer}
+            />
           </div>
         </div>
       )}

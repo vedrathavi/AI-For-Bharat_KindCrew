@@ -9,7 +9,8 @@ import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 export default function ProfilePage() {
   const router = useRouter();
   const { userInfo, token, authReady, isAuthenticated, logout } = useAuth();
-  const { creatorProfile, fetchProfile, profileLoading, hasProfile } = useAppStore();
+  const { creatorProfile, fetchProfile, profileLoading, hasProfile } =
+    useAppStore();
   console.log("User Info:", userInfo);
   console.log("Creator Profile:", creatorProfile);
   useEffect(() => {
@@ -26,7 +27,10 @@ export default function ProfilePage() {
 
   if (!authReady) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--color-background)" }}>
+      <div
+        className="flex items-center justify-center min-h-screen"
+        style={{ backgroundColor: "var(--color-background)" }}
+      >
         <div style={{ color: "var(--color-text-secondary)" }}>Loading...</div>
       </div>
     );
@@ -94,7 +98,7 @@ export default function ProfilePage() {
               <p className="text-lg" style={{ color: "var(--color-text)" }}>
                 {userInfo?.givenName && userInfo?.familyName
                   ? `${userInfo.givenName} ${userInfo.familyName}`
-                  : userInfo?.name  || "N/A"}
+                  : userInfo?.name || "N/A"}
               </p>
             </div>
             <div>
@@ -184,7 +188,8 @@ export default function ProfilePage() {
                 <span
                   className="px-4 py-2 rounded-lg text-sm"
                   style={{
-                    background: "linear-gradient(90deg, #60a5fa 0%, #a78bfa 100%)",
+                    background:
+                      "linear-gradient(90deg, #60a5fa 0%, #a78bfa 100%)",
                     color: "var(--color-white)",
                   }}
                 >
@@ -205,97 +210,99 @@ export default function ProfilePage() {
             </div>
 
             {/* Platforms */}
-            {creatorProfile.platforms && creatorProfile.platforms.length > 0 && (
-              <div>
-                <h3
-                  className="text-lg font-semibold mb-3"
-                  style={{ color: "var(--color-text)" }}
-                >
-                  Platforms
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {creatorProfile.platforms.map((platform, index) => (
-                    <div
-                      key={index}
-                      className="p-4 rounded-lg"
-                      style={{
-                        backgroundColor: "var(--color-background)",
-                        border: "1px solid var(--color-border)",
-                      }}
-                    >
-                      <p
-                        className="font-medium mb-1"
-                        style={{ color: "var(--color-text)" }}
+            {creatorProfile.platforms &&
+              creatorProfile.platforms.length > 0 && (
+                <div>
+                  <h3
+                    className="text-lg font-semibold mb-3"
+                    style={{ color: "var(--color-text)" }}
+                  >
+                    Platforms
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {creatorProfile.platforms.map((platform, index) => (
+                      <div
+                        key={index}
+                        className="p-4 rounded-lg"
+                        style={{
+                          backgroundColor: "var(--color-background)",
+                          border: "1px solid var(--color-border)",
+                        }}
                       >
-                        {platform.name}
-                      </p>
-                      <p
-                        className="text-sm"
-                        style={{ color: "var(--color-text-secondary)" }}
-                      >
-                        {platform.handle}
-                      </p>
-                      <span
-                        className={`text-xs mt-2 inline-block ${
-                          platform.active ? "text-green-500" : "text-red-500"
-                        }`}
-                      >
-                        {platform.active ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Competitors */}
-            {creatorProfile.competitors && creatorProfile.competitors.length > 0 && (
-              <div>
-                <h3
-                  className="text-lg font-semibold mb-3"
-                  style={{ color: "var(--color-text)" }}
-                >
-                  Competitors
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {creatorProfile.competitors.map((competitor, index) => (
-                    <div
-                      key={index}
-                      className="p-4 rounded-lg"
-                      style={{
-                        backgroundColor: "var(--color-background)",
-                        border: "1px solid var(--color-border)",
-                      }}
-                    >
-                      {competitor.name && (
                         <p
                           className="font-medium mb-1"
                           style={{ color: "var(--color-text)" }}
                         >
-                          {competitor.name}
+                          {platform.name}
                         </p>
-                      )}
-                      {competitor.url && (
                         <p
-                          className="text-sm mb-2 break-all"
+                          className="text-sm"
                           style={{ color: "var(--color-text-secondary)" }}
                         >
-                          {competitor.url}
+                          {platform.handle}
                         </p>
-                      )}
-                      {competitor.notes && (
-                        <p
-                          className="text-sm italic"
-                          style={{ color: "var(--color-text-muted)" }}
+                        <span
+                          className={`text-xs mt-2 inline-block ${
+                            platform.active ? "text-green-500" : "text-red-500"
+                          }`}
                         >
-                          {competitor.notes}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                          {platform.active ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+            {/* Competitors */}
+            {creatorProfile.competitors &&
+              creatorProfile.competitors.length > 0 && (
+                <div>
+                  <h3
+                    className="text-lg font-semibold mb-3"
+                    style={{ color: "var(--color-text)" }}
+                  >
+                    Competitors
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {creatorProfile.competitors.map((competitor, index) => (
+                      <div
+                        key={index}
+                        className="p-4 rounded-lg"
+                        style={{
+                          backgroundColor: "var(--color-background)",
+                          border: "1px solid var(--color-border)",
+                        }}
+                      >
+                        {competitor.name && (
+                          <p
+                            className="font-medium mb-1"
+                            style={{ color: "var(--color-text)" }}
+                          >
+                            {competitor.name}
+                          </p>
+                        )}
+                        {competitor.url && (
+                          <p
+                            className="text-sm mb-2 break-all"
+                            style={{ color: "var(--color-text-secondary)" }}
+                          >
+                            {competitor.url}
+                          </p>
+                        )}
+                        {competitor.notes && (
+                          <p
+                            className="text-sm italic"
+                            style={{ color: "var(--color-text-muted)" }}
+                          >
+                            {competitor.notes}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             {/* Goals */}
             <div>
@@ -313,7 +320,10 @@ export default function ProfilePage() {
                   >
                     Primary Goal
                   </p>
-                  <p className="font-medium capitalize" style={{ color: "var(--color-text)" }}>
+                  <p
+                    className="font-medium capitalize"
+                    style={{ color: "var(--color-text)" }}
+                  >
                     {creatorProfile.goals.primaryGoal.replace("-", " ")}
                   </p>
                 </div>
@@ -324,7 +334,10 @@ export default function ProfilePage() {
                   >
                     Creator Level
                   </p>
-                  <p className="font-medium capitalize" style={{ color: "var(--color-text)" }}>
+                  <p
+                    className="font-medium capitalize"
+                    style={{ color: "var(--color-text)" }}
+                  >
                     {creatorProfile.goals.creatorLevel}
                   </p>
                 </div>
@@ -347,7 +360,10 @@ export default function ProfilePage() {
                   >
                     Content Type
                   </p>
-                  <p className="font-medium capitalize" style={{ color: "var(--color-text)" }}>
+                  <p
+                    className="font-medium capitalize"
+                    style={{ color: "var(--color-text)" }}
+                  >
                     {creatorProfile.strategy.contentStrategy}
                   </p>
                 </div>
@@ -358,7 +374,10 @@ export default function ProfilePage() {
                   >
                     Posting Frequency
                   </p>
-                  <p className="font-medium" style={{ color: "var(--color-text)" }}>
+                  <p
+                    className="font-medium"
+                    style={{ color: "var(--color-text)" }}
+                  >
                     {creatorProfile.strategy.postingFrequency}
                   </p>
                 </div>
@@ -371,19 +390,21 @@ export default function ProfilePage() {
                       Content Pillars
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {creatorProfile.strategy.contentPillars.map((pillar, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 rounded-lg text-sm"
-                          style={{
-                            backgroundColor: "var(--color-background)",
-                            border: "1px solid var(--color-border)",
-                            color: "var(--color-text)",
-                          }}
-                        >
-                          {pillar}
-                        </span>
-                      ))}
+                      {creatorProfile.strategy.contentPillars.map(
+                        (pillar, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 rounded-lg text-sm"
+                            style={{
+                              backgroundColor: "var(--color-background)",
+                              border: "1px solid var(--color-border)",
+                              color: "var(--color-text)",
+                            }}
+                          >
+                            {pillar}
+                          </span>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
@@ -400,56 +421,62 @@ export default function ProfilePage() {
                   Preferences
                 </h3>
                 <div className="space-y-3">
-                  {creatorProfile.preferences.tones && creatorProfile.preferences.tones.length > 0 && (
-                    <div>
-                      <p
-                        className="text-sm mb-2"
-                        style={{ color: "var(--color-text-secondary)" }}
-                      >
-                        Tones
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {creatorProfile.preferences.tones.map((tone, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 rounded-lg text-sm"
-                            style={{
-                              backgroundColor: "var(--color-background)",
-                              border: "1px solid var(--color-border)",
-                              color: "var(--color-text)",
-                            }}
-                          >
-                            {tone}
-                          </span>
-                        ))}
+                  {creatorProfile.preferences.tones &&
+                    creatorProfile.preferences.tones.length > 0 && (
+                      <div>
+                        <p
+                          className="text-sm mb-2"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
+                          Tones
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {creatorProfile.preferences.tones.map(
+                            (tone, index) => (
+                              <span
+                                key={index}
+                                className="px-3 py-1 rounded-lg text-sm"
+                                style={{
+                                  backgroundColor: "var(--color-background)",
+                                  border: "1px solid var(--color-border)",
+                                  color: "var(--color-text)",
+                                }}
+                              >
+                                {tone}
+                              </span>
+                            ),
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {creatorProfile.preferences.formats && creatorProfile.preferences.formats.length > 0 && (
-                    <div>
-                      <p
-                        className="text-sm mb-2"
-                        style={{ color: "var(--color-text-secondary)" }}
-                      >
-                        Formats
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {creatorProfile.preferences.formats.map((format, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 rounded-lg text-sm"
-                            style={{
-                              backgroundColor: "var(--color-background)",
-                              border: "1px solid var(--color-border)",
-                              color: "var(--color-text)",
-                            }}
-                          >
-                            {format}
-                          </span>
-                        ))}
+                    )}
+                  {creatorProfile.preferences.formats &&
+                    creatorProfile.preferences.formats.length > 0 && (
+                      <div>
+                        <p
+                          className="text-sm mb-2"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
+                          Formats
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {creatorProfile.preferences.formats.map(
+                            (format, index) => (
+                              <span
+                                key={index}
+                                className="px-3 py-1 rounded-lg text-sm"
+                                style={{
+                                  backgroundColor: "var(--color-background)",
+                                  border: "1px solid var(--color-border)",
+                                  color: "var(--color-text)",
+                                }}
+                              >
+                                {format}
+                              </span>
+                            ),
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <p
@@ -458,8 +485,12 @@ export default function ProfilePage() {
                       >
                         CTA Strength
                       </p>
-                      <p className="font-medium capitalize" style={{ color: "var(--color-text)" }}>
-                        {creatorProfile.preferences.constraints?.ctaStrength || "medium"}
+                      <p
+                        className="font-medium capitalize"
+                        style={{ color: "var(--color-text)" }}
+                      >
+                        {creatorProfile.preferences.constraints?.ctaStrength ||
+                          "medium"}
                       </p>
                     </div>
                     <div>
@@ -469,8 +500,12 @@ export default function ProfilePage() {
                       >
                         Formality
                       </p>
-                      <p className="font-medium capitalize" style={{ color: "var(--color-text)" }}>
-                        {creatorProfile.preferences.constraints?.formality || "semi-formal"}
+                      <p
+                        className="font-medium capitalize"
+                        style={{ color: "var(--color-text)" }}
+                      >
+                        {creatorProfile.preferences.constraints?.formality ||
+                          "semi-formal"}
                       </p>
                     </div>
                     <div>
@@ -480,7 +515,10 @@ export default function ProfilePage() {
                       >
                         Time Commitment
                       </p>
-                      <p className="font-medium capitalize" style={{ color: "var(--color-text)" }}>
+                      <p
+                        className="font-medium capitalize"
+                        style={{ color: "var(--color-text)" }}
+                      >
                         {creatorProfile.preferences.timeCommitment || "medium"}
                       </p>
                     </div>
@@ -490,7 +528,10 @@ export default function ProfilePage() {
             )}
 
             {/* Status */}
-            <div className="pt-4 border-t" style={{ borderColor: "var(--color-border)" }}>
+            <div
+              className="pt-4 border-t"
+              style={{ borderColor: "var(--color-border)" }}
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p
@@ -502,8 +543,14 @@ export default function ProfilePage() {
                   <span
                     className="px-3 py-1 rounded-full text-sm inline-block capitalize"
                     style={{
-                      backgroundColor: creatorProfile.status === "active" ? "rgba(34, 197, 94, 0.2)" : "var(--color-surface-hover)",
-                      color: creatorProfile.status === "active" ? "#22c55e" : "var(--color-text)",
+                      backgroundColor:
+                        creatorProfile.status === "active"
+                          ? "rgba(34, 197, 94, 0.2)"
+                          : "var(--color-surface-hover)",
+                      color:
+                        creatorProfile.status === "active"
+                          ? "#22c55e"
+                          : "var(--color-text)",
                     }}
                   >
                     {creatorProfile.status}
@@ -519,11 +566,18 @@ export default function ProfilePage() {
                   <span
                     className="px-3 py-1 rounded-full text-sm inline-block"
                     style={{
-                      backgroundColor: creatorProfile.settings.onboardingCompleted ? "rgba(34, 197, 94, 0.2)" : "rgba(251, 146, 60, 0.2)",
-                      color: creatorProfile.settings.onboardingCompleted ? "#22c55e" : "#fb923c",
+                      backgroundColor: creatorProfile.settings
+                        .onboardingCompleted
+                        ? "rgba(34, 197, 94, 0.2)"
+                        : "rgba(251, 146, 60, 0.2)",
+                      color: creatorProfile.settings.onboardingCompleted
+                        ? "#22c55e"
+                        : "#fb923c",
                     }}
                   >
-                    {creatorProfile.settings.onboardingCompleted ? "Completed" : "Incomplete"}
+                    {creatorProfile.settings.onboardingCompleted
+                      ? "Completed"
+                      : "Incomplete"}
                   </span>
                 </div>
               </div>

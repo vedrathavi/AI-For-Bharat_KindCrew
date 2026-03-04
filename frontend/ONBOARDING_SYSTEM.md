@@ -37,14 +37,15 @@ frontend/src/
 ## 🎯 Features Implemented
 
 ### 1. **Progressive Onboarding Form** (`/onboarding`)
+
 - **Form Sections:**
-  - Niche (Primary* & Secondary)
+  - Niche (Primary\* & Secondary)
   - Social Media Platforms
   - Goals (Primary Goal* & Creator Level*)
-  - Content Strategy (Type*, Frequency*, Content Pillars*)
+  - Content Strategy (Type*, Frequency*, Content Pillars\*)
   - Preferences (Tones, Formats, CTA, Formality, Time Commitment)
 - **UX Features:**
-  - Required fields marked with *
+  - Required fields marked with \*
   - Optional fields labeled "(optional)"
   - Sticky bottom buttons: "Skip for now" & "Save and continue"
   - Dynamic array management (add/remove tags)
@@ -56,6 +57,7 @@ frontend/src/
   - Desktop: Multi-column forms, wider layout
 
 ### 2. **Dashboard with Sidebar** (`/dashboard`)
+
 - **Desktop (lg+):**
   - Fixed left sidebar with navigation
   - User info display with avatar
@@ -72,6 +74,7 @@ frontend/src/
   - Hidden automatically when profile exists
 
 ### 3. **Profile Page** (`/profile`)
+
 - **User Information Section:**
   - Profile picture/avatar
   - Name, email, user ID, role
@@ -88,6 +91,7 @@ frontend/src/
   - "Create Profile" CTA if no profile exists
 
 ### 4. **Sidebar Navigation**
+
 - **Links:**
   - Dashboard (📊)
   - Profile (👤)
@@ -103,38 +107,41 @@ frontend/src/
 ## 🔗 Backend Integration
 
 ### API Service (`lib/api/creatorProfile.ts`)
+
 ```typescript
 // Create new creator profile
-createCreatorProfile(token, profileData)
+createCreatorProfile(token, profileData);
 
-// Get authenticated user's profile  
-getMyProfile(token)
+// Get authenticated user's profile
+getMyProfile(token);
 
 // Update existing profile
-updateCreatorProfile(token, creatorId, updates)
+updateCreatorProfile(token, creatorId, updates);
 
 // Mark onboarding as complete
-completeOnboarding(token, creatorId)
+completeOnboarding(token, creatorId);
 ```
 
 ### State Management (`store/slice/creatorProfileSlice.ts`)
+
 ```typescript
 // State
-creatorProfile: CreatorProfile | null
-profileLoading: boolean
-profileError: string | null
-hasProfile: boolean
-profileChecked: boolean
+creatorProfile: CreatorProfile | null;
+profileLoading: boolean;
+profileError: string | null;
+hasProfile: boolean;
+profileChecked: boolean;
 
 // Actions
-fetchProfile(token)
-createProfile(token, data)
-updateProfile(token, creatorId, data)
-completeOnboarding(token, creatorId)
-clearProfile()
+fetchProfile(token);
+createProfile(token, data);
+updateProfile(token, creatorId, data);
+completeOnboarding(token, creatorId);
+clearProfile();
 ```
 
 ### API Endpoints Used
+
 - `POST /api/creator-profiles` - Create profile
 - `GET /api/creator-profiles/me/profile` - Get user's profile
 - `PUT /api/creator-profiles/:creatorId` - Update profile
@@ -143,7 +150,9 @@ clearProfile()
 ## 🎨 Design System
 
 ### Color Theme
+
 Matches existing landing page theme:
+
 - Background: `var(--color-background)` - #000000
 - Surface: `var(--color-surface)` - #1a1a1a
 - Surface Hover: `var(--color-surface-hover)` - #2d2d2d
@@ -153,17 +162,20 @@ Matches existing landing page theme:
 - Gradient: `linear-gradient(90deg, #60a5fa 0%, #a78bfa 100%)`
 
 ### Typography
+
 - Font: DM Sans (from globals.css)
 - Headings: Bold, large (text-3xl to text-4xl)
 - Body: Regular, readable (text-base to text-lg)
 - Labels: Medium weight, secondary color
 
 ### Spacing
+
 - Consistent padding: 4-6 (mobile), 6-8 (desktop)
 - Gaps: 3-6 between elements
 - Margins: Consistent vertical rhythm (mb-4, mb-6, mb-8)
 
 ### Components
+
 - Cards: Rounded-xl, surface background, border
 - Buttons: Rounded-lg, hover effects, disabled states
 - Inputs: Rounded-lg, border, focus states
@@ -182,12 +194,14 @@ xl: 1280px                - Desktop full width
 ```
 
 ### Desktop (lg+)
+
 - Sidebar: Fixed 256px width (w-64)
 - Content: Margin-left 256px (lg:ml-64)
 - Grid: Multi-column layouts
 - Form inputs: Side-by-side where appropriate
 
 ### Mobile (<lg)
+
 - Sidebar: Hidden
 - Top header: Fixed with hamburger menu
 - Content: Full width, padding-top for header
@@ -197,8 +211,9 @@ xl: 1280px                - Desktop full width
 ## 🚀 User Flow
 
 ### After Login
+
 ```
-Login Success 
+Login Success
     ↓
 Dashboard redirect (?token=jwt)
     ↓
@@ -216,6 +231,7 @@ Check: Does user have creator profile?
 ```
 
 ### Onboarding Flow
+
 ```
 /onboarding
     ↓
@@ -242,11 +258,12 @@ User fills form (required fields *)
 ```
 
 ### Profile Check Logic
+
 ```typescript
 // In dashboard/profile pages
 useEffect(() => {
   if (token && isAuthenticated() && !profileChecked) {
-    fetchProfile(token);  // Calls GET /api/creator-profiles/me/profile
+    fetchProfile(token); // Calls GET /api/creator-profiles/me/profile
   }
 }, [token, isAuthenticated, profileChecked]);
 
@@ -259,12 +276,15 @@ useEffect(() => {
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
 ### Backend Requirements
+
 DynamoDB table must exist with GSIs:
+
 - Table: `KindCrew-CreatorProfiles`
 - GSI 1: `UserIdIndex` (partition: userId)
 - GSI 2: `StatusIndex` (partition: status)
@@ -275,6 +295,7 @@ See `backend/CREATOR_PROFILE_SETUP.md` for setup instructions.
 ## 🧪 Testing Flow
 
 ### 1. Test Authentication
+
 ```bash
 # Start servers
 cd backend && npm run dev
@@ -285,6 +306,7 @@ cd frontend && npm run dev
 ```
 
 ### 2. Test Onboarding (New User)
+
 ```
 1. Login (no profile exists)
 2. Dashboard shows setup banner
@@ -297,6 +319,7 @@ cd frontend && npm run dev
 ```
 
 ### 3. Test Skip Flow
+
 ```
 1. Login (no profile exists)
 2. Dashboard shows setup banner
@@ -307,6 +330,7 @@ cd frontend && npm run dev
 ```
 
 ### 4. Test Profile Page
+
 ```
 1. Navigate to /profile
 2. See user information section
@@ -317,6 +341,7 @@ cd frontend && npm run dev
 ```
 
 ### 5. Test Responsive
+
 ```
 1. Open DevTools (F12)
 2. Toggle device toolbar
@@ -331,9 +356,11 @@ cd frontend && npm run dev
 ## 📊 State Persistence
 
 ### Zustand Persist
+
 Storage key: `kindcrew-app-storage`
 
 Persisted data:
+
 ```typescript
 {
   token: string,
@@ -345,6 +372,7 @@ Persisted data:
 ```
 
 Cleared on logout:
+
 ```typescript
 logout() {
   clearAuth();
@@ -357,16 +385,20 @@ logout() {
 ## 🐛 Common Issues & Solutions
 
 ### Issue: Setup banner always shows
+
 **Solution:** Check that profile fetch is working
+
 ```typescript
 // In DevTools Console:
-const store = JSON.parse(localStorage.getItem('kindcrew-app-storage'));
-console.log(store.state.hasProfile);  // Should be true if profile exists
-console.log(store.state.profileChecked);  // Should be true after fetch
+const store = JSON.parse(localStorage.getItem("kindcrew-app-storage"));
+console.log(store.state.hasProfile); // Should be true if profile exists
+console.log(store.state.profileChecked); // Should be true after fetch
 ```
 
 ### Issue: Sidebar not showing on desktop
+
 **Solution:** Check Tailwind breakpoint
+
 ```css
 /* Sidebar should have: */
 className="hidden lg:flex"
@@ -376,7 +408,9 @@ className="lg:ml-64"
 ```
 
 ### Issue: Mobile menu not closing
+
 **Solution:** Ensure onClick on overlay div:
+
 ```typescript
 <div onClick={() => setMobileMenuOpen(false)}>
   {/* Menu content */}
@@ -384,7 +418,9 @@ className="lg:ml-64"
 ```
 
 ### Issue: API calls failing
+
 **Solution:** Check:
+
 1. Backend running on port 5000
 2. CORS enabled for localhost:3000
 3. JWT token in localStorage
@@ -393,15 +429,16 @@ className="lg:ml-64"
 ## 🎓 Code Examples
 
 ### Using Creator Profile Hook
+
 ```typescript
 import { useCreatorProfile } from "@/hooks/useCreatorProfile";
 
 function MyComponent() {
-  const { 
-    creatorProfile, 
-    hasProfile, 
+  const {
+    creatorProfile,
+    hasProfile,
     profileLoading,
-    fetchProfile 
+    fetchProfile
   } = useCreatorProfile();
 
   // Fetch profile on mount
@@ -420,25 +457,26 @@ function MyComponent() {
 ```
 
 ### Creating a Profile
+
 ```typescript
 import { useAppStore } from "@/store/useAppStore";
 
 function OnboardingForm() {
   const { createProfile, profileLoading } = useAppStore();
-  
+
   const handleSubmit = async () => {
     try {
       await createProfile(token, {
         niche: { primary: "tech" },
-        goals: { 
-          primaryGoal: "growth", 
-          creatorLevel: "beginner" 
+        goals: {
+          primaryGoal: "growth",
+          creatorLevel: "beginner",
         },
         strategy: {
           contentStrategy: "educational",
           postingFrequency: "3-5 times/week",
-          contentPillars: ["Tips", "Tutorials"]
-        }
+          contentPillars: ["Tips", "Tutorials"],
+        },
       });
       router.push("/dashboard");
     } catch (error) {
@@ -449,11 +487,13 @@ function OnboardingForm() {
 ```
 
 ## 📚 Related Documentation
+
 - [Backend: CREATOR_PROFILE_SETUP.md](../backend/CREATOR_PROFILE_SETUP.md) - DynamoDB table setup
 - [Backend: CreatorProfile Model](../backend/models/CreatorProfile.js) - Schema definition
 - [Backend: Creator Profile Routes](../backend/routes/creatorProfileRoutes.js) - API endpoints
 
 ## ✅ Feature Checklist
+
 - [x] Progressive onboarding form
 - [x] Dashboard with sidebar
 - [x] Setup completion banner
@@ -471,6 +511,7 @@ function OnboardingForm() {
 - [x] Edit profile functionality
 
 ## 🚀 Next Features to Build
+
 - [ ] Content creation with AI
 - [ ] Analytics dashboard with charts
 - [ ] Settings page (account, notifications, preferences)

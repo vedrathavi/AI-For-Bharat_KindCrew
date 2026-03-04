@@ -17,8 +17,14 @@ export const createProfile = async (req, res) => {
 
     console.log("🎯 [CONTROLLER] createProfile called");
     console.log("👤 [CONTROLLER] userId:", userId);
-    console.log("📨 [CONTROLLER] req.body competitors:", profileData?.competitors);
-    console.log("📊 [CONTROLLER] Full profileData keys:", Object.keys(profileData || {}));
+    console.log(
+      "📨 [CONTROLLER] req.body competitors:",
+      profileData?.competitors,
+    );
+    console.log(
+      "📊 [CONTROLLER] Full profileData keys:",
+      Object.keys(profileData || {}),
+    );
 
     if (!userId) {
       return res.status(401).json({
@@ -34,7 +40,10 @@ export const createProfile = async (req, res) => {
       });
     }
 
-    const profile = await creatorProfileService.createProfile(userId, profileData);
+    const profile = await creatorProfileService.createProfile(
+      userId,
+      profileData,
+    );
 
     res.status(201).json({
       success: true,
@@ -137,9 +146,15 @@ export const updateProfile = async (req, res) => {
 
     console.log("🎯 [CONTROLLER] updateProfile called");
     console.log("📝 [CONTROLLER] creatorId:", creatorId);
-    console.log("📨 [CONTROLLER] updateData competitors:", updateData?.competitors);
+    console.log(
+      "📨 [CONTROLLER] updateData competitors:",
+      updateData?.competitors,
+    );
     console.log("📨 [CONTROLLER] updateData platforms:", updateData?.platforms);
-    console.log("📊 [CONTROLLER] updateData keys:", Object.keys(updateData || {}));
+    console.log(
+      "📊 [CONTROLLER] updateData keys:",
+      Object.keys(updateData || {}),
+    );
 
     if (!creatorId) {
       return res.status(400).json({
@@ -155,7 +170,10 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    const updated = await creatorProfileService.updateProfile(creatorId, updateData);
+    const updated = await creatorProfileService.updateProfile(
+      creatorId,
+      updateData,
+    );
 
     res.status(200).json({
       success: true,
@@ -230,7 +248,10 @@ export const removeCompetitor = async (req, res) => {
       });
     }
 
-    const updated = await creatorProfileService.removeCompetitor(creatorId, competitorId);
+    const updated = await creatorProfileService.removeCompetitor(
+      creatorId,
+      competitorId,
+    );
 
     res.status(200).json({
       success: true,
@@ -269,7 +290,10 @@ export const updatePlatforms = async (req, res) => {
       });
     }
 
-    const updated = await creatorProfileService.updatePlatforms(creatorId, platforms);
+    const updated = await creatorProfileService.updatePlatforms(
+      creatorId,
+      platforms,
+    );
 
     res.status(200).json({
       success: true,
@@ -392,7 +416,8 @@ export const getProfilesByNiche = async (req, res) => {
       });
     }
 
-    const profiles = await creatorProfileService.getProfilesByNiche(primaryNiche);
+    const profiles =
+      await creatorProfileService.getProfilesByNiche(primaryNiche);
 
     res.status(200).json({
       success: true,

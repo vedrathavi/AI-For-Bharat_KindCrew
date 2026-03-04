@@ -104,7 +104,9 @@ export async function createCreatorProfile(
     return data.data;
   } catch (error: unknown) {
     if (error instanceof TypeError) {
-      throw new Error("Unable to reach backend API. Make sure backend server is running.");
+      throw new Error(
+        "Unable to reach backend API. Make sure backend server is running.",
+      );
     }
     throw error;
   }
@@ -113,7 +115,9 @@ export async function createCreatorProfile(
 /**
  * Get current user's creator profile
  */
-export async function getMyProfile(token: string): Promise<CreatorProfile | null> {
+export async function getMyProfile(
+  token: string,
+): Promise<CreatorProfile | null> {
   const response = await fetch(`${API_BASE}/creator-profiles/me/profile`, {
     method: "GET",
     headers: {

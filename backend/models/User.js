@@ -122,7 +122,10 @@ class User {
       errors.push("Role must be 'user' or 'admin'");
     }
 
-    if (data.status && !["active", "inactive", "suspended"].includes(data.status)) {
+    if (
+      data.status &&
+      !["active", "inactive", "suspended"].includes(data.status)
+    ) {
       errors.push("Status must be 'active', 'inactive', or 'suspended'");
     }
 

@@ -88,8 +88,10 @@ class CreatorProfile {
         formats: profileData.preferences?.formats || ["static"],
         constraints: {
           emojiUsage: profileData.preferences?.constraints?.emojiUsage ?? true,
-          ctaStrength: profileData.preferences?.constraints?.ctaStrength || "medium",
-          formality: profileData.preferences?.constraints?.formality || "semi-formal",
+          ctaStrength:
+            profileData.preferences?.constraints?.ctaStrength || "medium",
+          formality:
+            profileData.preferences?.constraints?.formality || "semi-formal",
         },
         timeCommitment: profileData.preferences?.timeCommitment || "medium",
       },
@@ -117,7 +119,11 @@ class CreatorProfile {
     }
 
     // Validate niche
-    if (!data.niche || !data.niche.primary || typeof data.niche.primary !== "string") {
+    if (
+      !data.niche ||
+      !data.niche.primary ||
+      typeof data.niche.primary !== "string"
+    ) {
       errors.push("Primary niche is required");
     }
 
@@ -126,11 +132,21 @@ class CreatorProfile {
       errors.push("Primary goal is required");
     }
 
-    if (data.goals && !["growth", "monetization", "engagement", "brand-building"].includes(data.goals.primaryGoal)) {
+    if (
+      data.goals &&
+      !["growth", "monetization", "engagement", "brand-building"].includes(
+        data.goals.primaryGoal,
+      )
+    ) {
       errors.push("Invalid primary goal");
     }
 
-    if (data.goals && !["beginner", "intermediate", "advanced"].includes(data.goals.creatorLevel)) {
+    if (
+      data.goals &&
+      !["beginner", "intermediate", "advanced"].includes(
+        data.goals.creatorLevel,
+      )
+    ) {
       errors.push("Invalid creator level");
     }
 
@@ -192,7 +208,9 @@ class CreatorProfile {
    * @param {string} competitorId - Competitor ID to remove
    */
   removeCompetitor(competitorId) {
-    this.competitors = this.competitors.filter((c) => c.competitorId !== competitorId);
+    this.competitors = this.competitors.filter(
+      (c) => c.competitorId !== competitorId,
+    );
     this.updatedAt = new Date().toISOString();
   }
 

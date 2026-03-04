@@ -7,7 +7,12 @@ import { useAppStore } from "@/store/useAppStore";
 import { extractUserFromToken } from "@/lib/jwtDecode";
 import { toast } from "sonner";
 import { FiInfo } from "react-icons/fi";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 import type { CreatorProfileData, Platform } from "@/lib/api/creatorProfile";
 
@@ -15,8 +20,18 @@ export default function OnboardingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get("edit") === "true";
-  const { token, isAuthenticated, authReady, initializeAuth, setAuth } = useAuth();
-  const { createProfile, updateProfile, completeOnboarding, profileLoading, hasProfile, profileChecked, fetchProfile, creatorProfile } = useAppStore();
+  const { token, isAuthenticated, authReady, initializeAuth, setAuth } =
+    useAuth();
+  const {
+    createProfile,
+    updateProfile,
+    completeOnboarding,
+    profileLoading,
+    hasProfile,
+    profileChecked,
+    fetchProfile,
+    creatorProfile,
+  } = useAppStore();
 
   // Form state
   const [formData, setFormData] = useState<CreatorProfileData>({
@@ -54,7 +69,11 @@ export default function OnboardingPage() {
   const [newFormat, setNewFormat] = useState("");
   const [customNiche, setCustomNiche] = useState("");
   const [isOtherNiche, setIsOtherNiche] = useState(false);
-  const [newCompetitor, setNewCompetitor] = useState({ name: "", url: "", notes: "" });
+  const [newCompetitor, setNewCompetitor] = useState({
+    name: "",
+    url: "",
+    notes: "",
+  });
   const [profileLoaded, setProfileLoaded] = useState(false);
 
   // Handle token from OAuth callback
@@ -92,8 +111,15 @@ export default function OnboardingPage() {
       setFormData({
         niche: creatorProfile.niche || { primary: "", secondary: "" },
         platforms: creatorProfile.platforms || [],
-        goals: creatorProfile.goals || { primaryGoal: "growth", creatorLevel: "beginner" },
-        strategy: creatorProfile.strategy || { contentStrategy: "educational", postingFrequency: "", contentPillars: [] },
+        goals: creatorProfile.goals || {
+          primaryGoal: "growth",
+          creatorLevel: "beginner",
+        },
+        strategy: creatorProfile.strategy || {
+          contentStrategy: "educational",
+          postingFrequency: "",
+          contentPillars: [],
+        },
         preferences: creatorProfile.preferences || {
           tones: [],
           formats: [],
@@ -106,24 +132,62 @@ export default function OnboardingPage() {
         },
         competitors: creatorProfile.competitors || [],
       });
-      
+
       // If niche is a custom value (not in the standard list), set it as custom
-      const standardNiches = ["ai-ml", "web-dev", "mobile-dev", "cybersecurity", "devops", "data-science", "tech-general", 
-                              "yoga", "weightlifting", "running", "nutrition", "fitness-general", "marketing", "sales", 
-                              "leadership", "entrepreneurship", "finance", "business-general", "personal-dev", "productivity", 
-                              "lifestyle", "education", "entertainment", "food", "travel", "fashion", "gaming", "art", 
-                              "music", "photography", "parenting", "pets", "sustainability"];
-      if (creatorProfile.niche?.primary && !standardNiches.includes(creatorProfile.niche.primary)) {
+      const standardNiches = [
+        "ai-ml",
+        "web-dev",
+        "mobile-dev",
+        "cybersecurity",
+        "devops",
+        "data-science",
+        "tech-general",
+        "yoga",
+        "weightlifting",
+        "running",
+        "nutrition",
+        "fitness-general",
+        "marketing",
+        "sales",
+        "leadership",
+        "entrepreneurship",
+        "finance",
+        "business-general",
+        "personal-dev",
+        "productivity",
+        "lifestyle",
+        "education",
+        "entertainment",
+        "food",
+        "travel",
+        "fashion",
+        "gaming",
+        "art",
+        "music",
+        "photography",
+        "parenting",
+        "pets",
+        "sustainability",
+      ];
+      if (
+        creatorProfile.niche?.primary &&
+        !standardNiches.includes(creatorProfile.niche.primary)
+      ) {
         setCustomNiche(creatorProfile.niche.primary);
       }
-      
+
       setProfileLoaded(true); // ← Mark profile as loaded so this effect doesn't run again
     }
   }, [hasProfile, creatorProfile, profileLoaded]);
 
   // Debug: Log whenever formData.competitors changes
   useEffect(() => {
-    console.log("🔍 [DEBUG] formData.competitors changed:", formData.competitors, "Length:", formData.competitors?.length);
+    console.log(
+      "🔍 [DEBUG] formData.competitors changed:",
+      formData.competitors,
+      "Length:",
+      formData.competitors?.length,
+    );
   }, [formData.competitors]);
 
   useEffect(() => {
@@ -176,7 +240,9 @@ export default function OnboardingPage() {
       ...formData,
       strategy: {
         ...formData.strategy,
-        contentPillars: formData.strategy.contentPillars.filter((p) => p !== pillar),
+        contentPillars: formData.strategy.contentPillars.filter(
+          (p) => p !== pillar,
+        ),
       },
     });
   };
@@ -228,22 +294,27 @@ export default function OnboardingPage() {
   };
 
   const handleAddCompetitor = () => {
-    console.log("🏆 [BUTTON] Add Competitor clicked, newCompetitor state:", newCompetitor);
-    
+    console.log(
+      "🏆 [BUTTON] Add Competitor clicked, newCompetitor state:",
+      newCompetitor,
+    );
+
     // Validation: at least one field required
     if (!newCompetitor.name && !newCompetitor.url && !newCompetitor.notes) {
       console.warn("🏆 [VALIDATION] No fields filled");
       toast.error("Please add at least a name or URL for the competitor");
       return;
     }
-    
+
     // If notes exist, must have name or URL
     if (newCompetitor.notes && !newCompetitor.name && !newCompetitor.url) {
       console.warn("🏆 [VALIDATION] Notes exist but no name/url");
-      toast.error("When adding notes, please also include a competitor name or URL");
+      toast.error(
+        "When adding notes, please also include a competitor name or URL",
+      );
       return;
     }
-    
+
     const newComp = {
       competitorId: `comp_${Date.now()}`,
       name: newCompetitor.name || null,
@@ -251,16 +322,22 @@ export default function OnboardingPage() {
       notes: newCompetitor.notes || null,
     };
     console.log("🏆 [FORM] Adding competitor:", newComp);
-    
+
     const updatedCompetitors = [...(formData.competitors || []), newComp];
-    console.log("🏆 [FORM] Updated competitors array after add:", updatedCompetitors);
-    
+    console.log(
+      "🏆 [FORM] Updated competitors array after add:",
+      updatedCompetitors,
+    );
+
     setFormData({
       ...formData,
       competitors: updatedCompetitors,
     });
-    console.log("🏆 [FORM] FormData competitors after setState:", formData.competitors);
-    
+    console.log(
+      "🏆 [FORM] FormData competitors after setState:",
+      formData.competitors,
+    );
+
     setNewCompetitor({ name: "", url: "", notes: "" });
     toast.success(`Competitor added!`);
   };
@@ -268,7 +345,9 @@ export default function OnboardingPage() {
   const handleRemoveCompetitor = (competitorId: string) => {
     setFormData({
       ...formData,
-      competitors: formData.competitors?.filter((c) => c.competitorId !== competitorId),
+      competitors: formData.competitors?.filter(
+        (c) => c.competitorId !== competitorId,
+      ),
     });
   };
 
@@ -302,7 +381,7 @@ export default function OnboardingPage() {
         competitors: formData.competitors,
         competitorCount: formData.competitors?.length,
       });
-      
+
       // Log each competitor individually to verify structure
       if (formData.competitors && formData.competitors.length > 0) {
         console.log("📤 [SAVE] Competitors in formData:");
@@ -312,20 +391,24 @@ export default function OnboardingPage() {
       } else {
         console.warn("📤 [SAVE] ⚠️ NO COMPETITORS IN FORMDATA!");
       }
-      
+
       let profile;
-      
+
       // If profile already exists, update it instead of creating a new one
       if (hasProfile && creatorProfile?.creatorId) {
         console.log("📝 Updating existing profile:", creatorProfile.creatorId);
-        profile = await updateProfile(token, creatorProfile.creatorId, formData);
+        profile = await updateProfile(
+          token,
+          creatorProfile.creatorId,
+          formData,
+        );
       } else {
         console.log("✨ Creating new profile");
         profile = await createProfile(token, formData);
       }
-      
+
       console.log("✅ Profile saved:", profile);
-      
+
       if (profile?.creatorId) {
         await completeOnboarding(token, profile.creatorId);
       }
@@ -347,38 +430,63 @@ export default function OnboardingPage() {
 
   if (!authReady || profileLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--color-background)" }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--color-background)" }}
+      >
         <div style={{ color: "var(--color-text-secondary)" }}>Loading...</div>
       </div>
     );
   }
 
   const onboardingContent = (
-    <div className="min-h-screen pb-32" style={{ backgroundColor: "var(--color-background)" }}>
+    <div
+      className="min-h-screen pb-32"
+      style={{ backgroundColor: "var(--color-background)" }}
+    >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
         <div className="mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4" style={{ color: "var(--color-text)" }}>
+          <h1
+            className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4"
+            style={{ color: "var(--color-text)" }}
+          >
             Complete Your Creator Profile
           </h1>
-          <p className="text-base sm:text-lg" style={{ color: "var(--color-text-secondary)" }}>
-            Tell us about yourself to personalize your experience. Optional fields are marked with (optional).
+          <p
+            className="text-base sm:text-lg"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Tell us about yourself to personalize your experience. Optional
+            fields are marked with (optional).
           </p>
         </div>
 
         {/* Form */}
         <div className="space-y-6 sm:space-y-8">
           {/* Niche Section */}
-          <div className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
+          <div
+            className="p-4 sm:p-6 rounded-xl"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
             <div className="flex items-center gap-2 mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-semibold" style={{ color: "var(--color-text)" }}>
+              <h2
+                className="text-xl sm:text-2xl font-semibold"
+                style={{ color: "var(--color-text)" }}
+              >
                 Your Niche
               </h2>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button type="button" className="inline-flex items-center">
-                      <FiInfo className="w-4 h-4" style={{ color: "var(--color-text-secondary)" }} />
+                      <FiInfo
+                        className="w-4 h-4"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -389,7 +497,10 @@ export default function OnboardingPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Primary Niche
                 </label>
                 <select
@@ -397,11 +508,17 @@ export default function OnboardingPage() {
                   onChange={(e) => {
                     if (e.target.value === "other") {
                       setIsOtherNiche(true);
-                      setFormData({ ...formData, niche: { ...formData.niche, primary: customNiche } });
+                      setFormData({
+                        ...formData,
+                        niche: { ...formData.niche, primary: customNiche },
+                      });
                     } else {
                       setIsOtherNiche(false);
                       setCustomNiche("");
-                      setFormData({ ...formData, niche: { ...formData.niche, primary: e.target.value } });
+                      setFormData({
+                        ...formData,
+                        niche: { ...formData.niche, primary: e.target.value },
+                      });
                     }
                   }}
                   className="w-full px-4 py-3 pr-10 rounded-lg outline-none transition-colors text-sm sm:text-base"
@@ -420,18 +537,26 @@ export default function OnboardingPage() {
                   <option value="data-science">Data Science</option>
                   <option value="tech-general">Technology (General)</option>
                   <option value="yoga">Yoga & Meditation</option>
-                  <option value="weightlifting">Weightlifting & Strength</option>
+                  <option value="weightlifting">
+                    Weightlifting & Strength
+                  </option>
                   <option value="running">Running & Cardio</option>
                   <option value="nutrition">Nutrition & Diet</option>
-                  <option value="fitness-general">Fitness & Health (General)</option>
+                  <option value="fitness-general">
+                    Fitness & Health (General)
+                  </option>
                   <option value="marketing">Marketing & Advertising</option>
                   <option value="sales">Sales & Business Development</option>
                   <option value="leadership">Leadership & Management</option>
-                  <option value="entrepreneurship">Entrepreneurship & Startups</option>
+                  <option value="entrepreneurship">
+                    Entrepreneurship & Startups
+                  </option>
                   <option value="finance">Personal Finance & Investing</option>
                   <option value="business-general">Business (General)</option>
                   <option value="personal-dev">Personal Development</option>
-                  <option value="productivity">Productivity & Time Management</option>
+                  <option value="productivity">
+                    Productivity & Time Management
+                  </option>
                   <option value="lifestyle">Lifestyle</option>
                   <option value="education">Education & Teaching</option>
                   <option value="entertainment">Entertainment</option>
@@ -444,7 +569,9 @@ export default function OnboardingPage() {
                   <option value="photography">Photography & Videography</option>
                   <option value="parenting">Parenting & Family</option>
                   <option value="pets">Pets & Animals</option>
-                  <option value="sustainability">Sustainability & Eco-Living</option>
+                  <option value="sustainability">
+                    Sustainability & Eco-Living
+                  </option>
                   <option value="other">Other (Specify below)</option>
                 </select>
                 {isOtherNiche && (
@@ -453,7 +580,10 @@ export default function OnboardingPage() {
                     value={customNiche}
                     onChange={(e) => {
                       setCustomNiche(e.target.value);
-                      setFormData({ ...formData, niche: { ...formData.niche, primary: e.target.value } });
+                      setFormData({
+                        ...formData,
+                        niche: { ...formData.niche, primary: e.target.value },
+                      });
                     }}
                     placeholder="Specify your niche..."
                     className="w-full px-4 py-3 rounded-lg outline-none transition-colors text-sm sm:text-base mt-3"
@@ -466,13 +596,21 @@ export default function OnboardingPage() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Secondary Niche (optional)
                 </label>
                 <input
                   type="text"
                   value={formData.niche.secondary || ""}
-                  onChange={(e) => setFormData({ ...formData, niche: { ...formData.niche, secondary: e.target.value } })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      niche: { ...formData.niche, secondary: e.target.value },
+                    })
+                  }
                   placeholder="e.g., Personal Development"
                   className="w-full px-4 py-3 rounded-lg outline-none transition-colors text-sm sm:text-base"
                   style={{
@@ -486,8 +624,17 @@ export default function OnboardingPage() {
           </div>
 
           {/* Platforms Section */}
-          <div className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
-            <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6" style={{ color: "var(--color-text)" }}>
+          <div
+            className="p-4 sm:p-6 rounded-xl"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
+            <h2
+              className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6"
+              style={{ color: "var(--color-text)" }}
+            >
               Social Media Platforms (optional)
             </h2>
             <div className="space-y-4">
@@ -495,7 +642,9 @@ export default function OnboardingPage() {
                 <input
                   type="text"
                   value={newPlatform.name}
-                  onChange={(e) => setNewPlatform({ ...newPlatform, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewPlatform({ ...newPlatform, name: e.target.value })
+                  }
                   placeholder="Platform (e.g., Instagram)"
                   className="flex-1 px-4 py-3 rounded-lg outline-none transition-colors text-sm sm:text-base"
                   style={{
@@ -507,7 +656,9 @@ export default function OnboardingPage() {
                 <input
                   type="text"
                   value={newPlatform.handle}
-                  onChange={(e) => setNewPlatform({ ...newPlatform, handle: e.target.value })}
+                  onChange={(e) =>
+                    setNewPlatform({ ...newPlatform, handle: e.target.value })
+                  }
                   placeholder="@handle"
                   className="flex-1 px-4 py-3 rounded-lg outline-none transition-colors text-sm sm:text-base"
                   style={{
@@ -519,7 +670,10 @@ export default function OnboardingPage() {
                 <button
                   onClick={handleAddPlatform}
                   className="px-6 py-3 rounded-lg font-medium transition-colors whitespace-nowrap text-sm sm:text-base"
-                  style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
+                  style={{
+                    backgroundColor: "var(--color-surface-hover)",
+                    color: "var(--color-text)",
+                  }}
                 >
                   Add
                 </button>
@@ -530,7 +684,10 @@ export default function OnboardingPage() {
                     <div
                       key={index}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
-                      style={{ backgroundColor: "var(--color-background)", border: "1px solid var(--color-border)" }}
+                      style={{
+                        backgroundColor: "var(--color-background)",
+                        border: "1px solid var(--color-border)",
+                      }}
                     >
                       <span style={{ color: "var(--color-text)" }}>
                         {platform.name}: {platform.handle}
@@ -549,16 +706,28 @@ export default function OnboardingPage() {
           </div>
 
           {/* Goals Section */}
-          <div className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
+          <div
+            className="p-4 sm:p-6 rounded-xl"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
             <div className="flex items-center gap-2 mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-semibold" style={{ color: "var(--color-text)" }}>
+              <h2
+                className="text-xl sm:text-2xl font-semibold"
+                style={{ color: "var(--color-text)" }}
+              >
                 Your Goals
               </h2>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button type="button" className="inline-flex items-center">
-                      <FiInfo className="w-4 h-4" style={{ color: "var(--color-text-secondary)" }} />
+                      <FiInfo
+                        className="w-4 h-4"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -569,12 +738,23 @@ export default function OnboardingPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Primary Goal
                 </label>
                 <select
                   value={formData.goals.primaryGoal}
-                  onChange={(e) => setFormData({ ...formData, goals: { ...formData.goals, primaryGoal: e.target.value as any } })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      goals: {
+                        ...formData.goals,
+                        primaryGoal: e.target.value as any,
+                      },
+                    })
+                  }
                   className="w-full px-4 py-3 pr-10 rounded-lg outline-none transition-colors text-sm sm:text-base"
                   style={{
                     backgroundColor: "var(--color-background)",
@@ -592,12 +772,23 @@ export default function OnboardingPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Creator Level
                 </label>
                 <select
                   value={formData.goals.creatorLevel}
-                  onChange={(e) => setFormData({ ...formData, goals: { ...formData.goals, creatorLevel: e.target.value as any } })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      goals: {
+                        ...formData.goals,
+                        creatorLevel: e.target.value as any,
+                      },
+                    })
+                  }
                   className="w-full px-4 py-3 pr-10 rounded-lg outline-none transition-colors text-sm sm:text-base"
                   style={{
                     backgroundColor: "var(--color-background)",
@@ -606,26 +797,42 @@ export default function OnboardingPage() {
                   }}
                 >
                   <option value="beginner">Beginner (Just Starting)</option>
-                  <option value="intermediate">Intermediate (Some Experience)</option>
+                  <option value="intermediate">
+                    Intermediate (Some Experience)
+                  </option>
                   <option value="advanced">Advanced (Experienced)</option>
                   <option value="expert">Expert (Industry Leader)</option>
-                  <option value="professional">Professional (Full-Time Creator)</option>
+                  <option value="professional">
+                    Professional (Full-Time Creator)
+                  </option>
                 </select>
               </div>
             </div>
           </div>
 
           {/* Strategy Section */}
-          <div className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
+          <div
+            className="p-4 sm:p-6 rounded-xl"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
             <div className="flex items-center gap-2 mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-semibold" style={{ color: "var(--color-text)" }}>
+              <h2
+                className="text-xl sm:text-2xl font-semibold"
+                style={{ color: "var(--color-text)" }}
+              >
                 Content Strategy
               </h2>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button type="button" className="inline-flex items-center">
-                      <FiInfo className="w-4 h-4" style={{ color: "var(--color-text-secondary)" }} />
+                      <FiInfo
+                        className="w-4 h-4"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -636,12 +843,23 @@ export default function OnboardingPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Content Type
                 </label>
                 <select
                   value={formData.strategy.contentStrategy}
-                  onChange={(e) => setFormData({ ...formData, strategy: { ...formData.strategy, contentStrategy: e.target.value as any } })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      strategy: {
+                        ...formData.strategy,
+                        contentStrategy: e.target.value as any,
+                      },
+                    })
+                  }
                   className="w-full px-4 py-3 pr-10 rounded-lg outline-none transition-colors text-sm sm:text-base"
                   style={{
                     backgroundColor: "var(--color-background)",
@@ -652,7 +870,9 @@ export default function OnboardingPage() {
                   <option value="educational">Educational & How-To</option>
                   <option value="entertainment">Entertainment & Fun</option>
                   <option value="promotional">Promotional & Sales</option>
-                  <option value="inspirational">Inspirational & Motivational</option>
+                  <option value="inspirational">
+                    Inspirational & Motivational
+                  </option>
                   <option value="news">News & Updates</option>
                   <option value="mixed">Mixed (Variety)</option>
                   <option value="storytelling">Storytelling & Narrative</option>
@@ -660,13 +880,24 @@ export default function OnboardingPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Posting Frequency
                 </label>
                 <input
                   type="text"
                   value={formData.strategy.postingFrequency}
-                  onChange={(e) => setFormData({ ...formData, strategy: { ...formData.strategy, postingFrequency: e.target.value } })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      strategy: {
+                        ...formData.strategy,
+                        postingFrequency: e.target.value,
+                      },
+                    })
+                  }
                   placeholder="e.g., 3-5 times per week"
                   className="w-full px-4 py-3 rounded-lg outline-none transition-colors text-sm sm:text-base"
                   style={{
@@ -677,7 +908,10 @@ export default function OnboardingPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Content Pillars (Add at least one)
                 </label>
                 <div className="flex gap-3">
@@ -697,7 +931,10 @@ export default function OnboardingPage() {
                   <button
                     onClick={handleAddPillar}
                     className="px-6 py-3 rounded-lg font-medium transition-colors whitespace-nowrap text-sm sm:text-base"
-                    style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
+                    style={{
+                      backgroundColor: "var(--color-surface-hover)",
+                      color: "var(--color-text)",
+                    }}
                   >
                     Add
                   </button>
@@ -708,9 +945,14 @@ export default function OnboardingPage() {
                       <div
                         key={index}
                         className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
-                        style={{ backgroundColor: "var(--color-background)", border: "1px solid var(--color-border)" }}
+                        style={{
+                          backgroundColor: "var(--color-background)",
+                          border: "1px solid var(--color-border)",
+                        }}
                       >
-                        <span style={{ color: "var(--color-text)" }}>{pillar}</span>
+                        <span style={{ color: "var(--color-text)" }}>
+                          {pillar}
+                        </span>
                         <button
                           onClick={() => handleRemovePillar(pillar)}
                           className="text-red-500 hover:text-red-400"
@@ -726,13 +968,25 @@ export default function OnboardingPage() {
           </div>
 
           {/* Preferences Section */}
-          <div className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
-            <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6" style={{ color: "var(--color-text)" }}>
+          <div
+            className="p-4 sm:p-6 rounded-xl"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
+            <h2
+              className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6"
+              style={{ color: "var(--color-text)" }}
+            >
               Preferences (optional)
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Content Tones
                 </label>
                 <div className="flex gap-3">
@@ -752,34 +1006,46 @@ export default function OnboardingPage() {
                   <button
                     onClick={handleAddTone}
                     className="px-6 py-3 rounded-lg font-medium transition-colors whitespace-nowrap text-sm sm:text-base"
-                    style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
+                    style={{
+                      backgroundColor: "var(--color-surface-hover)",
+                      color: "var(--color-text)",
+                    }}
                   >
                     Add
                   </button>
                 </div>
-                {formData.preferences?.tones && formData.preferences.tones.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {formData.preferences.tones.map((tone, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
-                        style={{ backgroundColor: "var(--color-background)", border: "1px solid var(--color-border)" }}
-                      >
-                        <span style={{ color: "var(--color-text)" }}>{tone}</span>
-                        <button
-                          onClick={() => handleRemoveTone(tone)}
-                          className="text-red-500 hover:text-red-400"
+                {formData.preferences?.tones &&
+                  formData.preferences.tones.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {formData.preferences.tones.map((tone, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
+                          style={{
+                            backgroundColor: "var(--color-background)",
+                            border: "1px solid var(--color-border)",
+                          }}
                         >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                          <span style={{ color: "var(--color-text)" }}>
+                            {tone}
+                          </span>
+                          <button
+                            onClick={() => handleRemoveTone(tone)}
+                            className="text-red-500 hover:text-red-400"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Content Formats
                 </label>
                 <div className="flex gap-3">
@@ -799,39 +1065,53 @@ export default function OnboardingPage() {
                   <button
                     onClick={handleAddFormat}
                     className="px-6 py-3 rounded-lg font-medium transition-colors whitespace-nowrap text-sm sm:text-base"
-                    style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
+                    style={{
+                      backgroundColor: "var(--color-surface-hover)",
+                      color: "var(--color-text)",
+                    }}
                   >
                     Add
                   </button>
                 </div>
-                {formData.preferences?.formats && formData.preferences.formats.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {formData.preferences.formats.map((format, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
-                        style={{ backgroundColor: "var(--color-background)", border: "1px solid var(--color-border)" }}
-                      >
-                        <span style={{ color: "var(--color-text)" }}>{format}</span>
-                        <button
-                          onClick={() => handleRemoveFormat(format)}
-                          className="text-red-500 hover:text-red-400"
+                {formData.preferences?.formats &&
+                  formData.preferences.formats.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {formData.preferences.formats.map((format, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
+                          style={{
+                            backgroundColor: "var(--color-background)",
+                            border: "1px solid var(--color-border)",
+                          }}
                         >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                          <span style={{ color: "var(--color-text)" }}>
+                            {format}
+                          </span>
+                          <button
+                            onClick={() => handleRemoveFormat(format)}
+                            className="text-red-500 hover:text-red-400"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     CTA Strength (optional)
                   </label>
                   <select
-                    value={formData.preferences?.constraints?.ctaStrength || "medium"}
+                    value={
+                      formData.preferences?.constraints?.ctaStrength || "medium"
+                    }
                     onChange={(e) =>
                       setFormData({
                         ...formData,
@@ -858,11 +1138,17 @@ export default function OnboardingPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     Formality Level (optional)
                   </label>
                   <select
-                    value={formData.preferences?.constraints?.formality || "semi-formal"}
+                    value={
+                      formData.preferences?.constraints?.formality ||
+                      "semi-formal"
+                    }
                     onChange={(e) =>
                       setFormData({
                         ...formData,
@@ -890,7 +1176,10 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Time Commitment
                 </label>
                 <select
@@ -921,7 +1210,9 @@ export default function OnboardingPage() {
                 <input
                   type="checkbox"
                   id="emojiUsage"
-                  checked={formData.preferences?.constraints?.emojiUsage || false}
+                  checked={
+                    formData.preferences?.constraints?.emojiUsage || false
+                  }
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -936,7 +1227,11 @@ export default function OnboardingPage() {
                   }
                   className="w-5 h-5 rounded"
                 />
-                <label htmlFor="emojiUsage" className="text-sm cursor-pointer" style={{ color: "var(--color-text)" }}>
+                <label
+                  htmlFor="emojiUsage"
+                  className="text-sm cursor-pointer"
+                  style={{ color: "var(--color-text)" }}
+                >
                   Use emojis in content
                 </label>
               </div>
@@ -944,20 +1239,35 @@ export default function OnboardingPage() {
           </div>
 
           {/* Competitors Section */}
-          <div className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
+          <div
+            className="p-4 sm:p-6 rounded-xl"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
             <div className="flex items-center gap-2 mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-semibold" style={{ color: "var(--color-text)" }}>
+              <h2
+                className="text-xl sm:text-2xl font-semibold"
+                style={{ color: "var(--color-text)" }}
+              >
                 Competitors (optional)
               </h2>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button type="button" className="inline-flex items-center">
-                      <FiInfo className="w-4 h-4" style={{ color: "var(--color-text-secondary)" }} />
+                      <FiInfo
+                        className="w-4 h-4"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Track creators/brands in your niche for inspiration and benchmarking</p>
+                    <p>
+                      Track creators/brands in your niche for inspiration and
+                      benchmarking
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -968,8 +1278,14 @@ export default function OnboardingPage() {
                   type="text"
                   value={newCompetitor.name}
                   onChange={(e) => {
-                    console.log("🏆 [INPUT] Competitor name changed:", e.target.value);
-                    setNewCompetitor({ ...newCompetitor, name: e.target.value });
+                    console.log(
+                      "🏆 [INPUT] Competitor name changed:",
+                      e.target.value,
+                    );
+                    setNewCompetitor({
+                      ...newCompetitor,
+                      name: e.target.value,
+                    });
                   }}
                   placeholder="Competitor name (optional)"
                   className="w-full px-4 py-3 rounded-lg outline-none transition-colors text-sm sm:text-base"
@@ -983,7 +1299,10 @@ export default function OnboardingPage() {
                   type="url"
                   value={newCompetitor.url}
                   onChange={(e) => {
-                    console.log("🏆 [INPUT] Competitor URL changed:", e.target.value);
+                    console.log(
+                      "🏆 [INPUT] Competitor URL changed:",
+                      e.target.value,
+                    );
                     setNewCompetitor({ ...newCompetitor, url: e.target.value });
                   }}
                   placeholder="Profile URL (optional)"
@@ -998,8 +1317,14 @@ export default function OnboardingPage() {
                   type="text"
                   value={newCompetitor.notes}
                   onChange={(e) => {
-                    console.log("🏆 [INPUT] Competitor notes changed:", e.target.value);
-                    setNewCompetitor({ ...newCompetitor, notes: e.target.value });
+                    console.log(
+                      "🏆 [INPUT] Competitor notes changed:",
+                      e.target.value,
+                    );
+                    setNewCompetitor({
+                      ...newCompetitor,
+                      notes: e.target.value,
+                    });
                   }}
                   placeholder="Notes (optional)"
                   className="w-full px-4 py-3 rounded-lg outline-none transition-colors text-sm sm:text-base"
@@ -1012,8 +1337,14 @@ export default function OnboardingPage() {
                 <button
                   onClick={() => {
                     console.log("🏆 [BUTTON] Add Competitor clicked");
-                    console.log("🏆 [BUTTON] Current newCompetitor state:", newCompetitor);
-                    console.log("🏆 [BUTTON] Current formData.competitors:", formData.competitors);
+                    console.log(
+                      "🏆 [BUTTON] Current newCompetitor state:",
+                      newCompetitor,
+                    );
+                    console.log(
+                      "🏆 [BUTTON] Current formData.competitors:",
+                      formData.competitors,
+                    );
                     handleAddCompetitor();
                   }}
                   type="button"
@@ -1035,20 +1366,31 @@ export default function OnboardingPage() {
                       style={{ backgroundColor: "var(--color-background)" }}
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium break-words" style={{ color: "var(--color-text)" }}>
+                        <p
+                          className="font-medium break-words"
+                          style={{ color: "var(--color-text)" }}
+                        >
                           {competitor.name}
                         </p>
-                        <p className="text-sm break-all" style={{ color: "var(--color-text-secondary)" }}>
+                        <p
+                          className="text-sm break-all"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
                           {competitor.url}
                         </p>
                         {competitor.notes && (
-                          <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
+                          <p
+                            className="text-sm mt-1"
+                            style={{ color: "var(--color-text-muted)" }}
+                          >
                             {competitor.notes}
                           </p>
                         )}
                       </div>
                       <button
-                        onClick={() => handleRemoveCompetitor(competitor.competitorId)}
+                        onClick={() =>
+                          handleRemoveCompetitor(competitor.competitorId)
+                        }
                         type="button"
                         className="ml-3 px-3 py-1 rounded text-sm transition-colors flex-shrink-0"
                         style={{

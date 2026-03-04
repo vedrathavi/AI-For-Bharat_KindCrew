@@ -48,16 +48,32 @@ router.get("/creator-profiles/me/profile", authMiddleware, getMyProfile);
 router.put("/creator-profiles/:creatorId", authMiddleware, updateProfile);
 
 // Add competitor - requires auth
-router.post("/creator-profiles/:creatorId/competitors", authMiddleware, addCompetitor);
+router.post(
+  "/creator-profiles/:creatorId/competitors",
+  authMiddleware,
+  addCompetitor,
+);
 
 // Remove competitor - requires auth
-router.delete("/creator-profiles/:creatorId/competitors/:competitorId", authMiddleware, removeCompetitor);
+router.delete(
+  "/creator-profiles/:creatorId/competitors/:competitorId",
+  authMiddleware,
+  removeCompetitor,
+);
 
 // Update platforms - requires auth
-router.patch("/creator-profiles/:creatorId/platforms", authMiddleware, updatePlatforms);
+router.patch(
+  "/creator-profiles/:creatorId/platforms",
+  authMiddleware,
+  updatePlatforms,
+);
 
 // Complete onboarding - requires auth
-router.patch("/creator-profiles/:creatorId/complete-onboarding", authMiddleware, completeOnboarding);
+router.patch(
+  "/creator-profiles/:creatorId/complete-onboarding",
+  authMiddleware,
+  completeOnboarding,
+);
 
 // Delete profile - requires auth
 router.delete("/creator-profiles/:creatorId", authMiddleware, deleteProfile);

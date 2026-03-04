@@ -17,7 +17,10 @@ export default function ContentPage() {
 
   if (!authReady) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "var(--color-background)" }}>
+      <div
+        className="flex items-center justify-center min-h-screen"
+        style={{ backgroundColor: "var(--color-background)" }}
+      >
         <div style={{ color: "var(--color-text-secondary)" }}>Loading...</div>
       </div>
     );
@@ -26,21 +29,27 @@ export default function ContentPage() {
   return (
     <AuthenticatedLayout>
       <div className="max-w-5xl mx-auto">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: "var(--color-text)" }}>
-        Content
-      </h1>
-      <div
-        className="p-8 rounded-xl text-center"
-        style={{
-          backgroundColor: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-        }}
-      >
-        <p className="text-lg" style={{ color: "var(--color-text-secondary)" }}>
-          Content creation features coming soon...
-        </p>
+        <h1
+          className="text-3xl sm:text-4xl font-bold mb-4"
+          style={{ color: "var(--color-text)" }}
+        >
+          Content
+        </h1>
+        <div
+          className="p-8 rounded-xl text-center"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <p
+            className="text-lg"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Content creation features coming soon...
+          </p>
+        </div>
       </div>
-    </div>
     </AuthenticatedLayout>
   );
 }

@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { 
-  FiHome, 
-  FiUser, 
+import {
+  FiHome,
+  FiUser,
   FiEdit,
-  FiBarChart2, 
-  FiSettings, 
+  FiBarChart2,
+  FiSettings,
   FiLogOut,
   FiChevronLeft,
   FiChevronRight,
-  FiX
+  FiX,
 } from "react-icons/fi";
 
 type SidebarProps = {
@@ -22,7 +22,12 @@ type SidebarProps = {
   onCloseDrawer?: () => void;
 };
 
-export default function Sidebar({ onLogout, collapsed = false, setCollapsed, onCloseDrawer }: SidebarProps) {
+export default function Sidebar({
+  onLogout,
+  collapsed = false,
+  setCollapsed,
+  onCloseDrawer,
+}: SidebarProps) {
   const pathname = usePathname();
   const { userInfo } = useAuth();
 
@@ -38,7 +43,7 @@ export default function Sidebar({ onLogout, collapsed = false, setCollapsed, onC
 
   return (
     <div
-      className={`${collapsed ? 'w-20' : 'w-64'} h-full min-h-screen flex flex-col ${onCloseDrawer ? 'border-r-0' : 'border-r'} lg:border-r transition-all duration-300`}
+      className={`${collapsed ? "w-20" : "w-64"} h-full min-h-screen flex flex-col ${onCloseDrawer ? "border-r-0" : "border-r"} lg:border-r transition-all duration-300`}
       style={{
         backgroundColor: "var(--color-surface)",
         borderRightColor: "var(--color-border)",
@@ -83,7 +88,7 @@ export default function Sidebar({ onLogout, collapsed = false, setCollapsed, onC
             style={{ backgroundColor: "var(--color-surface-hover)" }}
           ></div>
         )}
-        
+
         {/* Desktop Collapse Toggle */}
         {setCollapsed && (
           <button
@@ -92,7 +97,11 @@ export default function Sidebar({ onLogout, collapsed = false, setCollapsed, onC
             style={{ color: "var(--color-text-secondary)" }}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {collapsed ? <FiChevronRight className="w-4 h-4" /> : <FiChevronLeft className="w-4 h-4" />}
+            {collapsed ? (
+              <FiChevronRight className="w-4 h-4" />
+            ) : (
+              <FiChevronLeft className="w-4 h-4" />
+            )}
           </button>
         )}
       </div>
@@ -173,12 +182,14 @@ export default function Sidebar({ onLogout, collapsed = false, setCollapsed, onC
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-lg transition-colors`}
+              className={`flex items-center ${collapsed ? "justify-center" : "space-x-3"} px-4 py-3 rounded-lg transition-colors`}
               style={{
                 backgroundColor: active
                   ? "var(--color-surface-hover)"
                   : "transparent",
-                color: active ? "var(--color-text)" : "var(--color-text-secondary)",
+                color: active
+                  ? "var(--color-text)"
+                  : "var(--color-text-secondary)",
               }}
               title={collapsed ? item.name : undefined}
               onClick={onCloseDrawer}
@@ -200,7 +211,7 @@ export default function Sidebar({ onLogout, collapsed = false, setCollapsed, onC
             onLogout();
             if (onCloseDrawer) onCloseDrawer();
           }}
-          className={`w-full flex items-center ${collapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-lg transition-colors hover:bg-opacity-50`}
+          className={`w-full flex items-center ${collapsed ? "justify-center" : "space-x-3"} px-4 py-3 rounded-lg transition-colors hover:bg-opacity-50`}
           style={{
             backgroundColor: "transparent",
             color: "var(--color-text-secondary)",

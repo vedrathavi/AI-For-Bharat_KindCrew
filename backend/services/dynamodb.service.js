@@ -5,7 +5,10 @@ import {
   ScanCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
-import docClient, { usersTable, creatorProfilesTable } from "../config/dynamodb.js";
+import docClient, {
+  usersTable,
+  creatorProfilesTable,
+} from "../config/dynamodb.js";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -195,23 +198,41 @@ class DynamoDBService {
    */
   async createCreatorProfile(profileData) {
     console.log("🗃️ [DYNAMODB] createCreatorProfile called");
-    console.log("🗃️ [DYNAMODB] Input profileData competitors:", profileData.competitors);
-    console.log("🗃️ [DYNAMODB] Input profileData competitors type:", typeof profileData.competitors);
-    console.log("🗃️ [DYNAMODB] Input profileData competitors length:", profileData.competitors?.length);
-    console.log("🗃️ [DYNAMODB] Input profileData keys:", Object.keys(profileData));
-    
+    console.log(
+      "🗃️ [DYNAMODB] Input profileData competitors:",
+      profileData.competitors,
+    );
+    console.log(
+      "🗃️ [DYNAMODB] Input profileData competitors type:",
+      typeof profileData.competitors,
+    );
+    console.log(
+      "🗃️ [DYNAMODB] Input profileData competitors length:",
+      profileData.competitors?.length,
+    );
+    console.log(
+      "🗃️ [DYNAMODB] Input profileData keys:",
+      Object.keys(profileData),
+    );
+
     const putCommand = new PutCommand({
       TableName: creatorProfilesTable,
       Item: profileData,
     });
-    
-    console.log("🗃️ [DYNAMODB] About to execute PutCommand with Item.competitors:", putCommand.input.Item?.competitors);
+
+    console.log(
+      "🗃️ [DYNAMODB] About to execute PutCommand with Item.competitors:",
+      putCommand.input.Item?.competitors,
+    );
 
     await docClient.send(putCommand);
 
     console.log("🗃️ [DYNAMODB] Creator profile saved to DynamoDB successfully");
-    console.log("🗃️ [DYNAMODB] Returning profileData with competitors:", profileData.competitors);
-    
+    console.log(
+      "🗃️ [DYNAMODB] Returning profileData with competitors:",
+      profileData.competitors,
+    );
+
     return profileData;
   }
 
@@ -276,16 +297,16 @@ class DynamoDBService {
           const parts = key.split(".");
           const placeholders = parts.map((part, index) => `#${part}_${index}`);
           const valuePlaceholder = `:${key.replace(/\./g, "_")}`;
-          
+
           // Build the nested path expression (e.g., "#settings_0.#onboardingCompleted_1")
           const path = placeholders.join(".");
           updateExpression.push(`${path} = ${valuePlaceholder}`);
-          
+
           // Set attribute names for each part
           parts.forEach((part, index) => {
             expressionAttributeNames[placeholders[index]] = part;
           });
-          
+
           expressionAttributeValues[valuePlaceholder] = updateData[key];
         } else {
           const placeholder = `#${key}`;
@@ -296,9 +317,15 @@ class DynamoDBService {
       }
     });
 
-    console.log("🗃️ [DDB] UPDATE EXPRESSION:", `SET ${updateExpression.join(", ")}`);
+    console.log(
+      "🗃️ [DDB] UPDATE EXPRESSION:",
+      `SET ${updateExpression.join(", ")}`,
+    );
     console.log("🗃️ [DDB] ATTRIBUTE NAMES:", expressionAttributeNames);
-    console.log("🗃️ [DDB] ATTRIBUTE VALUES:", JSON.stringify(expressionAttributeValues));
+    console.log(
+      "🗃️ [DDB] ATTRIBUTE VALUES:",
+      JSON.stringify(expressionAttributeValues),
+    );
 
     const result = await docClient.send(
       new UpdateCommand({
@@ -311,8 +338,14 @@ class DynamoDBService {
       }),
     );
 
-    console.log("✅ [DDB] Result.Attributes.competitors:", result.Attributes?.competitors);
-    console.log("✅ [DDB] Result.Attributes.platforms:", result.Attributes?.platforms);
+    console.log(
+      "✅ [DDB] Result.Attributes.competitors:",
+      result.Attributes?.competitors,
+    );
+    console.log(
+      "✅ [DDB] Result.Attributes.platforms:",
+      result.Attributes?.platforms,
+    );
 
     return result.Attributes;
   }

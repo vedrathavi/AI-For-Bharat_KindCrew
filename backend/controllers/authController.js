@@ -133,7 +133,13 @@ export const handleCallback = async (req, res) => {
 
       // Generate API token
       console.log("\n🔑 Step 4: Generating API token...");
-      const apiToken = generateToken(user.userId, user.email, user.name, user.givenName, user.familyName);
+      const apiToken = generateToken(
+        user.userId,
+        user.email,
+        user.name,
+        user.givenName,
+        user.familyName,
+      );
       console.log("✅ Step 4 complete: API token generated");
 
       // Store in session
@@ -152,11 +158,13 @@ export const handleCallback = async (req, res) => {
 
       console.log("\n✅ AUTHENTICATION SUCCESSFUL!");
       console.log("User email:", user.email);
-      
+
       // Check if user has a creator profile
       let redirectPath = "/onboarding";
       try {
-        const profile = await creatorProfileService.getProfileByUserId(user.userId);
+        const profile = await creatorProfileService.getProfileByUserId(
+          user.userId,
+        );
         if (profile) {
           redirectPath = "/dashboard";
           console.log("✓ User has profile, redirecting to dashboard");
@@ -164,9 +172,11 @@ export const handleCallback = async (req, res) => {
           console.log("✓ New user, redirecting to onboarding");
         }
       } catch (error) {
-        console.log("✓ Profile check failed (new user), redirecting to onboarding");
+        console.log(
+          "✓ Profile check failed (new user), redirecting to onboarding",
+        );
       }
-      
+
       const redirectUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}${redirectPath}?token=${apiToken}`;
       console.log("Redirecting to:", redirectUrl);
       console.log("========== CALLBACK END ==========\n");
