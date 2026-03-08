@@ -4,10 +4,19 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useContent } from "@/hooks/useContent";
 import { getUserIdeas, IdeaBrief } from "@/lib/api/ideation";
-import { createContentFromIdea, createContentFromManual } from "@/lib/api/content";
+import {
+  createContentFromIdea,
+  createContentFromManual,
+} from "@/lib/api/content";
 import { useEffect, useMemo, useState } from "react";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
-import { FiCheckCircle, FiCopy, FiEdit3, FiLayers, FiZap } from "react-icons/fi";
+import {
+  FiCheckCircle,
+  FiCopy,
+  FiEdit3,
+  FiLayers,
+  FiZap,
+} from "react-icons/fi";
 
 type InputMode = "idea" | "manual";
 
@@ -81,6 +90,12 @@ function formatDisplayValue(value: unknown): string {
   }
 }
 
+function asNonEmptyString(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export default function ContentPage() {
   const router = useRouter();
   const { isAuthenticated, authReady, userInfo, token } = useAuth();
@@ -111,7 +126,9 @@ export default function ContentPage() {
 
   const [inputMode, setInputMode] = useState<InputMode>("idea");
   const [selectedIdea, setSelectedIdea] = useState<IdeaItem | null>(null);
-  const [localSavedContent, setLocalSavedContent] = useState<SavedContentItem[]>([]);
+  const [localSavedContent, setLocalSavedContent] = useState<
+    SavedContentItem[]
+  >([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
   const [copiedBlock, setCopiedBlock] = useState("");
@@ -178,7 +195,10 @@ export default function ContentPage() {
   }, [authReady, isAuthenticated, token]);
 
   const platformVariants = useMemo(() => {
-    if (!generatedContent?.platformVariants || typeof generatedContent.platformVariants !== "object") {
+    if (
+      !generatedContent?.platformVariants ||
+      typeof generatedContent.platformVariants !== "object"
+    ) {
       return [] as Array<[string, any]>;
     }
 
@@ -186,18 +206,56 @@ export default function ContentPage() {
   }, [generatedContent]);
 
   const scriptVariants = useMemo(() => {
-    if (!generatedContent?.scripts || typeof generatedContent.scripts !== "object") {
+    if (
+      !generatedContent?.scripts ||
+      typeof generatedContent.scripts !== "object"
+    ) {
       return [] as Array<[string, any]>;
     }
 
     return Object.entries(generatedContent.scripts);
   }, [generatedContent]);
 
+  const generatedOutline = useMemo(() => {
+    if (
+      !generatedContent?.outline ||
+      typeof generatedContent.outline !== "object" ||
+      Array.isArray(generatedContent.outline)
+    ) {
+      return null;
+    }
+
+    return generatedContent.outline as Record<string, unknown>;
+  }, [generatedContent]);
+
+  const outlineSections = useMemo(() => {
+    if (!generatedOutline || !Array.isArray(generatedOutline.sections)) {
+      return [] as unknown[];
+    }
+
+    return generatedOutline.sections;
+  }, [generatedOutline]);
+
+  const generatedDraftText = useMemo(() => {
+    const draft = generatedContent?.draft;
+
+    if (typeof draft === "string") {
+      return draft;
+    }
+
+    if (draft && typeof draft === "object" && "text" in draft) {
+      const text = (draft as { text?: unknown }).text;
+      return typeof text === "string" ? text : "";
+    }
+
+    return "";
+  }, [generatedContent]);
+
   // Deduplicate merged saved content - prefer server content over local
   const mergedSavedContent = useMemo(() => {
-    const serverContentIds = new Set(contentList.map(item => item.contentId));
+    const serverContentIds = new Set(contentList.map((item) => item.contentId));
     const uniqueLocalContent = localSavedContent.filter(
-      item => !serverContentIds.has(item.contentId)
+      (item) => !serverContentIds.has(item.contentId),
     );
     return [...contentList, ...uniqueLocalContent];
   }, [contentList, localSavedContent]);
@@ -208,14 +266,15 @@ export default function ContentPage() {
         .split("\n")
         .map((point) => point.trim())
         .filter(Boolean),
-    [manualInput.keyPointsText]
+    [manualInput.keyPointsText],
   );
 
   const isGenerateDisabled =
     isGenerating ||
     (inputMode === "idea" && !selectedIdea) ||
     (inputMode === "manual" &&
-      (!manualInput.topic.trim() || customization.selectedPlatforms.length === 0));
+      (!manualInput.topic.trim() ||
+        customization.selectedPlatforms.length === 0));
 
   const togglePlatform = (platform: string) => {
     const isSelected = customization.selectedPlatforms.includes(platform);
@@ -228,7 +287,8 @@ export default function ContentPage() {
 
   const copyContent = async (key: string, value: any) => {
     try {
-      const textToCopy = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+      const textToCopy =
+        typeof value === "string" ? value : JSON.stringify(value, null, 2);
       await navigator.clipboard.writeText(textToCopy);
       setCopiedBlock(key);
       setTimeout(() => setCopiedBlock(""), 1500);
@@ -241,29 +301,39 @@ export default function ContentPage() {
     if (!generatedContent || !userInfo?.userId) return;
 
     const localKey = `kindcrew-content-local-${userInfo.userId}`;
-    
-    // Generate or use existing contentId
-    const contentIdToUse = generatedContent.contentId || `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    
+
+    // Generate or use existing contentId, but only if it is a valid non-empty string.
+    const contentIdToUse =
+      asNonEmptyString(generatedContent.contentId) ||
+      `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    const topicFromGenerated = asNonEmptyString(generatedContent.topic);
+    const contentTypeFromGenerated = asNonEmptyString(
+      generatedContent.contentType,
+    );
+
     // Check if this content is already saved (prevent duplicates)
-    const alreadySaved = localSavedContent.some(item => item.contentId === contentIdToUse);
-    
+    const alreadySaved = localSavedContent.some(
+      (item) => item.contentId === contentIdToUse,
+    );
+
     if (alreadySaved) {
       setSaveMessage("This content is already saved in your library.");
       setTimeout(() => setSaveMessage(""), 1800);
       return;
     }
-    
+
     const nextItem: SavedContentItem = {
       ...(generatedContent as SavedContentItem),
       contentId: contentIdToUse,
       topic:
-        generatedContent.topic ||
+        topicFromGenerated ||
         manualInput.topic ||
         selectedIdea?.topic ||
         selectedIdea?.title ||
         "Untitled Content",
-      contentType: generatedContent.contentType || manualInput.contentType || "post",
+      contentType:
+        contentTypeFromGenerated || manualInput.contentType || "post",
       createdAt: new Date().toISOString(),
       source: "local",
     };
@@ -306,7 +376,9 @@ export default function ContentPage() {
       const selectedIdeaId = selectedIdea?.ideaId;
 
       if (inputMode === "idea" && !selectedIdeaId) {
-        setErrorMessage("Selected idea is missing an ID. Please choose another idea.");
+        setErrorMessage(
+          "Selected idea is missing an ID. Please choose another idea.",
+        );
         return;
       }
 
@@ -362,7 +434,7 @@ export default function ContentPage() {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Something went wrong while generating content."
+          : "Something went wrong while generating content.",
       );
     } finally {
       setIsGenerating(false);
@@ -397,7 +469,8 @@ export default function ContentPage() {
                 className="text-base sm:text-lg"
                 style={{ color: "var(--color-text-secondary)" }}
               >
-                Pick a saved idea or write your own brief, then generate platform-ready drafts in one flow.
+                Pick a saved idea or write your own brief, then generate
+                platform-ready drafts in one flow.
               </p>
             </div>
 
@@ -417,8 +490,17 @@ export default function ContentPage() {
 
         <div className="space-y-6">
           <section className="space-y-6">
-            <div className="rounded-2xl border p-4 sm:p-5" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
-              <p className="text-sm font-semibold mb-3" style={{ color: "var(--color-text)" }}>
+            <div
+              className="rounded-2xl border p-4 sm:p-5"
+              style={{
+                borderColor: "var(--color-border)",
+                backgroundColor: "var(--color-surface)",
+              }}
+            >
+              <p
+                className="text-sm font-semibold mb-3"
+                style={{ color: "var(--color-text)" }}
+              >
                 1. Choose Input Mode
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -432,7 +514,9 @@ export default function ContentPage() {
                   className="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
                   style={{
                     backgroundColor:
-                      inputMode === "idea" ? "var(--color-surface-hover)" : "var(--color-background)",
+                      inputMode === "idea"
+                        ? "var(--color-surface-hover)"
+                        : "var(--color-background)",
                     color: "var(--color-text)",
                     border: "1px solid var(--color-border)",
                   }}
@@ -450,7 +534,9 @@ export default function ContentPage() {
                   className="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
                   style={{
                     backgroundColor:
-                      inputMode === "manual" ? "var(--color-surface-hover)" : "var(--color-background)",
+                      inputMode === "manual"
+                        ? "var(--color-surface-hover)"
+                        : "var(--color-background)",
                     color: "var(--color-text)",
                     border: "1px solid var(--color-border)",
                   }}
@@ -461,27 +547,51 @@ export default function ContentPage() {
             </div>
 
             {inputMode === "idea" ? (
-              <div className="rounded-2xl border p-4 sm:p-5" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
+              <div
+                className="rounded-2xl border p-4 sm:p-5"
+                style={{
+                  borderColor: "var(--color-border)",
+                  backgroundColor: "var(--color-surface)",
+                }}
+              >
                 <div className="flex items-center justify-between gap-2 mb-4">
-                  <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+                  <p
+                    className="text-sm font-semibold"
+                    style={{ color: "var(--color-text)" }}
+                  >
                     2. Select Saved Idea
                   </p>
                   <button
                     type="button"
                     onClick={() => router.push("/ideation")}
                     className="text-xs px-3 py-1.5 rounded-md font-medium"
-                    style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
+                    style={{
+                      backgroundColor: "var(--color-background)",
+                      color: "var(--color-text)",
+                    }}
                   >
                     Open Ideation
                   </button>
                 </div>
 
                 {loadingIdeas ? (
-                  <div className="rounded-xl p-4 text-sm" style={{ ...baseFieldStyle, color: "var(--color-text-secondary)" }}>
+                  <div
+                    className="rounded-xl p-4 text-sm"
+                    style={{
+                      ...baseFieldStyle,
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
                     Loading saved ideas...
                   </div>
                 ) : savedIdeas.length === 0 ? (
-                  <div className="rounded-xl p-4 text-sm" style={{ ...baseFieldStyle, color: "var(--color-text-secondary)" }}>
+                  <div
+                    className="rounded-xl p-4 text-sm"
+                    style={{
+                      ...baseFieldStyle,
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
                     No saved ideas yet. Create one from the Ideation page.
                   </div>
                 ) : (
@@ -501,18 +611,36 @@ export default function ContentPage() {
                           }}
                           className="w-full text-left rounded-xl p-3 transition-colors"
                           style={{
-                            backgroundColor: active ? "var(--color-surface-hover)" : "var(--color-background)",
-                            border: active ? "1px solid var(--color-text)" : "1px solid var(--color-border)",
+                            backgroundColor: active
+                              ? "var(--color-surface-hover)"
+                              : "var(--color-background)",
+                            border: active
+                              ? "1px solid var(--color-text)"
+                              : "1px solid var(--color-border)",
                           }}
                         >
-                          <p className="text-sm font-semibold truncate" style={{ color: "var(--color-text)" }}>
-                            {safeText(idea.topic) || safeText(idea.title) || "Untitled Idea"}
+                          <p
+                            className="text-sm font-semibold truncate"
+                            style={{ color: "var(--color-text)" }}
+                          >
+                            {safeText(idea.topic) || "Untitled Idea"}
                           </p>
-                          <p className="text-xs mt-1 line-clamp-2" style={{ color: "var(--color-text-secondary)" }}>
-                            {safeText(idea.angle) || safeText(idea.description) || "No angle added"}
+                          <p
+                            className="text-xs mt-1 line-clamp-2"
+                            style={{ color: "var(--color-text-secondary)" }}
+                          >
+                            {safeText(idea.angle) ||
+                              safeText(idea.targetAudience) ||
+                              "No angle added"}
                           </p>
                           {typeof idea.scores?.virality === "number" && (
-                            <span className="inline-block mt-2 text-xs px-2 py-1 rounded" style={{ ...baseFieldStyle, color: "var(--color-text-secondary)" }}>
+                            <span
+                              className="inline-block mt-2 text-xs px-2 py-1 rounded"
+                              style={{
+                                ...baseFieldStyle,
+                                color: "var(--color-text-secondary)",
+                              }}
+                            >
                               Virality: {Math.round(idea.scores.virality)}
                             </span>
                           )}
@@ -523,37 +651,70 @@ export default function ContentPage() {
                 )}
 
                 {selectedIdea && (
-                  <div className="mt-3 rounded-lg px-3 py-2 text-sm" style={{ ...baseFieldStyle }}>
-                    <span style={{ color: "var(--color-text-secondary)" }}>Selected Idea:</span>{" "}
-                    <span style={{ color: "var(--color-text)", fontWeight: 600 }}>
-                      {selectedIdea.topic || selectedIdea.title || "Untitled Idea"}
+                  <div
+                    className="mt-3 rounded-lg px-3 py-2 text-sm"
+                    style={{ ...baseFieldStyle }}
+                  >
+                    <span style={{ color: "var(--color-text-secondary)" }}>
+                      Selected Idea:
+                    </span>{" "}
+                    <span
+                      style={{ color: "var(--color-text)", fontWeight: 600 }}
+                    >
+                      {selectedIdea.topic ||
+                        selectedIdea.title ||
+                        "Untitled Idea"}
                     </span>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl border p-4 sm:p-5" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
-                <p className="text-sm font-semibold mb-4" style={{ color: "var(--color-text)" }}>
+              <div
+                className="rounded-2xl border p-4 sm:p-5"
+                style={{
+                  borderColor: "var(--color-border)",
+                  backgroundColor: "var(--color-surface)",
+                }}
+              >
+                <p
+                  className="text-sm font-semibold mb-4"
+                  style={{ color: "var(--color-text)" }}
+                >
                   2. Write Your Brief
                 </p>
                 <div className="space-y-3">
                   <input
                     value={manualInput.topic}
-                    onChange={(e) => setManualInput((prev) => ({ ...prev, topic: e.target.value }))}
+                    onChange={(e) =>
+                      setManualInput((prev) => ({
+                        ...prev,
+                        topic: e.target.value,
+                      }))
+                    }
                     placeholder="Topic *"
                     className="w-full rounded-lg px-3 py-2 text-sm"
                     style={baseFieldStyle}
                   />
                   <input
                     value={manualInput.angle}
-                    onChange={(e) => setManualInput((prev) => ({ ...prev, angle: e.target.value }))}
+                    onChange={(e) =>
+                      setManualInput((prev) => ({
+                        ...prev,
+                        angle: e.target.value,
+                      }))
+                    }
                     placeholder="Angle"
                     className="w-full rounded-lg px-3 py-2 text-sm"
                     style={baseFieldStyle}
                   />
                   <input
                     value={manualInput.targetAudience}
-                    onChange={(e) => setManualInput((prev) => ({ ...prev, targetAudience: e.target.value }))}
+                    onChange={(e) =>
+                      setManualInput((prev) => ({
+                        ...prev,
+                        targetAudience: e.target.value,
+                      }))
+                    }
                     placeholder="Target audience"
                     className="w-full rounded-lg px-3 py-2 text-sm"
                     style={baseFieldStyle}
@@ -562,7 +723,12 @@ export default function ContentPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <select
                       value={manualInput.goal}
-                      onChange={(e) => setManualInput((prev) => ({ ...prev, goal: e.target.value }))}
+                      onChange={(e) =>
+                        setManualInput((prev) => ({
+                          ...prev,
+                          goal: e.target.value,
+                        }))
+                      }
                       className="rounded-lg px-3 py-2 text-sm"
                       style={baseFieldStyle}
                     >
@@ -573,7 +739,12 @@ export default function ContentPage() {
                     </select>
                     <select
                       value={manualInput.contentType}
-                      onChange={(e) => setManualInput((prev) => ({ ...prev, contentType: e.target.value }))}
+                      onChange={(e) =>
+                        setManualInput((prev) => ({
+                          ...prev,
+                          contentType: e.target.value,
+                        }))
+                      }
                       className="rounded-lg px-3 py-2 text-sm"
                       style={baseFieldStyle}
                     >
@@ -586,7 +757,12 @@ export default function ContentPage() {
 
                   <input
                     value={manualInput.hookIdea}
-                    onChange={(e) => setManualInput((prev) => ({ ...prev, hookIdea: e.target.value }))}
+                    onChange={(e) =>
+                      setManualInput((prev) => ({
+                        ...prev,
+                        hookIdea: e.target.value,
+                      }))
+                    }
                     placeholder="Hook idea"
                     className="w-full rounded-lg px-3 py-2 text-sm"
                     style={baseFieldStyle}
@@ -594,7 +770,12 @@ export default function ContentPage() {
                   <textarea
                     rows={5}
                     value={manualInput.keyPointsText}
-                    onChange={(e) => setManualInput((prev) => ({ ...prev, keyPointsText: e.target.value }))}
+                    onChange={(e) =>
+                      setManualInput((prev) => ({
+                        ...prev,
+                        keyPointsText: e.target.value,
+                      }))
+                    }
                     placeholder="Key points (one per line)"
                     className="w-full rounded-lg px-3 py-2 text-sm"
                     style={baseFieldStyle}
@@ -603,17 +784,37 @@ export default function ContentPage() {
               </div>
             )}
 
-            <div className="rounded-2xl border p-4 sm:p-5" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
+            <div
+              className="rounded-2xl border p-4 sm:p-5"
+              style={{
+                borderColor: "var(--color-border)",
+                backgroundColor: "var(--color-surface)",
+              }}
+            >
               <div className="flex items-center gap-2 mb-4">
-                <FiZap className="w-4 h-4" style={{ color: "var(--color-text-secondary)" }} />
-                <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+                <FiZap
+                  className="w-4 h-4"
+                  style={{ color: "var(--color-text-secondary)" }}
+                />
+                <p
+                  className="text-sm font-semibold"
+                  style={{ color: "var(--color-text)" }}
+                >
                   3. Customize Generation
                 </p>
               </div>
 
               {inputMode === "idea" && selectedIdea && (
-                <p className="text-xs mb-4" style={{ color: "var(--color-text-secondary)" }}>
-                  Using: <span style={{ color: "var(--color-text)", fontWeight: 600 }}>{selectedIdea.topic || selectedIdea.title || "Untitled Idea"}</span>
+                <p
+                  className="text-xs mb-4"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  Using:{" "}
+                  <span style={{ color: "var(--color-text)", fontWeight: 600 }}>
+                    {selectedIdea.topic ||
+                      selectedIdea.title ||
+                      "Untitled Idea"}
+                  </span>
                 </p>
               )}
 
@@ -645,17 +846,36 @@ export default function ContentPage() {
 
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
-                      Platforms {inputMode === "manual" && <span style={{ color: "#dc2626" }}>*</span>}
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "var(--color-text)" }}
+                    >
+                      Platforms{" "}
+                      {inputMode === "manual" && (
+                        <span style={{ color: "#dc2626" }}>*</span>
+                      )}
                     </p>
-                    <p className="text-xs" style={{ color: customization.selectedPlatforms.length === 0 && inputMode === "manual" ? "#dc2626" : "var(--color-text-secondary)" }}>
+                    <p
+                      className="text-xs"
+                      style={{
+                        color:
+                          customization.selectedPlatforms.length === 0 &&
+                          inputMode === "manual"
+                            ? "#dc2626"
+                            : "var(--color-text-secondary)",
+                      }}
+                    >
                       {customization.selectedPlatforms.length} selected
-                      {customization.selectedPlatforms.length === 0 && inputMode === "manual" && " (required)"}
+                      {customization.selectedPlatforms.length === 0 &&
+                        inputMode === "manual" &&
+                        " (required)"}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {platformOptions.map((platform) => {
-                      const active = customization.selectedPlatforms.includes(platform.value);
+                      const active = customization.selectedPlatforms.includes(
+                        platform.value,
+                      );
                       return (
                         <button
                           key={platform.value}
@@ -663,9 +883,13 @@ export default function ContentPage() {
                           onClick={() => togglePlatform(platform.value)}
                           className="px-3 py-1.5 text-sm rounded-full transition-colors"
                           style={{
-                            backgroundColor: active ? "var(--color-surface-hover)" : "var(--color-background)",
+                            backgroundColor: active
+                              ? "var(--color-surface-hover)"
+                              : "var(--color-background)",
                             color: "var(--color-text)",
-                            border: active ? "1px solid var(--color-text)" : "1px solid var(--color-border)",
+                            border: active
+                              ? "1px solid var(--color-text)"
+                              : "1px solid var(--color-border)",
                           }}
                         >
                           {platform.label}
@@ -701,35 +925,59 @@ export default function ContentPage() {
                 onClick={handleGenerateContent}
                 disabled={isGenerateDisabled}
                 className="mt-5 w-full sm:w-auto px-5 py-2.5 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
+                style={{
+                  backgroundColor: "var(--color-surface-hover)",
+                  color: "var(--color-text)",
+                }}
               >
                 {isGenerating ? "Generating..." : "Generate Content"}
               </button>
             </div>
 
             {/* Saved Content Library - Moved below customize section */}
-            <div className="rounded-2xl border p-4 sm:p-5" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
+            <div
+              className="rounded-2xl border p-4 sm:p-5"
+              style={{
+                borderColor: "var(--color-border)",
+                backgroundColor: "var(--color-surface)",
+              }}
+            >
               <div className="flex items-center justify-between gap-2 mb-3">
-                <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+                <p
+                  className="text-sm font-semibold"
+                  style={{ color: "var(--color-text)" }}
+                >
                   4. Saved Content Library
                 </p>
                 <button
                   type="button"
-                  onClick={() => userInfo?.userId && fetchUserContent(userInfo.userId)}
+                  onClick={() =>
+                    userInfo?.userId && fetchUserContent(userInfo.userId)
+                  }
                   className="text-xs px-2.5 py-1.5 rounded-md"
-                  style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
+                  style={{
+                    backgroundColor: "var(--color-background)",
+                    color: "var(--color-text)",
+                  }}
                 >
                   Refresh
                 </button>
               </div>
 
               {loading ? (
-                <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                <p
+                  className="text-xs"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   Loading saved content...
                 </p>
               ) : mergedSavedContent.length === 0 ? (
-                <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-                  No saved content yet. Generated items will appear here automatically.
+                <p
+                  className="text-xs"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  No saved content yet. Generated items will appear here
+                  automatically.
                 </p>
               ) : (
                 <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
@@ -737,18 +985,29 @@ export default function ContentPage() {
                     <button
                       type="button"
                       key={item.contentId}
-                      onClick={() => setGeneratedContent(item as Record<string, any>)}
+                      onClick={() =>
+                        setGeneratedContent(item as Record<string, any>)
+                      }
                       className="w-full text-left rounded-xl p-3 transition-colors"
                       style={{
                         backgroundColor: "var(--color-background)",
                         border: "1px solid var(--color-border)",
                       }}
                     >
-                      <p className="text-sm font-semibold truncate" style={{ color: "var(--color-text)" }}>
+                      <p
+                        className="text-sm font-semibold truncate"
+                        style={{ color: "var(--color-text)" }}
+                      >
                         {item.topic || "Untitled Content"}
                       </p>
-                      <p className="text-xs mt-1" style={{ color: "var(--color-text-secondary)" }}>
-                        {item.contentType || "post"} {item.createdAt ? `• ${new Date(item.createdAt).toLocaleDateString()}` : ""}
+                      <p
+                        className="text-xs mt-1"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      >
+                        {item.contentType || "post"}{" "}
+                        {item.createdAt
+                          ? `• ${new Date(item.createdAt).toLocaleDateString()}`
+                          : ""}
                         {item.source === "local" ? " • local" : ""}
                       </p>
                     </button>
@@ -758,103 +1017,166 @@ export default function ContentPage() {
             </div>
 
             {generatedContent && (
-              <div className="rounded-2xl border p-4 sm:p-5" style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}>
+              <div
+                className="rounded-2xl border p-4 sm:p-5"
+                style={{
+                  borderColor: "var(--color-border)",
+                  backgroundColor: "var(--color-surface)",
+                }}
+              >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+                    <p
+                      className="text-sm font-semibold"
+                      style={{ color: "var(--color-text)" }}
+                    >
                       Generated Output
                     </p>
-                    <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-                      Topic: {generatedContent.topic || manualInput.topic || selectedIdea?.topic || "-"}
+                    <p
+                      className="text-xs"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Topic:{" "}
+                      {asNonEmptyString(generatedContent.topic) ||
+                        manualInput.topic ||
+                        selectedIdea?.topic ||
+                        "-"}
                     </p>
                   </div>
                   <button
                     onClick={() => setGeneratedContent(null)}
                     className="px-3 py-2 rounded-lg text-sm font-medium"
-                    style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)" }}
+                    style={{
+                      backgroundColor: "var(--color-background)",
+                      color: "var(--color-text)",
+                    }}
                   >
                     Generate Another
                   </button>
                 </div>
 
-                {generatedContent.outline && (
+                {generatedOutline && (
                   <div className="mb-5 rounded-xl p-4" style={baseFieldStyle}>
                     <div className="flex items-center justify-between gap-2 mb-2">
-                      <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+                      <p
+                        className="text-sm font-semibold"
+                        style={{ color: "var(--color-text)" }}
+                      >
                         Outline
                       </p>
                       <button
-                        onClick={() => copyContent("outline", generatedContent.outline)}
+                        onClick={() => copyContent("outline", generatedOutline)}
                         className="text-xs px-2.5 py-1.5 rounded-md inline-flex items-center gap-1"
-                        style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
+                        style={{
+                          backgroundColor: "var(--color-surface-hover)",
+                          color: "var(--color-text)",
+                        }}
                       >
-                        {copiedBlock === "outline" ? <FiCheckCircle className="w-3 h-3" /> : <FiCopy className="w-3 h-3" />}
+                        {copiedBlock === "outline" ? (
+                          <FiCheckCircle className="w-3 h-3" />
+                        ) : (
+                          <FiCopy className="w-3 h-3" />
+                        )}
                         {copiedBlock === "outline" ? "Copied" : "Copy All"}
                       </button>
                     </div>
-                    {generatedContent.outline.title && (
-                      <p className="text-sm mb-2" style={{ color: "var(--color-text-secondary)" }}>
-                        <span style={{ color: "var(--color-text)" }}>Title:</span> {generatedContent.outline.title}
+                    {asNonEmptyString(generatedOutline.title) && (
+                      <p
+                        className="text-sm mb-2"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      >
+                        <span style={{ color: "var(--color-text)" }}>
+                          Title:
+                        </span>{" "}
+                        {asNonEmptyString(generatedOutline.title)}
                       </p>
                     )}
-                    {generatedContent.outline.hook && (
-                      <p className="text-sm mb-2" style={{ color: "var(--color-text-secondary)" }}>
-                        <span style={{ color: "var(--color-text)" }}>Hook:</span> {generatedContent.outline.hook}
+                    {asNonEmptyString(generatedOutline.hook) && (
+                      <p
+                        className="text-sm mb-2"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      >
+                        <span style={{ color: "var(--color-text)" }}>
+                          Hook:
+                        </span>{" "}
+                        {asNonEmptyString(generatedOutline.hook)}
                       </p>
                     )}
-                    {Array.isArray(generatedContent.outline.sections) && generatedContent.outline.sections.length > 0 && (
+                    {outlineSections.length > 0 && (
                       <div className="mb-2">
-                        <p className="text-sm font-medium mb-1" style={{ color: "var(--color-text)" }}>Sections</p>
+                        <p
+                          className="text-sm font-medium mb-1"
+                          style={{ color: "var(--color-text)" }}
+                        >
+                          Sections
+                        </p>
                         <ul className="space-y-1">
-                          {generatedContent.outline.sections.map((point: unknown, index: number) => (
-                            <li key={index} className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                              {index + 1}. {formatDisplayValue(point)}
-                            </li>
-                          ))}
+                          {outlineSections.map(
+                            (point: unknown, index: number) => (
+                              <li
+                                key={index}
+                                className="text-sm"
+                                style={{ color: "var(--color-text-secondary)" }}
+                              >
+                                {index + 1}. {formatDisplayValue(point)}
+                              </li>
+                            ),
+                          )}
                         </ul>
                       </div>
                     )}
-                    {generatedContent.outline.cta && (
-                      <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                        <span style={{ color: "var(--color-text)" }}>CTA:</span> {generatedContent.outline.cta}
+                    {asNonEmptyString(generatedOutline.cta) && (
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      >
+                        <span style={{ color: "var(--color-text)" }}>CTA:</span>{" "}
+                        {asNonEmptyString(generatedOutline.cta)}
                       </p>
                     )}
                   </div>
                 )}
 
-                {(typeof generatedContent.draft === "string" || typeof generatedContent.draft?.text === "string") && (
+                {generatedDraftText && (
                   <div className="mb-5 rounded-xl p-4" style={baseFieldStyle}>
                     <div className="flex items-center justify-between gap-2 mb-2">
-                      <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+                      <p
+                        className="text-sm font-semibold"
+                        style={{ color: "var(--color-text)" }}
+                      >
                         Draft
                       </p>
                       <button
-                        onClick={() =>
-                          copyContent(
-                            "draft",
-                            typeof generatedContent.draft === "string"
-                              ? generatedContent.draft
-                              : generatedContent.draft?.text || ""
-                          )
-                        }
+                        onClick={() => copyContent("draft", generatedDraftText)}
                         className="text-xs px-2.5 py-1.5 rounded-md inline-flex items-center gap-1"
-                        style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
+                        style={{
+                          backgroundColor: "var(--color-surface-hover)",
+                          color: "var(--color-text)",
+                        }}
                       >
-                        {copiedBlock === "draft" ? <FiCheckCircle className="w-3 h-3" /> : <FiCopy className="w-3 h-3" />}
+                        {copiedBlock === "draft" ? (
+                          <FiCheckCircle className="w-3 h-3" />
+                        ) : (
+                          <FiCopy className="w-3 h-3" />
+                        )}
                         {copiedBlock === "draft" ? "Copied" : "Copy"}
                       </button>
                     </div>
-                    <p className="text-sm whitespace-pre-wrap" style={{ color: "var(--color-text-secondary)" }}>
-                      {typeof generatedContent.draft === "string"
-                        ? generatedContent.draft
-                        : generatedContent.draft?.text}
+                    <p
+                      className="text-sm whitespace-pre-wrap"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      {generatedDraftText}
                     </p>
                   </div>
                 )}
 
                 {platformVariants.length > 0 && (
                   <div className="mb-5">
-                    <p className="text-sm font-semibold mb-3" style={{ color: "var(--color-text)" }}>
+                    <p
+                      className="text-sm font-semibold mb-3"
+                      style={{ color: "var(--color-text)" }}
+                    >
                       Platform Variants
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -864,7 +1186,9 @@ export default function ContentPage() {
                           title={platform}
                           value={value}
                           copied={copiedBlock === `variant-${platform}`}
-                          onCopy={() => copyContent(`variant-${platform}`, value)}
+                          onCopy={() =>
+                            copyContent(`variant-${platform}`, value)
+                          }
                         />
                       ))}
                     </div>
@@ -873,7 +1197,10 @@ export default function ContentPage() {
 
                 {scriptVariants.length > 0 && (
                   <div>
-                    <p className="text-sm font-semibold mb-3" style={{ color: "var(--color-text)" }}>
+                    <p
+                      className="text-sm font-semibold mb-3"
+                      style={{ color: "var(--color-text)" }}
+                    >
                       Scripts
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -883,7 +1210,9 @@ export default function ContentPage() {
                           title={`${platform} script`}
                           value={value}
                           copied={copiedBlock === `script-${platform}`}
-                          onCopy={() => copyContent(`script-${platform}`, value)}
+                          onCopy={() =>
+                            copyContent(`script-${platform}`, value)
+                          }
                         />
                       ))}
                     </div>
@@ -894,34 +1223,50 @@ export default function ContentPage() {
                   <button
                     onClick={saveCurrentOutput}
                     className="px-3 py-2 rounded-lg text-xs font-medium"
-                    style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
+                    style={{
+                      backgroundColor: "var(--color-surface-hover)",
+                      color: "var(--color-text)",
+                    }}
                   >
                     Save Current Output
                   </button>
                   <button
                     onClick={() => router.push("/content/library")}
                     className="px-3 py-2 rounded-lg text-xs font-medium"
-                    style={{ backgroundColor: "var(--color-primary)", color: "white" }}
+                    style={{
+                      backgroundColor: "var(--color-primary)",
+                      color: "white",
+                    }}
                   >
                     View Content Library
                   </button>
                   <button
                     onClick={() => router.push("/analytics")}
                     className="px-3 py-2 rounded-lg text-xs font-medium"
-                    style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
+                    style={{
+                      backgroundColor: "var(--color-surface-hover)",
+                      color: "var(--color-text)",
+                    }}
                   >
                     Continue to Analytics
                   </button>
                   <button
                     onClick={() => router.push("/dashboard")}
                     className="px-3 py-2 rounded-lg text-xs font-medium"
-                    style={{ backgroundColor: "var(--color-background)", color: "var(--color-text)", border: "1px solid var(--color-border)" }}
+                    style={{
+                      backgroundColor: "var(--color-background)",
+                      color: "var(--color-text)",
+                      border: "1px solid var(--color-border)",
+                    }}
                   >
                     Back to Dashboard
                   </button>
                 </div>
                 {saveMessage && (
-                  <p className="mt-2 text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                  <p
+                    className="mt-2 text-xs"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     {saveMessage}
                   </p>
                 )}
@@ -947,7 +1292,10 @@ function OptionGroup({
 }) {
   return (
     <div>
-      <p className="text-sm font-medium mb-2" style={{ color: "var(--color-text)" }}>
+      <p
+        className="text-sm font-medium mb-2"
+        style={{ color: "var(--color-text)" }}
+      >
         {title}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -960,9 +1308,13 @@ function OptionGroup({
               onClick={() => onChange(option)}
               className="px-3 py-1.5 text-sm rounded-lg capitalize transition-colors"
               style={{
-                backgroundColor: active ? "var(--color-surface-hover)" : "var(--color-background)",
+                backgroundColor: active
+                  ? "var(--color-surface-hover)"
+                  : "var(--color-background)",
                 color: "var(--color-text)",
-                border: active ? "1px solid var(--color-text)" : "1px solid var(--color-border)",
+                border: active
+                  ? "1px solid var(--color-text)"
+                  : "1px solid var(--color-border)",
               }}
             >
               {option}
@@ -986,17 +1338,33 @@ function StructuredOutputCard({
   onCopy: () => void;
 }) {
   return (
-    <div className="rounded-xl p-4" style={{ backgroundColor: "var(--color-background)", border: "1px solid var(--color-border)" }}>
+    <div
+      className="rounded-xl p-4"
+      style={{
+        backgroundColor: "var(--color-background)",
+        border: "1px solid var(--color-border)",
+      }}
+    >
       <div className="flex items-center justify-between gap-2 mb-2">
-        <p className="text-sm font-semibold capitalize" style={{ color: "var(--color-text)" }}>
+        <p
+          className="text-sm font-semibold capitalize"
+          style={{ color: "var(--color-text)" }}
+        >
           {title}
         </p>
         <button
           onClick={onCopy}
           className="text-xs px-2.5 py-1.5 rounded-md inline-flex items-center gap-1"
-          style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
+          style={{
+            backgroundColor: "var(--color-surface-hover)",
+            color: "var(--color-text)",
+          }}
         >
-          {copied ? <FiCheckCircle className="w-3 h-3" /> : <FiCopy className="w-3 h-3" />}
+          {copied ? (
+            <FiCheckCircle className="w-3 h-3" />
+          ) : (
+            <FiCopy className="w-3 h-3" />
+          )}
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
@@ -1004,20 +1372,35 @@ function StructuredOutputCard({
       {typeof value === "string" ? (
         <pre
           className="text-xs whitespace-pre-wrap break-words"
-          style={{ color: "var(--color-text-secondary)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" }}
+          style={{
+            color: "var(--color-text-secondary)",
+            fontFamily:
+              "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+          }}
         >
           {value}
         </pre>
       ) : (
         <div className="space-y-2">
           {Object.entries(value || {}).map(([field, fieldValue]) => (
-            <div key={field} className="rounded-lg p-2" style={{ border: "1px solid var(--color-border)" }}>
-              <p className="text-xs font-semibold capitalize mb-1" style={{ color: "var(--color-text)" }}>
+            <div
+              key={field}
+              className="rounded-lg p-2"
+              style={{ border: "1px solid var(--color-border)" }}
+            >
+              <p
+                className="text-xs font-semibold capitalize mb-1"
+                style={{ color: "var(--color-text)" }}
+              >
                 {field}
               </p>
               <pre
                 className="text-xs whitespace-pre-wrap break-words"
-                style={{ color: "var(--color-text-secondary)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" }}
+                style={{
+                  color: "var(--color-text-secondary)",
+                  fontFamily:
+                    "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                }}
               >
                 {formatDisplayValue(fieldValue)}
               </pre>
@@ -1039,14 +1422,32 @@ function StepCard({
   subtitle: string;
 }) {
   return (
-    <div className="rounded-xl p-4" style={{ backgroundColor: "var(--color-background)", border: "1px solid var(--color-border)" }}>
-      <div className="inline-flex p-2 rounded-lg mb-3" style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}>
+    <div
+      className="rounded-xl p-4"
+      style={{
+        backgroundColor: "var(--color-background)",
+        border: "1px solid var(--color-border)",
+      }}
+    >
+      <div
+        className="inline-flex p-2 rounded-lg mb-3"
+        style={{
+          backgroundColor: "var(--color-surface-hover)",
+          color: "var(--color-text)",
+        }}
+      >
         {icon}
       </div>
-      <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+      <p
+        className="text-sm font-semibold"
+        style={{ color: "var(--color-text)" }}
+      >
         {title}
       </p>
-      <p className="text-xs mt-1" style={{ color: "var(--color-text-secondary)" }}>
+      <p
+        className="text-xs mt-1"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
         {subtitle}
       </p>
     </div>

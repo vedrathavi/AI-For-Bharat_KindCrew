@@ -1,4 +1,8 @@
-import { DynamoDBClient, ListTablesCommand, DescribeTableCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  ListTablesCommand,
+  DescribeTableCommand,
+} from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import dotenv from "dotenv";
 
@@ -7,7 +11,9 @@ dotenv.config();
 console.log("🔍 Database Debug Check\n");
 console.log("Environment Variables:");
 console.log(`  AWS_REGION: ${process.env.AWS_REGION || "us-east-1"}`);
-console.log(`  DYNAMODB_ENDPOINT: ${process.env.DYNAMODB_ENDPOINT || "AWS Default"}`);
+console.log(
+  `  DYNAMODB_ENDPOINT: ${process.env.DYNAMODB_ENDPOINT || "AWS Default"}`,
+);
 console.log("");
 
 const config = {
@@ -37,7 +43,9 @@ async function debug() {
     );
     console.log(`  Status: ${describeResult.Table.TableStatus}`);
     console.log(`  Item Count: ${describeResult.Table.ItemCount}`);
-    console.log(`  Size: ${Math.round(describeResult.Table.TableSizeBytes / 1024)} KB\n`);
+    console.log(
+      `  Size: ${Math.round(describeResult.Table.TableSizeBytes / 1024)} KB\n`,
+    );
 
     // Query user-123 records
     console.log("🔎 Querying for user-123 records...\n");

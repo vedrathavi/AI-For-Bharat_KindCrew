@@ -1,6 +1,7 @@
 # Comprehensive Testing Checklist - KindCrew Platform
 
 ## Test Environment Setup
+
 - [ ] Backend running on http://localhost:5000
 - [ ] Frontend running on http://localhost:3000
 - [ ] DynamoDB accessible and configured
@@ -13,6 +14,7 @@
 ## 1. AUTHENTICATION & PROFILE FLOW
 
 ### User Authentication
+
 - [ ] Register new user account
 - [ ] Login with credentials
 - [ ] Verify JWT token stored in localStorage
@@ -21,6 +23,7 @@
 - [ ] Logout - verify token cleared
 
 ### Creator Profile
+
 - [ ] Create creator profile (first login)
 - [ ] Fill all profile fields (niche, audience, platforms, goals)
 - [ ] Save profile successfully
@@ -29,6 +32,7 @@
 - [ ] View profile in DynamoDB (backend)
 
 **Expected State After:**
+
 ```javascript
 // localStorage: kindcrew-app-storage
 {
@@ -46,6 +50,7 @@
 ## 2. IDEATION FLOW - ZERO IDEA (Generate from Profile)
 
 ### Generate Ideas
+
 - [ ] Navigate to `/ideation` → Click "Zero Idea"
 - [ ] Form auto-fills from creator profile
 - [ ] Edit: niche, audience, platforms (multiple), goal
@@ -55,6 +60,7 @@
 - [ ] Ideas sorted by overall score (highest first)
 
 ### Select & Navigate to Research
+
 - [ ] Click on an idea card to select it
 - [ ] Click "Select This Idea" button
 - [ ] Redirects to `/ideation/research`
@@ -62,6 +68,7 @@
 - [ ] Idea details preserved (topic, angle, platform, audience, scores)
 
 ### Research Phase
+
 - [ ] Verify idea details display correctly
 - [ ] Click "Generate Research"
 - [ ] Loading state during research generation
@@ -74,6 +81,7 @@
 - [ ] Reload page - verify research persists in sessionStorage
 
 ### Approve & Save Idea
+
 - [ ] Click "Approve & Save Idea"
 - [ ] Success message appears
 - [ ] Redirects to success page with ideaId
@@ -82,6 +90,7 @@
 - [ ] Verify `hasContent: false` on idea
 
 ### Verify Backend Storage
+
 - [ ] Check DynamoDB `KindCrew-ContentIdeas` table
 - [ ] Verify idea record exists with:
   - userId, ideaId, topic, angle, platform
@@ -91,6 +100,7 @@
   - NO hasContent field yet (added on query)
 
 **Expected State After:**
+
 ```javascript
 // localStorage: kindcrew-app-storage
 {
@@ -122,6 +132,7 @@
 ## 3. IDEATION FLOW - SOME IDEA (Refine Rough Idea)
 
 ### Generate Refined Ideas
+
 - [ ] Navigate to `/ideation` → Click "Some Idea"
 - [ ] Enter rough idea (e.g., "AI productivity tools")
 - [ ] Enter target audience
@@ -131,6 +142,7 @@
 - [ ] Each has unique angle/hook
 
 ### Research & Save
+
 - [ ] Select one refined idea
 - [ ] Proceed to research page
 - [ ] Generate research (same as Zero Idea flow)
@@ -144,6 +156,7 @@
 ## 4. IDEATION FLOW - FULL IDEA (Evaluate Existing Idea)
 
 ### Evaluate Idea
+
 - [ ] Navigate to `/ideation` → Click "Full Idea"
 - [ ] Enter complete idea
 - [ ] Enter target audience
@@ -155,6 +168,7 @@
   - Scores (virality, clarity, competition, overall)
 
 ### Research & Save
+
 - [ ] Proceed to research page
 - [ ] Generate research
 - [ ] Approve and save
@@ -167,6 +181,7 @@
 ## 5. MY IDEAS PAGE - View & Manage
 
 ### Display Saved Ideas
+
 - [ ] Navigate to `/ideation/my-ideas`
 - [ ] All saved ideas display as cards
 - [ ] Each card shows:
@@ -178,6 +193,7 @@
   - Created date
 
 ### Expand Idea Details
+
 - [ ] Click "View" button on an idea
 - [ ] Expanded section shows:
   - Full angle/description
@@ -185,6 +201,7 @@
 - [ ] Click "Hide" to collapse
 
 ### Generate Research (for ideas without research)
+
 - [ ] Find idea without research
 - [ ] Click "Generate Research" button
 - [ ] Loading state shows
@@ -192,16 +209,19 @@
 - [ ] Reload page - research persists
 
 ### Copy Idea
+
 - [ ] Click copy button
 - [ ] Check clipboard has full idea text
 - [ ] Button shows checkmark briefly
 
 ### Reload Test
+
 - [ ] Reload `/ideation/my-ideas` page
 - [ ] All ideas reload from backend
 - [ ] hasContent flags correctly set
 
 **Expected Behavior:**
+
 - Ideas with content show "Content Generated" badge
 - Generate Content button disabled if `hasContent: true`
 - Generate Content button enabled if `hasContent: false`
@@ -211,6 +231,7 @@
 ## 6. CONTENT GENERATION - From Saved Idea
 
 ### Generate Content
+
 - [ ] On `/ideation/my-ideas`, find idea with `hasContent: false`
 - [ ] Click "Generate Content" button
 - [ ] Loading state shows "Generating..."
@@ -218,6 +239,7 @@
 - [ ] Success: redirects to `/content/library`
 
 ### Verify Content Created
+
 - [ ] Content appears in library with:
   - Topic from idea
   - Created timestamp
@@ -227,6 +249,7 @@
 - [ ] Verify outline, draft, platform variants display
 
 ### Verify hasContent Flag Updated
+
 - [ ] Return to `/ideation/my-ideas`
 - [ ] Find the same idea used for content
 - [ ] Verify badge shows "Content Generated"
@@ -234,6 +257,7 @@
 - [ ] Reload page - flag persists
 
 ### Verify Backend Storage
+
 - [ ] Check DynamoDB `KindCrew-ContentItems` table
 - [ ] Verify content record with:
   - contentId, userId, ideaId (linked!)
@@ -246,6 +270,7 @@
   - createdAt, updatedAt
 
 **Expected State After:**
+
 ```javascript
 // localStorage: kindcrew-app-storage
 {
@@ -276,6 +301,7 @@
 ## 7. CONTENT GENERATION - Manual Entry
 
 ### Create Manual Content
+
 - [ ] Navigate to `/content/create`
 - [ ] Form displays with all fields empty
 - [ ] Fill in:
@@ -292,6 +318,7 @@
 - [ ] All fields editable
 
 ### Submit & Generate
+
 - [ ] Click "Generate Content" button
 - [ ] Loading state shows
 - [ ] Content generates successfully
@@ -299,6 +326,7 @@
 - [ ] New content appears
 
 ### Verify Backend Storage
+
 - [ ] Check DynamoDB `KindCrew-ContentItems` table
 - [ ] Verify:
   - source: "manual"
@@ -306,6 +334,7 @@
   - All manual input fields saved
 
 **Expected State:**
+
 ```javascript
 // DynamoDB: KindCrew-ContentItems
 {
@@ -323,6 +352,7 @@
 ## 8. CONTENT LIBRARY PAGE
 
 ### Display All Content
+
 - [ ] Navigate to `/content/library`
 - [ ] All generated content displays
 - [ ] Content from ideas AND manual entry both shown
@@ -334,6 +364,7 @@
   - Status (draft/scheduled/published)
 
 ### View Content Details
+
 - [ ] Click on any content card
 - [ ] Redirects to `/content/[contentId]`
 - [ ] Detail page shows:
@@ -343,6 +374,7 @@
   - Platform-specific content (posts, threads, captions, hashtags)
 
 ### Copy Platform Content
+
 - [ ] Select a platform tab
 - [ ] Click copy button on post text
 - [ ] Verify copied to clipboard
@@ -350,6 +382,7 @@
 - [ ] Try different sections (threads, hashtags)
 
 ### Reload Test
+
 - [ ] Reload `/content/library`
 - [ ] All content reloads from backend
 - [ ] Reload `/content/[contentId]`
@@ -360,6 +393,7 @@
 ## 9. STATE MANAGEMENT - Zustand Store
 
 ### Verify Store Persistence
+
 - [ ] Generate ideas → Check store: `ideas: Array[10]`
 - [ ] Navigate away → Return → Ideas cleared (not persisted)
 - [ ] Select idea → Check sessionStorage: `selectedIdea: {...}`
@@ -368,12 +402,14 @@
 - [ ] Reload page → Check store: `contentList` persists
 
 ### Clear State Test
+
 - [ ] Generate ideas in Zero Idea flow
 - [ ] Click "Generate New Ideas" button
 - [ ] Verify `ideas` array cleared
 - [ ] Verify form resets
 
 ### Logout Test
+
 - [ ] Logout from app
 - [ ] Verify localStorage cleared of token
 - [ ] Verify store resets to initial state
@@ -384,6 +420,7 @@
 ## 10. PROFILE CONTEXT IN CONTENT GENERATION
 
 ### Verify Profile Used in Prompts
+
 - [ ] Create creator profile with:
   - Niche: "SaaS Marketing"
   - Voice Tone: "Conversational"
@@ -392,6 +429,7 @@
   - Topics to Avoid: ["Politics", "Religion"]
 
 ### Generate Content and Verify
+
 - [ ] Generate content (from idea or manual)
 - [ ] Check backend logs for prompt content
 - [ ] Verify profile context included:
@@ -410,6 +448,7 @@
 ## 11. NAVIGATION & ROUTING
 
 ### All Routes Accessible
+
 - [ ] `/` - Landing page
 - [ ] `/ideation` - Ideation hub
 - [ ] `/ideation/zero` - Zero idea generator
@@ -424,6 +463,7 @@
 - [ ] `/profile` - Creator profile (if exists)
 
 ### Navigation Flow
+
 - [ ] Back buttons work on all pages
 - [ ] Redirects work after form submissions
 - [ ] Unauthorized users redirect to login
@@ -435,17 +475,20 @@
 ## 12. ERROR HANDLING
 
 ### Network Errors
+
 - [ ] Stop backend server
 - [ ] Try generating ideas
 - [ ] Verify error message displays
 - [ ] Verify graceful degradation (no crashes)
 
 ### Invalid Data
+
 - [ ] Submit empty form (should show validation errors)
 - [ ] Try accessing non-existent contentId
 - [ ] Verify 404 or error message
 
 ### API Timeout
+
 - [ ] Monitor long-running Bedrock API calls
 - [ ] Verify loading states persist
 - [ ] Verify timeout handling if applicable
@@ -455,6 +498,7 @@
 ## 13. EDGE CASES & SPECIAL SCENARIOS
 
 ### Multiple Ideas to Same Content
+
 - [ ] Generate 3 different ideas
 - [ ] Generate content from idea #1 → Success
 - [ ] Try generating content from idea #1 again → Button disabled
@@ -463,17 +507,20 @@
 - [ ] Verify both ideas show `hasContent: true`
 
 ### Delete Idea with Linked Content
+
 - [ ] (If delete functionality exists)
 - [ ] Verify content still accessible
 - [ ] Verify orphaned content handling
 
 ### Large Dataset Test
+
 - [ ] Generate and save 10+ ideas
 - [ ] Generate content for multiple ideas
 - [ ] Verify pagination or list performance
 - [ ] Verify all data loads correctly
 
 ### Concurrent Users
+
 - [ ] Test with 2 different user accounts
 - [ ] Verify data isolation (User A doesn't see User B's ideas)
 
@@ -482,12 +529,14 @@
 ## 14. PERFORMANCE & OPTIMIZATION
 
 ### Loading Performance
+
 - [ ] Measure idea generation time (expect 5-15 seconds)
 - [ ] Measure content generation time (expect 30-60 seconds)
 - [ ] Check for unnecessary re-renders in React DevTools
 - [ ] Verify no memory leaks on page reload
 
 ### Data Caching
+
 - [ ] Navigate to my-ideas → Note load time
 - [ ] Navigate away and return → Should be faster (from store)
 - [ ] Reload page → Should load from backend
@@ -497,6 +546,7 @@
 ## 15. FINAL INTEGRATION TEST - Complete User Journey
 
 ### Scenario: New user creates content from scratch
+
 1. [ ] Register/Login new user
 2. [ ] Create creator profile (full details)
 3. [ ] Generate 10 ideas (Zero Idea flow)
@@ -516,6 +566,7 @@
 17. [ ] Verify cannot regenerate content for same idea
 
 ### Scenario: User with existing data
+
 1. [ ] Login with account that has data
 2. [ ] Verify profile loads
 3. [ ] Verify my-ideas shows all saved ideas with correct flags
@@ -527,6 +578,7 @@
 ## VALIDATION CHECKLIST SUMMARY
 
 ### Backend Validation
+
 - [ ] All API endpoints respond correctly
 - [ ] Authentication middleware working
 - [ ] DynamoDB tables populated correctly:
@@ -538,6 +590,7 @@
 - [ ] Profile context used in AI prompts
 
 ### Frontend Validation
+
 - [ ] Zustand store persists correctly to localStorage
 - [ ] SessionStorage used for temporary data (selectedIdea)
 - [ ] All forms validate input
@@ -548,6 +601,7 @@
 - [ ] Content renders properly (Markdown support)
 
 ### State Synchronization
+
 - [ ] Frontend store matches backend data after reload
 - [ ] `hasContent` flag prevents duplicate content generation
 - [ ] Multiple tabs/windows sync (if applicable)
@@ -558,6 +612,7 @@
 ## BUGS TO CHECK FOR
 
 Common issues to verify are fixed:
+
 - [ ] Generate button not disabled after content created → SHOULD BE DISABLED
 - [ ] hasContent flag not updating → SHOULD UPDATE
 - [ ] Profile context not in content prompts → SHOULD BE INCLUDED
@@ -572,24 +627,27 @@ Common issues to verify are fixed:
 
 ## TEST EXECUTION NOTES
 
-**Date:** ___________  
-**Tester:** ___________  
-**Environment:** Dev / Staging / Prod  
+**Date:** ****\_\_\_****  
+**Tester:** ****\_\_\_****  
+**Environment:** Dev / Staging / Prod
 
 **Results:**
-- Total Tests: _____ / _____
-- Passed: _____
-- Failed: _____
-- Blocked: _____
+
+- Total Tests: **\_** / **\_**
+- Passed: **\_**
+- Failed: **\_**
+- Blocked: **\_**
 
 **Critical Issues Found:**
-1. 
-2. 
-3. 
+
+1.
+2.
+3.
 
 **Nice-to-Have Improvements:**
-1. 
-2. 
-3. 
 
-**Sign-off:** ___________
+1.
+2.
+3.
+
+**Sign-off:** ****\_\_\_****

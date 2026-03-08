@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useAppStore } from "@/store/useAppStore";
@@ -16,7 +16,7 @@ import {
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 import type { CreatorProfileData, Platform } from "@/lib/api/creatorProfile";
 
-export default function OnboardingPage() {
+function OnboardingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get("edit") === "true";
@@ -108,7 +108,6 @@ export default function OnboardingPage() {
   // Load existing profile data for editing (only once!)
   useEffect(() => {
     if (hasProfile && creatorProfile && !profileLoaded) {
-      console.log("📂 [INIT] Loading profile data into form ONCE");
       setFormData({
         niche: creatorProfile.niche || { primary: "", secondary: "" },
         targetAudience: creatorProfile.targetAudience || "",
@@ -181,16 +180,6 @@ export default function OnboardingPage() {
       setProfileLoaded(true); // ← Mark profile as loaded so this effect doesn't run again
     }
   }, [hasProfile, creatorProfile, profileLoaded]);
-
-  // Debug: Log whenever formData.competitors changes
-  useEffect(() => {
-    console.log(
-      "🔍 [DEBUG] formData.competitors changed:",
-      formData.competitors,
-      "Length:",
-      formData.competitors?.length,
-    );
-  }, [formData.competitors]);
 
   useEffect(() => {
     if (authReady && !isAuthenticated()) {
@@ -308,21 +297,14 @@ export default function OnboardingPage() {
   };
 
   const handleAddCompetitor = () => {
-    console.log(
-      "🏆 [BUTTON] Add Competitor clicked, newCompetitor state:",
-      newCompetitor,
-    );
-
     // Validation: at least one field required
     if (!newCompetitor.name && !newCompetitor.url && !newCompetitor.notes) {
-      console.warn("🏆 [VALIDATION] No fields filled");
       toast.error("Please add at least a name or URL for the competitor");
       return;
     }
 
     // If notes exist, must have name or URL
     if (newCompetitor.notes && !newCompetitor.name && !newCompetitor.url) {
-      console.warn("🏆 [VALIDATION] Notes exist but no name/url");
       toast.error(
         "When adding notes, please also include a competitor name or URL",
       );
@@ -335,22 +317,13 @@ export default function OnboardingPage() {
       url: newCompetitor.url || null,
       notes: newCompetitor.notes || null,
     };
-    console.log("🏆 [FORM] Adding competitor:", newComp);
 
     const updatedCompetitors = [...(formData.competitors || []), newComp];
-    console.log(
-      "🏆 [FORM] Updated competitors array after add:",
-      updatedCompetitors,
-    );
 
     setFormData({
       ...formData,
       competitors: updatedCompetitors,
     });
-    console.log(
-      "🏆 [FORM] FormData competitors after setState:",
-      formData.competitors,
-    );
 
     setNewCompetitor({ name: "", url: "", notes: "" });
     toast.success(`Competitor added!`);
@@ -390,48 +363,22 @@ export default function OnboardingPage() {
     if (!token) return;
 
     try {
-      console.log("📤 [SAVE] Current formData state:", {
-        niche: formData.niche,
-        goals: formData.goals,
-        strategy: { contentPillars: formData.strategy.contentPillars.length },
-        platforms: formData.platforms,
-        platformCount: formData.platforms?.length,
-        competitors: formData.competitors,
-        competitorCount: formData.competitors?.length,
-      });
-
-      // Log each competitor individually to verify structure
-      if (formData.competitors && formData.competitors.length > 0) {
-        console.log("📤 [SAVE] Competitors in formData:");
-        formData.competitors.forEach((c, i) => {
-          console.log(`  [${i}]:`, c);
-        });
-      } else {
-        console.warn("📤 [SAVE] ⚠️ NO COMPETITORS IN FORMDATA!");
-      }
-
       let profile;
 
       // If profile already exists, update it instead of creating a new one
       if (hasProfile && creatorProfile?.creatorId) {
-        console.log("📝 Updating existing profile:", creatorProfile.creatorId);
         profile = await updateProfile(
           token,
           creatorProfile.creatorId,
           formData,
         );
       } else {
-        console.log("✨ Creating new profile");
         profile = await createProfile(token, formData);
       }
 
-      console.log("✅ Profile saved:", profile);
-
       if (profile?.creatorId) {
-        console.log("📋 Completing onboarding for:", profile.creatorId);
         try {
           await completeOnboarding(token, profile.creatorId);
-          console.log("✅ Onboarding completed successfully!");
         } catch (onboardingError) {
           console.error("❌ Failed to complete onboarding:", onboardingError);
           toast.error(
@@ -1534,4 +1481,19 @@ export default function OnboardingPage() {
   );
 
   return <AuthenticatedLayout>{onboardingContent}</AuthenticatedLayout>;
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          className="min-h-screen"
+          style={{ backgroundColor: "var(--color-background)" }}
+        />
+      }
+    >
+      <OnboardingPageContent />
+    </Suspense>
+  );
 }

@@ -194,7 +194,6 @@ const creatorProfileService = {
         updatedAt: new Date().toISOString(),
       });
 
-      console.log(`Competitor added to profile: ${creatorId}`);
       return updated;
     } catch (error) {
       console.error("Failed to add competitor:", error);
@@ -228,7 +227,6 @@ const creatorProfileService = {
         updatedAt: new Date().toISOString(),
       });
 
-      console.log(`Competitor removed from profile: ${creatorId}`);
       return updated;
     } catch (error) {
       console.error("Failed to remove competitor:", error);
@@ -252,7 +250,6 @@ const creatorProfileService = {
         platforms,
         updatedAt: new Date().toISOString(),
       });
-      console.log(`Platforms updated for profile: ${creatorId}`);
       return updated;
     } catch (error) {
       console.error("Failed to update platforms:", error);
@@ -275,7 +272,6 @@ const creatorProfileService = {
         "settings.onboardingCompleted": true,
         updatedAt: new Date().toISOString(),
       });
-      console.log(`Onboarding completed for profile: ${creatorId}`);
       return updated;
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
@@ -295,7 +291,6 @@ const creatorProfileService = {
 
     try {
       await dynamodb.deleteCreatorProfile(creatorId);
-      console.log(`Creator profile deleted: ${creatorId}`);
     } catch (error) {
       console.error("Failed to delete creator profile:", error);
       throw error;
@@ -314,9 +309,6 @@ const creatorProfileService = {
 
     try {
       const profiles = await dynamodb.queryCreatorProfilesByStatus(status);
-      console.log(
-        `Retrieved ${profiles.length} profiles with status: ${status}`,
-      );
       return profiles;
     } catch (error) {
       console.error("Failed to get profiles by status:", error);
@@ -336,9 +328,6 @@ const creatorProfileService = {
 
     try {
       const profiles = await dynamodb.queryCreatorProfilesByNiche(primaryNiche);
-      console.log(
-        `Retrieved ${profiles.length} profiles with niche: ${primaryNiche}`,
-      );
       return profiles;
     } catch (error) {
       console.error("Failed to get profiles by niche:", error);

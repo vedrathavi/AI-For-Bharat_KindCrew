@@ -198,41 +198,12 @@ class DynamoDBService {
    * @returns {Promise<Object>} Created profile
    */
   async createCreatorProfile(profileData) {
-    console.log("🗃️ [DYNAMODB] createCreatorProfile called");
-    console.log(
-      "🗃️ [DYNAMODB] Input profileData competitors:",
-      profileData.competitors,
-    );
-    console.log(
-      "🗃️ [DYNAMODB] Input profileData competitors type:",
-      typeof profileData.competitors,
-    );
-    console.log(
-      "🗃️ [DYNAMODB] Input profileData competitors length:",
-      profileData.competitors?.length,
-    );
-    console.log(
-      "🗃️ [DYNAMODB] Input profileData keys:",
-      Object.keys(profileData),
-    );
-
     const putCommand = new PutCommand({
       TableName: creatorProfilesTable,
       Item: profileData,
     });
 
-    console.log(
-      "🗃️ [DYNAMODB] About to execute PutCommand with Item.competitors:",
-      putCommand.input.Item?.competitors,
-    );
-
     await docClient.send(putCommand);
-
-    console.log("🗃️ [DYNAMODB] Creator profile saved to DynamoDB successfully");
-    console.log(
-      "🗃️ [DYNAMODB] Returning profileData with competitors:",
-      profileData.competitors,
-    );
 
     return profileData;
   }
@@ -280,12 +251,6 @@ class DynamoDBService {
    * @returns {Promise<Object>} Updated profile
    */
   async updateCreatorProfile(creatorId, updateData) {
-    console.log("🗃️ [DDB] updateCreatorProfile called");
-    console.log("🗃️ [DDB] creatorId:", creatorId);
-    console.log("🗃️ [DDB] updateData.competitors:", updateData.competitors);
-    console.log("🗃️ [DDB] updateData.platforms:", updateData.platforms);
-    console.log("🗃️ [DDB] updateData keys:", Object.keys(updateData));
-
     // Build update expression
     const updateExpression = [];
     const expressionAttributeValues = {};
@@ -318,16 +283,6 @@ class DynamoDBService {
       }
     });
 
-    console.log(
-      "🗃️ [DDB] UPDATE EXPRESSION:",
-      `SET ${updateExpression.join(", ")}`,
-    );
-    console.log("🗃️ [DDB] ATTRIBUTE NAMES:", expressionAttributeNames);
-    console.log(
-      "🗃️ [DDB] ATTRIBUTE VALUES:",
-      JSON.stringify(expressionAttributeValues),
-    );
-
     const result = await docClient.send(
       new UpdateCommand({
         TableName: creatorProfilesTable,
@@ -337,15 +292,6 @@ class DynamoDBService {
         ExpressionAttributeValues: expressionAttributeValues,
         ReturnValues: "ALL_NEW",
       }),
-    );
-
-    console.log(
-      "✅ [DDB] Result.Attributes.competitors:",
-      result.Attributes?.competitors,
-    );
-    console.log(
-      "✅ [DDB] Result.Attributes.platforms:",
-      result.Attributes?.platforms,
     );
 
     return result.Attributes;
@@ -366,7 +312,6 @@ class DynamoDBService {
 
     // Note: DynamoDB doesn't have a DELETE command, use UpdateCommand to mark as deleted
     // Or implement soft delete by updating status to 'deleted'
-    console.log("Creator profile deleted (implement soft delete as needed)");
   }
 
   /**

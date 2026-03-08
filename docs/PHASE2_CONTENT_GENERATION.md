@@ -15,9 +15,11 @@ Idea → Structured Content → Platform Variants → Distribution
 ### Entry Points
 
 #### 1. From Phase 1 Ideation
+
 Users can generate content directly from saved ideas by clicking "Generate Content" button in My Ideas page.
 
 #### 2. Manual Content Creation
+
 Users can skip Phase 1 and create content from scratch at `/content/create`.
 
 ### Content Generation Pipeline
@@ -45,18 +47,21 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
 ## Supported Platforms
 
 ### Text-Based Platforms
+
 - **LinkedIn** - Professional networking posts
 - **Twitter/X** - Thread-based microblogging
 - **Reddit** - Community-focused discussions
 - **Medium** - Long-form blog articles
 
 ### Video-Enabled Platforms
+
 - **YouTube** - Video metadata + script
 - **Instagram** - Carousel/Reel + caption + script
 
 ### Platform-Specific Features
 
 #### LinkedIn Package
+
 ```json
 {
   "platform": "linkedin",
@@ -67,6 +72,7 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
 ```
 
 #### Twitter Package
+
 ```json
 {
   "platform": "twitter",
@@ -77,6 +83,7 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
 ```
 
 #### Instagram Package
+
 ```json
 {
   "platform": "instagram",
@@ -89,6 +96,7 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
 ```
 
 #### Reddit Package
+
 ```json
 {
   "platform": "reddit",
@@ -99,6 +107,7 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
 ```
 
 #### YouTube Package
+
 ```json
 {
   "platform": "youtube",
@@ -112,6 +121,7 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
 ```
 
 #### Medium Package
+
 ```json
 {
   "platform": "medium",
@@ -131,29 +141,32 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
 ### DynamoDB Table: `KindCrew-ContentItems`
 
 **Keys:**
+
 - Partition Key: `userId` (String)
 - Sort Key: `contentId` (String)
 
 **Global Secondary Index:**
+
 - `CreatedAtIndex`: userId + createdAt
 
 **Complete Schema:**
+
 ```javascript
 {
   contentId: "uuid",
   userId: "uuid",
-  
+
   // Metadata
   source: "phase1 | manual",
   ideaId: "uuid",  // if from Phase 1
-  
+
   // Content Info
   topic: "string",
   angle: "string",
   targetAudience: "string",
   goal: "growth | engagement | authority | conversion",
   contentType: "list-post | story | educational | tutorial",
-  
+
   // Content Structure
   outline: {
     title: "string",
@@ -163,12 +176,12 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
     contentFormat: "list | story | educational",
     estimatedWordCount: 150
   },
-  
+
   // Draft Content
   draft: {
     text: "complete draft text"
   },
-  
+
   // Platform Variants
   platformVariants: {
     linkedin: {},
@@ -178,7 +191,7 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
     reddit: {},
     medium: {}
   },
-  
+
   // Video Scripts (conditional)
   scripts: {
     youtube: {
@@ -191,21 +204,21 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
     },
     instagramReel: {}
   },
-  
+
   // Distribution
   distribution: {
     status: "draft | scheduled | published",
     platformTargets: ["linkedin", "twitter"],
     scheduledAt: "ISO_DATE"
   },
-  
+
   // Analytics
   analytics: {
     likes: 0,
     comments: 0,
     shares: 0
   },
-  
+
   // Timestamps
   createdAt: "ISO_DATE",
   updatedAt: "ISO_DATE"
@@ -219,9 +232,11 @@ Users can skip Phase 1 and create content from scratch at `/content/create`.
 ### Content Creation
 
 #### `POST /api/content/from-idea`
+
 Create content from Phase 1 idea.
 
 **Request:**
+
 ```json
 {
   "userId": "uuid",
@@ -230,6 +245,7 @@ Create content from Phase 1 idea.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -244,9 +260,11 @@ Create content from Phase 1 idea.
 ---
 
 #### `POST /api/content/from-manual`
+
 Create content from manual input.
 
 **Request:**
+
 ```json
 {
   "userId": "uuid",
@@ -266,6 +284,7 @@ Create content from manual input.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -278,9 +297,11 @@ Create content from manual input.
 ### Content Retrieval
 
 #### `GET /api/content/user?userId=uuid`
+
 Get all content for a user.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -292,9 +313,11 @@ Get all content for a user.
 ---
 
 #### `GET /api/content/:contentId?userId=uuid`
+
 Get specific content by ID.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -307,9 +330,11 @@ Get specific content by ID.
 ### Content Generation Steps
 
 #### `POST /api/content/generate-outline`
+
 Generate outline only (for preview/refinement).
 
 **Request:**
+
 ```json
 {
   "topic": "AI tools",
@@ -322,6 +347,7 @@ Generate outline only (for preview/refinement).
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -337,9 +363,11 @@ Generate outline only (for preview/refinement).
 ---
 
 #### `POST /api/content/generate-draft`
+
 Generate draft from outline.
 
 **Request:**
+
 ```json
 {
   "outline": { ... },
@@ -350,6 +378,7 @@ Generate draft from outline.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -364,9 +393,11 @@ Generate draft from outline.
 ### Content Management
 
 #### `POST /api/content/regenerate-variant`
+
 Regenerate variant for specific platform.
 
 **Request:**
+
 ```json
 {
   "userId": "uuid",
@@ -376,6 +407,7 @@ Regenerate variant for specific platform.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -387,9 +419,11 @@ Regenerate variant for specific platform.
 ---
 
 #### `POST /api/content/update-status`
+
 Update distribution status.
 
 **Request:**
+
 ```json
 {
   "userId": "uuid",
@@ -400,6 +434,7 @@ Update distribution status.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -412,7 +447,9 @@ Update distribution status.
 ## Frontend Pages
 
 ### `/content/create`
+
 Manual content creation page with form inputs:
+
 - Topic/Idea
 - Target Platforms (multi-select)
 - Content Type
@@ -425,7 +462,9 @@ Manual content creation page with form inputs:
 - CTA preference
 
 ### `/content/library`
+
 Content library page displaying:
+
 - All generated content items
 - Platform variant preview modals
 - Status badges (draft/scheduled/published)
@@ -434,7 +473,9 @@ Content library page displaying:
 - Navigation to Phase 3 distribution
 
 ### `/ideation/my-ideas` (Enhanced)
+
 Added "Generate Content" button to each idea card that:
+
 - Triggers content generation from idea
 - Shows loading state
 - Redirects to content library on success
@@ -446,12 +487,14 @@ Added "Generate Content" button to each idea card that:
 ### Backend Services
 
 **`services/ddbContentService.js`**
+
 - DynamoDB operations for content_items table
 - CRUD operations
 - Distribution status updates
 - Platform variant updates
 
 **`services/contentGenerationService.js`**
+
 - AI-powered content generation
 - Outline generation
 - Draft generation
@@ -461,6 +504,7 @@ Added "Generate Content" button to each idea card that:
 ### Backend Controllers
 
 **`controllers/contentController.js`**
+
 - HTTP request handlers
 - Input normalization
 - Orchestration of generation pipeline
@@ -469,23 +513,27 @@ Added "Generate Content" button to each idea card that:
 ### Backend Routes
 
 **`routes/contentRoutes.js`**
+
 - Route definitions for all content endpoints
 - Registered at `/api/content/*`
 
 ### Frontend API
 
 **`lib/api/content.ts`**
+
 - TypeScript client functions
 - All API endpoint wrappers
 
 ### Frontend Pages
 
 **`app/content/create/page.tsx`**
+
 - Manual content creation form
 - Form validation
 - Platform selection
 
 **`app/content/library/page.tsx`**
+
 - Content list display
 - Platform variant modals
 - Status management
@@ -507,6 +555,7 @@ This creates the `KindCrew-ContentItems` table with proper schema.
 ### 2. Environment Variables
 
 Ensure `.env` file has:
+
 ```
 AWS_REGION=us-east-1
 BEDROCK_DEFAULT_MODEL=anthropic.claude-3-5-sonnet-20240620-v1:0
@@ -521,12 +570,14 @@ Frontend already has required dependencies.
 ### 4. Start Services
 
 **Backend:**
+
 ```bash
 cd backend
 npm run dev
 ```
 
 **Frontend:**
+
 ```bash
 cd frontend
 npm run dev
@@ -598,21 +649,25 @@ No transformation needed - Phase 3 reads directly from stored data.
 ## AI Prompts Strategy
 
 ### Outline Generation
+
 - Focuses on structure and flow
 - Returns JSON with title, hook, sections, CTA
 - Platform-optimized recommendations
 
 ### Draft Generation
+
 - Converts outline to full post text
 - Platform-appropriate tone and length
 - Includes formatting and line breaks
 
 ### Platform Variants
+
 - Each platform has dedicated prompt
 - Platform-specific best practices
 - Optimized hashtags and metadata
 
 ### Video Scripts
+
 - Only generated for video platforms
 - Timed sections for pacing
 - Hook-based opening
@@ -622,6 +677,7 @@ No transformation needed - Phase 3 reads directly from stored data.
 ## Error Handling
 
 All endpoints return:
+
 ```json
 {
   "success": false,
@@ -636,12 +692,14 @@ Frontend displays errors in UI and allows retry.
 ## Future Enhancements
 
 ### Phase 2.1 (Planned)
+
 - Content templates library
 - A/B testing variants
 - Brand voice consistency checker
 - Content calendar integration
 
 ### Phase 2.2 (Planned)
+
 - Image generation integration
 - Video thumbnail generation
 - Carousel slide generator
@@ -661,6 +719,7 @@ Frontend displays errors in UI and allows retry.
 ## Support
 
 For issues or questions about Phase 2:
+
 1. Check backend logs for AI errors
 2. Verify DynamoDB table schema
 3. Test endpoints individually
@@ -671,6 +730,7 @@ For issues or questions about Phase 2:
 ## Summary
 
 Phase 2 successfully transforms ideas into production-ready multi-platform content packages with:
+
 - ✅ Dual entry points (Phase 1 + Manual)
 - ✅ 6 platform variants per content
 - ✅ Video script generation

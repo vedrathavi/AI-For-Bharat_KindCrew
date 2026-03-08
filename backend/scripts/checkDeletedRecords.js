@@ -4,7 +4,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const client = new DynamoDBClient({ region: process.env.AWS_REGION || "us-east-1" });
+const client = new DynamoDBClient({
+  region: process.env.AWS_REGION || "us-east-1",
+});
 const docClient = DynamoDBDocumentClient.from(client);
 
 const IDEATION_TABLE = "KindCrew-ContentIdeas";

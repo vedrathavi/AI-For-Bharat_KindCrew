@@ -52,7 +52,10 @@ export default function DashboardPage() {
     ) {
       return content.distribution.platformTargets.length;
     }
-    if (content?.platformVariants && typeof content.platformVariants === "object") {
+    if (
+      content?.platformVariants &&
+      typeof content.platformVariants === "object"
+    ) {
       return Object.keys(content.platformVariants).length;
     }
     return 0;
@@ -582,20 +585,20 @@ export default function DashboardPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {recentContent.map((content, index) => (
               <button
                 key={`${content._id || content.contentId || content.ideaId || content.createdAt || "content"}-${index}`}
                 onClick={() => router.push("/content/library")}
-                className="text-left p-4 rounded-lg"
+                className="text-left p-4 rounded-lg transition-all hover:shadow-md min-h-[140px] flex flex-col"
                 style={{
                   border: "1px solid var(--color-border)",
                   backgroundColor: "var(--color-background)",
                 }}
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between gap-2 mb-3 flex-shrink-0">
                   <span
-                    className="text-xs px-2 py-1 rounded capitalize"
+                    className="text-xs px-2 py-1 rounded capitalize whitespace-nowrap overflow-hidden text-ellipsis max-w-[50%]"
                     style={{
                       backgroundColor: "var(--color-surface-hover)",
                       color: "var(--color-text-secondary)",
@@ -604,21 +607,26 @@ export default function DashboardPage() {
                     {content.contentType || "post"}
                   </span>
                   <span
-                    className="text-xs"
+                    className="text-xs whitespace-nowrap flex-shrink-0"
                     style={{ color: "var(--color-text-secondary)" }}
                   >
                     {getPlatformCount(content)} platforms
                   </span>
                 </div>
                 <p
-                  className="text-sm font-medium line-clamp-2"
-                  style={{ color: "var(--color-text)" }}
+                  className="text-sm font-medium line-clamp-2 flex-grow break-words overflow-hidden"
+                  style={{
+                    color: "var(--color-text)",
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                    hyphens: "auto",
+                  }}
                 >
                   {content.topic || content.title || "Untitled Content"}
                 </p>
                 {content.createdAt && (
                   <p
-                    className="text-xs mt-2"
+                    className="text-xs mt-3 flex-shrink-0"
                     style={{ color: "var(--color-text-secondary)" }}
                   >
                     {new Date(content.createdAt).toLocaleDateString()}
