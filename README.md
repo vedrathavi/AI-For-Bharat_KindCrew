@@ -6,7 +6,9 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16+-blue)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue)](https://www.typescriptlang.org/)
 [![AWS](https://img.shields.io/badge/AWS-DynamoDB%20%7C%20Cognito%20%7C%20Bedrock-orange)](https://aws.amazon.com/)
+## ðŸŽ¬ Try It Out
 
+**Live Demo:** [https://kindcrew-one.vercel.app/](https://kindcrew-one.vercel.app/)
 ## ?? Table of Contents
 
 - [Features](#features)
@@ -53,7 +55,7 @@
 
 ### Infrastructure
 - **Backend**: Render (free tier, Node.js)
-- **Frontend**: AWS Amplify (free tier, Next.js)
+- **Frontend**: AWS Amplify / Vercel (free tier, Next.js)
 - **Database**: AWS DynamoDB
 - **Auth**: AWS Cognito
 - **AI**: AWS Bedrock (Gemma 3)
@@ -79,81 +81,34 @@ cd backend && npm install && npm run dev
 cd ../frontend && npm install && npm run dev
 ```
 
-## ?? Configuration
 
-### Backend (.env)
-```env
-PORT=5000
-NODE_ENV=development
-AWS_REGION=ap-south-1
-AWS_ACCESS_KEY_ID=your_key
-AWS_SECRET_ACCESS_KEY=your_secret
-
-COGNITO_USER_POOL_ID=ap-south-1_AVgAOJlyL
-COGNITO_CLIENT_ID=your_client_id
-COGNITO_CLIENT_SECRET=your_secret
-COGNITO_DOMAIN=https://ap-south-1avgaojlyl.auth.ap-south-1.amazoncognito.com
-COGNITO_REDIRECT_URI=http://localhost:5000/api/auth/callback
-
-DYNAMODB_USERS_TABLE=KindCrew-Users
-DYNAMODB_CREATOR_PROFILES_TABLE=KindCrew-CreatorProfiles
-
-FRONTEND_URL=http://localhost:3000
-JWT_SECRET=your-secret-key
-BEDROCK_DEFAULT_MODEL=google.gemma-3-12b-it
-```
-
-### Frontend (.env.local)
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000
-```
-
-### Frontend (.env.production)
-```env
-NEXT_PUBLIC_API_URL=https://kindcrew-api.onrender.com
-```
-
-## ?? Deployment
-
-### Backend on Render
-See [DEPLOY_RENDER.md](DEPLOY_RENDER.md)
-
-Set environment variables:
-- `FRONTEND_URL=https://your-amplify-url.amplifyapp.com`
-- `COGNITO_REDIRECT_URI=https://kindcrew-api.onrender.com/api/auth/callback`
-
-### Frontend on AWS Amplify
-See [DEPLOY_AMPLIFY.md](DEPLOY_AMPLIFY.md)
-
-Set environment variable:
-- `NEXT_PUBLIC_API_URL=https://kindcrew-api.onrender.com`
 
 ## ?? Project Structure
 
 ```
 +-- backend/
-¦   +-- config/app.js          # Express setup
-¦   +-- controllers/           # Request handlers
-¦   +-- services/              # Business logic
-¦   +-- utils/                 # Utilities
-¦   +-- routes/
-¦   +-- middleware/
-¦   +-- server.js
-¦   +-- package.json
-¦
+ï¿½   +-- config/app.js          # Express setup
+ï¿½   +-- controllers/           # Request handlers
+ï¿½   +-- services/              # Business logic
+ï¿½   +-- utils/                 # Utilities
+ï¿½   +-- routes/
+ï¿½   +-- middleware/
+ï¿½   +-- server.js
+ï¿½   +-- package.json
+ï¿½
 +-- frontend/
-¦   +-- src/
-¦   ¦   +-- app/               # Next.js App Router
-¦   ¦   +-- lib/api/           # API clients
-¦   ¦   +-- store/             # Zustand state
-¦   ¦   +-- components/
-¦   +-- amplify.yml            # Build config
-¦   +-- package.json
-¦
+ï¿½   +-- src/
+ï¿½   ï¿½   +-- app/               # Next.js App Router
+ï¿½   ï¿½   +-- lib/api/           # API clients
+ï¿½   ï¿½   +-- store/             # Zustand state
+ï¿½   ï¿½   +-- components/
+ï¿½   +-- amplify.yml            # Build config
+ï¿½   +-- package.json
+ï¿½
 +-- docs/
-¦   +-- design.md
-¦   +-- requirements.md
-¦
+ï¿½   +-- design.md
+ï¿½   +-- requirements.md
+ï¿½
 +-- DEPLOY_RENDER.md / DEPLOY_AMPLIFY.md
 ```
 
@@ -218,9 +173,9 @@ See [SECURITY_NOTICE.md](SECURITY_NOTICE.md)
 ## ?? Support
 
 - [GitHub Issues](https://github.com/navyajain7105/AI-For-Bharat_KindCrew/issues)
-- Check [DEPLOY_RENDER.md](DEPLOY_RENDER.md) & [DEPLOY_AMPLIFY.md](DEPLOY_AMPLIFY.md)
+
 - Review `/docs` folder
 
 ---
 
-**Version:** 1.0.0 | **Updated:** March 8, 2026 | **Maintained by:** AI-For-Bharat Team
+**Version:** 1.0.0 | **Updated:** March 8, 2026 | **Maintained by:** KindCrew - AI-For-Bharat Team
