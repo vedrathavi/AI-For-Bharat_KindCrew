@@ -3,7 +3,7 @@
 /**
  * Bedrock Integration Test Script
  * Tests all Bedrock API endpoints
- * 
+ *
  * Usage: node scripts/testBedrock.js
  */
 
@@ -89,7 +89,7 @@ class BedrockTester {
       if (response.status === 200 && response.data.success) {
         this.log(
           `Found ${Object.keys(response.data.data).length} model providers`,
-          "success"
+          "success",
         );
 
         // Print model summary
@@ -138,7 +138,7 @@ class BedrockTester {
         this.log(`Response: "${response.data.data.content}"`);
         this.log(
           `Tokens used - Input: ${response.data.data.usage.inputTokens}, Output: ${response.data.data.usage.outputTokens}`,
-          "info"
+          "info",
         );
         return true;
       } else {
@@ -176,15 +176,14 @@ class BedrockTester {
       this.log("Starting multi-turn conversation...");
       messages.forEach((msg, idx) => {
         this.log(
-          `Turn ${idx + 1}: ${msg.role.toUpperCase()} - ${msg.content.substring(0, 50)}...`
+          `Turn ${idx + 1}: ${msg.role.toUpperCase()} - ${msg.content.substring(0, 50)}...`,
         );
       });
 
       const response = await this.client.post("/converse", {
         messages,
         modelId: "anthropic.claude-3-haiku-20240307-v1:0",
-        systemPrompt:
-          "You are a content strategy expert for tech creators.",
+        systemPrompt: "You are a content strategy expert for tech creators.",
         maxTokens: 800,
         temperature: 0.6,
       });
@@ -210,8 +209,7 @@ class BedrockTester {
     try {
       const systemPrompt =
         "You are an expert content coach for Indian creators. Provide advice tailored to Indian audiences and platforms.";
-      const userMessage =
-        "How can I grow my following on YouTube in India?";
+      const userMessage = "How can I grow my following on YouTube in India?";
 
       this.log(`System Prompt: "${systemPrompt}"`);
       this.log(`User Message: "${userMessage}"`);
@@ -268,8 +266,7 @@ class BedrockTester {
           messages: [
             {
               role: "user",
-              content:
-                "Say your name and briefly describe your capabilities.",
+              content: "Say your name and briefly describe your capabilities.",
             },
           ],
           modelId: model.id,
@@ -285,10 +282,7 @@ class BedrockTester {
           allPassed = false;
         }
       } catch (error) {
-        this.log(
-          `Error testing ${model.name}: ${error.message}`,
-          "error"
-        );
+        this.log(`Error testing ${model.name}: ${error.message}`, "error");
         allPassed = false;
       }
 
@@ -356,7 +350,9 @@ class BedrockTester {
     // Print summary
     this.log("header", "📊 TEST RESULTS SUMMARY");
     Object.entries(results).forEach(([test, passed]) => {
-      const status = passed ? colors.green("✅ PASSED") : colors.red("❌ FAILED");
+      const status = passed
+        ? colors.green("✅ PASSED")
+        : colors.red("❌ FAILED");
       console.log(`${test}: ${status}`);
     });
 
@@ -364,11 +360,14 @@ class BedrockTester {
     const passedTests = Object.values(results).filter((r) => r).length;
 
     console.log(
-      `\n${colors.cyan(`Total: ${passedTests}/${totalTests} tests passed`)}`
+      `\n${colors.cyan(`Total: ${passedTests}/${totalTests} tests passed`)}`,
     );
 
     if (passedTests === totalTests) {
-      this.log("🎉 All tests passed! Bedrock integration is ready to use.", "success");
+      this.log(
+        "🎉 All tests passed! Bedrock integration is ready to use.",
+        "success",
+      );
     } else {
       this.log("⚠️  Some tests failed. Check the configuration.", "warning");
     }

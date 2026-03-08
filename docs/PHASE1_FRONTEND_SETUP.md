@@ -43,6 +43,7 @@
 **File**: `src/lib/api/ideation.ts`
 
 6 API functions with TypeScript interfaces:
+
 - `generateIdeas()` - Zero flow
 - `refineIdea()` - Some flow
 - `evaluateIdea()` - Full flow
@@ -53,6 +54,7 @@
 ## 🚀 Running the Frontend
 
 ### Prerequisites
+
 - Node.js 18+ installed
 - Backend running on http://localhost:3000
 
@@ -128,18 +130,22 @@ Frontend will run on: **http://localhost:3001**
 ## 🎨 UI Features
 
 ### Color-Coded Scores
+
 - 🟢 **Green** (8.0-10.0): Excellent
 - 🟡 **Yellow** (6.0-7.9): Good
 - 🔴 **Red** (0.0-5.9): Needs Work
 
 ### Gradient Backgrounds
+
 - Zero: Blue gradient
 - Some: Purple/Pink gradient
 - Full: Green/Teal gradient
 - Research: Indigo/Purple gradient
 
 ### Session Storage Flow
+
 Ideas passed between pages using sessionStorage:
+
 - Selected on Zero/Some/Full page
 - Retrieved on Research page
 - Cleared after approval
@@ -153,7 +159,7 @@ Default: `http://localhost:3000/api`
 To change, update in `src/lib/api/ideation.ts`:
 
 ```typescript
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 ```
 
 Or add to `.env.local`:
@@ -175,6 +181,7 @@ Used in all API calls until authentication implemented.
 **Cause**: Backend not running or wrong URL
 
 **Solution**:
+
 1. Start backend: `cd backend && npm start`
 2. Check backend health: http://localhost:3000/health
 3. Verify API URL in ideation.ts
@@ -183,7 +190,8 @@ Used in all API calls until authentication implemented.
 
 **Cause**: AWS IAM permissions issue
 
-**Solution**: 
+**Solution**:
+
 1. Check AWS credentials in backend/.env
 2. Add bedrock:InvokeModel to IAM role
 3. See backend documentation
@@ -192,7 +200,8 @@ Used in all API calls until authentication implemented.
 
 **Cause**: Session storage empty on Research page
 
-**Solution**: 
+**Solution**:
+
 1. Always navigate through proper flow
 2. Don't directly access /ideation/research
 3. Clear browser cache: Ctrl+Shift+Delete
@@ -202,6 +211,7 @@ Used in all API calls until authentication implemented.
 **Cause**: DynamoDB table not set up or API error
 
 **Solution**:
+
 1. Run setup: `cd backend && node scripts/setupIdeationTable.js`
 2. Check backend logs for errors
 3. Verify AWS credentials
@@ -211,13 +221,14 @@ Used in all API calls until authentication implemented.
 Backend calculates scores as:
 
 ```
-overall = 0.4 × virality 
-        + 0.3 × audience_relevance 
-        + 0.2 × clarity 
+overall = 0.4 × virality
+        + 0.3 × audience_relevance
+        + 0.2 × clarity
         + 0.1 × (10 - competition)
 ```
 
 Competition score from Google Trends:
+
 - High trend (>70): Score 8-10
 - Medium trend (30-70): Score 5-7
 - Low trend (<30): Score 3-4
@@ -225,6 +236,7 @@ Competition score from Google Trends:
 ## 🎯 Next Phase Preview
 
 Phase 2 will add:
+
 - Content Structuring module
 - Script Generation with sections
 - Editing & refinement tools
@@ -264,6 +276,7 @@ frontend/src/
 Phase 1 frontend is complete and ready to test.
 
 Start with:
+
 ```bash
 npm run dev
 ```

@@ -1,5 +1,11 @@
-import { BedrockRuntimeClient, ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
-import { analyzeTrendCompetition, getTrendingTopics } from "./googleTrendsService.js";
+import {
+  BedrockRuntimeClient,
+  ConverseCommand,
+} from "@aws-sdk/client-bedrock-runtime";
+import {
+  analyzeTrendCompetition,
+  getTrendingTopics,
+} from "./googleTrendsService.js";
 
 const client = new BedrockRuntimeClient({ region: process.env.AWS_REGION });
 const MODEL_ID = process.env.BEDROCK_DEFAULT_MODEL;
@@ -90,7 +96,12 @@ Return as a valid JSON array. ONLY return the JSON array, no other text.`;
 /**
  * Refine ideas from partial input (Some Idea flow)
  */
-async function refineSomeIdea(roughIdea, audience, platform, creatorProfile = null) {
+async function refineSomeIdea(
+  roughIdea,
+  audience,
+  platform,
+  creatorProfile = null,
+) {
   const profileContext = buildProfileContext(creatorProfile);
 
   const prompt = `Refine this rough content idea into multiple strategic angles:
@@ -115,7 +126,12 @@ Return as valid JSON array. ONLY return JSON, no other text.`;
 /**
  * Evaluate and improve full idea
  */
-async function evaluateFullIdea(idea, audience, platform, creatorProfile = null) {
+async function evaluateFullIdea(
+  idea,
+  audience,
+  platform,
+  creatorProfile = null,
+) {
   const profileContext = buildProfileContext(creatorProfile);
 
   const prompt = `Evaluate this content idea and suggest improvements:
@@ -168,7 +184,14 @@ ONLY return valid JSON, no other text.`;
  * overall = 0.4 * virality + 0.3 * audience + 0.2 * clarity + 0.1 * (10 - competition)
  */
 function calculateScore(virality, audienceRelevance, clarity, competition) {
-  return parseFloat((0.4 * virality + 0.3 * audienceRelevance + 0.2 * clarity + 0.1 * (10 - competition)).toFixed(1));
+  return parseFloat(
+    (
+      0.4 * virality +
+      0.3 * audienceRelevance +
+      0.2 * clarity +
+      0.1 * (10 - competition)
+    ).toFixed(1),
+  );
 }
 
 /**
@@ -240,8 +263,13 @@ function parseModelJson(rawText, context = "") {
     try {
       return JSON.parse(cleaned);
     } catch (secondError) {
-      console.error(`Failed to parse AI JSON (${context}). Raw content:`, rawText);
-      throw new Error(`AI returned invalid JSON (${context}): ${secondError.message}`);
+      console.error(
+        `Failed to parse AI JSON (${context}). Raw content:`,
+        rawText,
+      );
+      throw new Error(
+        `AI returned invalid JSON (${context}): ${secondError.message}`,
+      );
     }
   }
 }
@@ -274,8 +302,27 @@ async function scoreIdeaWithLogic(idea, options = {}) {
   const combinedText = normalizeText(`${title} ${angle} ${hook}`);
   const titleLength = title.trim().length;
 
-  const viralityKeywords = ["how", "why", "best", "mistake", "secret", "trend", "viral", "vs", "before", "after"];
-  const clarityKeywords = ["step", "guide", "framework", "checklist", "example", "template", "explained"];
+  const viralityKeywords = [
+    "how",
+    "why",
+    "best",
+    "mistake",
+    "secret",
+    "trend",
+    "viral",
+    "vs",
+    "before",
+    "after",
+  ];
+  const clarityKeywords = [
+    "step",
+    "guide",
+    "framework",
+    "checklist",
+    "example",
+    "template",
+    "explained",
+  ];
 
   let virality = 6.0;
   virality += countKeywordMatches(combinedText, viralityKeywords) * 0.25;
@@ -284,7 +331,11 @@ async function scoreIdeaWithLogic(idea, options = {}) {
   if (titleLength >= 35 && titleLength <= 85) virality += 0.5;
 
   const formatText = normalizeText(format);
-  if (["reel", "short", "short-form", "carousel", "list", "how-to", "video"].some((f) => formatText.includes(f))) {
+  if (
+    ["reel", "short", "short-form", "carousel", "list", "how-to", "video"].some(
+      (f) => formatText.includes(f),
+    )
+  ) {
     virality += 0.5;
   }
 
@@ -313,7 +364,12 @@ async function scoreIdeaWithLogic(idea, options = {}) {
     audienceRelevance += 0.6;
   }
 
-  const trendKeyword = title || options?.fallbackKeyword || niche || audience || "content strategy";
+  const trendKeyword =
+    title ||
+    options?.fallbackKeyword ||
+    niche ||
+    audience ||
+    "content strategy";
   const competition = await getCompetitionFromTrends(trendKeyword);
 
   virality = toOneDecimal(virality);
@@ -325,7 +381,12 @@ async function scoreIdeaWithLogic(idea, options = {}) {
     virality,
     clarity,
     competition: normalizedCompetition,
-    overall: calculateScore(virality, audienceRelevance, clarity, normalizedCompetition),
+    overall: calculateScore(
+      virality,
+      audienceRelevance,
+      clarity,
+      normalizedCompetition,
+    ),
   };
 }
 
@@ -354,9 +415,13 @@ async function callBedrockAI(prompt, context = "") {
     });
 
     const response = await client.send(command);
-    
+
     // Check if response has expected structure
-    if (!response.output || !response.output.message || !response.output.message.content) {
+    if (
+      !response.output ||
+      !response.output.message ||
+      !response.output.message.content
+    ) {
       console.error("Unexpected response structure:", response);
       throw new Error("Invalid response structure from Bedrock");
     }

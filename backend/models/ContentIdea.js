@@ -129,7 +129,14 @@ class ContentIdea {
    * @returns {Array<string>} Valid platform values
    */
   static getValidPlatforms() {
-    return ["youtube", "instagram", "tiktok", "linkedin", "twitter", "facebook"];
+    return [
+      "youtube",
+      "instagram",
+      "tiktok",
+      "linkedin",
+      "twitter",
+      "facebook",
+    ];
   }
 
   /**
@@ -149,9 +156,19 @@ class ContentIdea {
    * @param {number} competition - Competition level (0-10)
    * @returns {number} Overall score (0-10)
    */
-  static calculateOverallScore(virality, audienceRelevance, clarity, competition) {
+  static calculateOverallScore(
+    virality,
+    audienceRelevance,
+    clarity,
+    competition,
+  ) {
     return parseFloat(
-      (0.4 * virality + 0.3 * audienceRelevance + 0.2 * clarity + 0.1 * (10 - competition)).toFixed(1)
+      (
+        0.4 * virality +
+        0.3 * audienceRelevance +
+        0.2 * clarity +
+        0.1 * (10 - competition)
+      ).toFixed(1),
     );
   }
 }

@@ -1,5 +1,9 @@
 import { config } from "dotenv";
-import { DynamoDBClient, CreateTableCommand, DescribeTableCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  CreateTableCommand,
+  DescribeTableCommand,
+} from "@aws-sdk/client-dynamodb";
 
 config(); // Load environment variables
 
@@ -11,7 +15,9 @@ async function setupIdeationTable() {
   try {
     // Check if table exists
     try {
-      await client.send(new DescribeTableCommand({ TableName: IDEATION_TABLE }));
+      await client.send(
+        new DescribeTableCommand({ TableName: IDEATION_TABLE }),
+      );
       console.log(`✅ Table ${IDEATION_TABLE} already exists`);
       return;
     } catch (error) {

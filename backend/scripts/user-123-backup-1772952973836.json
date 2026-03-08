@@ -1,0 +1,119 @@
+[
+  {
+    "angle": "Discovery of hidden gems, showcasing breadth of AI capabilities",
+    "contentType": "carousel",
+    "createdAt": "2026-03-08T02:20:49.457Z",
+    "hookIdea": "",
+    "keyPoints": [
+      "AI doesn't have to be expensive; many affordable options exist.",
+      "Choosing the right AI tool depends on your specific startup needs and goals.",
+      "Focus on tools that automate repetitive tasks to free up time for core business activities.",
+      "Even non-technical founders can learn to use AI tools with the right resources and support (easy to use interfaces emphasized).",
+      "Experimentation is key - try out different tools to find what works best for your startup."
+    ],
+    "platform": "linkedin",
+    "research": {
+      "audiencePainPoints": [
+        "Limited budget for marketing and tools.",
+        "Overwhelmed by the sheer number of AI tools available.",
+        "Difficulty identifying tools that genuinely improve productivity and efficiency.",
+        "Lack of technical expertise to effectively implement and utilize AI tools."
+      ],
+      "competitorPatterns": [
+        "Focus on ChatGPT as the primary AI tool, overlooking alternatives.",
+        "Generic lists of AI tools without specific use cases for startups.",
+        "Technical explanations that are difficult for non-technical founders to understand.",
+        "Lack of personalized recommendations based on startup stage or industry."
+      ],
+      "keyPoints": [
+        "AI doesn't have to be expensive; many affordable options exist.",
+        "Choosing the right AI tool depends on your specific startup needs and goals.",
+        "Focus on tools that automate repetitive tasks to free up time for core business activities.",
+        "Even non-technical founders can learn to use AI tools with the right resources and support (easy to use interfaces emphasized).",
+        "Experimentation is key - try out different tools to find what works best for your startup."
+      ]
+    },
+    "scores": {
+      "overall": "7.8",
+      "competition": 5.631601270272605,
+      "clarity": 9.001128228270627,
+      "virality": 7.629396323101494
+    },
+    "status": "approved",
+    "targetAudience": "startup founders",
+    "topic": "Beyond ChatGPT: 5 Underrated AI Tools Every Startup Founder Should Know",
+    "updatedAt": "2026-03-08T04:00:24.335Z",
+    "userId": "user-123",
+    "ideaId": "24327c6c-4f72-4602-8722-333506ee6c12"
+  },
+  {
+    "topic": "Local Heroes: Stories of Everyday Kindness in [City Name]",
+    "research": {},
+    "status": "approved",
+    "scores": {
+      "overall": 7.9,
+      "competition": 6.107243382265448,
+      "clarity": 9,
+      "virality": 7.9512638583549196
+    },
+    "createdAt": "2026-03-08T02:40:35.348Z",
+    "targetAudience": "normal audience",
+    "angle": "Highlighting individuals within the city who consistently demonstrate kindness and make a positive impact on their community.",
+    "contentType": "Interview-based video featuring personal stories and showcasing their acts of kindness.",
+    "platform": "youtube",
+    "userId": "user-123",
+    "updatedAt": null,
+    "hookIdea": "They're not famous, but they're changing lives. Meet the unsung heroes of [City Name].",
+    "keyPoints": [],
+    "ideaId": "55ed32ad-717a-469a-bbb7-c6c5e46cb0cf"
+  },
+  {
+    "angle": "full idea",
+    "contentType": "Carousel post with each slide featuring one YouTuber. Include a brief bio, their primary YouTube channel, a summary of their business ventures (including revenue models where possible), and 1-2 key entrepreneurial lessons from their journey. Include relevant images/screenshots.",
+    "createdAt": "2026-03-08T02:46:19.091Z",
+    "hookIdea": "Beyond the views: how are India's top YouTubers *actually* building sustainable businesses? We break down 10 creators and the strategies they're using.",
+    "keyPoints": [
+      "The importance of identifying a core business beyond content creation.",
+      "Strategies for building a sustainable and diversified revenue model.",
+      "The role of branding and building a loyal community beyond YouTube.",
+      "Navigating the legal and financial complexities of running a business in India.",
+      "The value of mentorship and networking for entrepreneurial growth."
+    ],
+    "platform": "linkedin",
+    "research": {
+      "audiencePainPoints": [
+        "Lack of clear business models beyond content creation.",
+        "Difficulty scaling beyond YouTube's platform.",
+        "Challenges in diversifying revenue streams.",
+        "Limited understanding of legal and financial aspects of running a business.",
+        "Struggling to build and manage a team."
+      ],
+      "competitorPatterns": [
+        "Focus on affiliate marketing and merchandise.",
+        "Reliance on sponsorships and brand deals.",
+        "Limited investment in building a separate brand identity.",
+        "Utilizing YouTube analytics as primary market research.",
+        "Often lack formal business training or mentorship."
+      ],
+      "keyPoints": [
+        "The importance of identifying a core business beyond content creation.",
+        "Strategies for building a sustainable and diversified revenue model.",
+        "The role of branding and building a loyal community beyond YouTube.",
+        "Navigating the legal and financial complexities of running a business in India.",
+        "The value of mentorship and networking for entrepreneurial growth."
+      ]
+    },
+    "scores": {
+      "overall": 7.5,
+      "competition": 3,
+      "clarity": 9,
+      "virality": 6
+    },
+    "status": "approved",
+    "targetAudience": "startup founders",
+    "topic": "Decoding Entrepreneurial Success: 10 Indian YouTubers Building Businesses",
+    "updatedAt": "2026-03-08T04:09:10.675Z",
+    "userId": "user-123",
+    "ideaId": "dd2157b6-9566-4564-ba54-94660fc73866"
+  }
+]

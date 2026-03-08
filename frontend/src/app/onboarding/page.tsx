@@ -434,7 +434,9 @@ export default function OnboardingPage() {
           console.log("✅ Onboarding completed successfully!");
         } catch (onboardingError) {
           console.error("❌ Failed to complete onboarding:", onboardingError);
-          toast.error("Profile saved but failed to mark onboarding as complete");
+          toast.error(
+            "Profile saved but failed to mark onboarding as complete",
+          );
         }
       }
       toast.success("Profile saved successfully!");
@@ -677,18 +679,30 @@ export default function OnboardingPage() {
               <option value="">Select your target audience</option>
               <option value="students-general">Students (General)</option>
               <option value="high-school-students">High School Students</option>
-              <option value="college-students">College/University Students</option>
+              <option value="college-students">
+                College/University Students
+              </option>
               <option value="graduate-students">Graduate Students</option>
               <option value="recent-graduates">Recent Graduates</option>
               <option value="career-changers">Career Changers</option>
-              <option value="entry-level-professionals">Entry-Level Professionals</option>
-              <option value="mid-level-professionals">Mid-Level Professionals</option>
-              <option value="senior-professionals">Senior Professionals/Executives</option>
+              <option value="entry-level-professionals">
+                Entry-Level Professionals
+              </option>
+              <option value="mid-level-professionals">
+                Mid-Level Professionals
+              </option>
+              <option value="senior-professionals">
+                Senior Professionals/Executives
+              </option>
               <option value="entrepreneurs">Entrepreneurs/Founders</option>
               <option value="solopreneurs">Solopreneurs/Freelancers</option>
-              <option value="small-business-owners">Small Business Owners</option>
+              <option value="small-business-owners">
+                Small Business Owners
+              </option>
               <option value="corporate-enterprise">Corporate/Enterprise</option>
-              <option value="content-creators">Content Creators/Influencers</option>
+              <option value="content-creators">
+                Content Creators/Influencers
+              </option>
               <option value="coaches-consultants">Coaches/Consultants</option>
               <option value="educators">Educators/Teachers</option>
               <option value="parents">Parents</option>

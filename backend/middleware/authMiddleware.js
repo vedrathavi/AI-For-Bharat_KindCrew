@@ -11,7 +11,8 @@ export const authMiddleware = (req, res, next) => {
     const bearerToken = authHeader.startsWith("Bearer ")
       ? authHeader.slice(7)
       : null;
-    const token = bearerToken || req.cookies?.authToken;
+    const sessionToken = req.session?.token;
+    const token = bearerToken || req.cookies?.authToken || sessionToken;
 
     if (!token) {
       return res

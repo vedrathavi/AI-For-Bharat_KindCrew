@@ -6,9 +6,16 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAppStore } from "@/store/useAppStore";
 import { extractUserFromToken } from "@/lib/jwtDecode";
 import { getUserIdeas, IdeaBrief } from "@/lib/api/ideation";
+import { getUserContent } from "@/lib/api/content";
 import SetupBanner from "@/components/SetupBanner";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
-import { FiEdit3, FiBarChart2, FiUser, FiCompass, FiArrowRight } from "react-icons/fi";
+import {
+  FiEdit3,
+  FiBarChart2,
+  FiUser,
+  FiCompass,
+  FiArrowRight,
+} from "react-icons/fi";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -32,6 +39,24 @@ export default function DashboardPage() {
   const [showSetupBanner, setShowSetupBanner] = useState(true);
   const [recentIdeas, setRecentIdeas] = useState<IdeaBrief[]>([]);
   const [ideasLoading, setIdeasLoading] = useState(false);
+  const [recentContent, setRecentContent] = useState<any[]>([]);
+  const [contentLoading, setContentLoading] = useState(false);
+
+  const getPlatformCount = (content: any) => {
+    if (Array.isArray(content?.platforms) && content.platforms.length > 0) {
+      return content.platforms.length;
+    }
+    if (
+      Array.isArray(content?.distribution?.platformTargets) &&
+      content.distribution.platformTargets.length > 0
+    ) {
+      return content.distribution.platformTargets.length;
+    }
+    if (content?.platformVariants && typeof content.platformVariants === "object") {
+      return Object.keys(content.platformVariants).length;
+    }
+    return 0;
+  };
 
   const formatScore = (score: number | string | undefined) => {
     if (typeof score === "number") return score.toFixed(1);
@@ -73,9 +98,13 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const loadRecentIdeas = async () => {
+      if (!userInfo?.userId || !token) {
+        return;
+      }
+
       setIdeasLoading(true);
       try {
-        const result = await getUserIdeas(userInfo?.userId || "user-123");
+        const result = await getUserIdeas(token);
         if (result.success) {
           setRecentIdeas((result.ideas || []).slice(0, 3));
         }
@@ -89,7 +118,31 @@ export default function DashboardPage() {
     if (authReady && isAuthenticated()) {
       loadRecentIdeas();
     }
-  }, [authReady, isAuthenticated, userInfo?.userId]);
+  }, [authReady, isAuthenticated, userInfo?.userId, token]);
+
+  useEffect(() => {
+    const loadRecentContent = async () => {
+      if (!userInfo?.userId || !token) {
+        return;
+      }
+
+      setContentLoading(true);
+      try {
+        const result = await getUserContent(token);
+        if (result.success && result.content) {
+          setRecentContent(result.content.slice(0, 3));
+        }
+      } catch (error) {
+        console.error("Failed to load recent content:", error);
+      } finally {
+        setContentLoading(false);
+      }
+    };
+
+    if (authReady && isAuthenticated()) {
+      loadRecentContent();
+    }
+  }, [authReady, isAuthenticated, userInfo?.userId, token]);
 
   // Redirect to root if not authenticated
   useEffect(() => {
@@ -413,7 +466,9 @@ export default function DashboardPage() {
         </div>
 
         {ideasLoading ? (
-          <p style={{ color: "var(--color-text-secondary)" }}>Loading ideas...</p>
+          <p style={{ color: "var(--color-text-secondary)" }}>
+            Loading ideas...
+          </p>
         ) : recentIdeas.length === 0 ? (
           <div className="flex items-center justify-between gap-3">
             <p style={{ color: "var(--color-text-secondary)" }}>
@@ -465,6 +520,110 @@ export default function DashboardPage() {
                 >
                   {idea.topic}
                 </p>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div
+        className="mt-6 sm:mt-8 rounded-xl p-4 sm:p-6"
+        style={{
+          backgroundColor: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
+        }}
+      >
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div>
+            <h2
+              className="text-lg sm:text-xl font-semibold"
+              style={{ color: "var(--color-text)" }}
+            >
+              Recently Added Content
+            </h2>
+            <p
+              className="text-sm"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
+              Your latest generated content.
+            </p>
+          </div>
+          <button
+            onClick={() => router.push("/content/library")}
+            className="px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            style={{
+              backgroundColor: "var(--color-surface-hover)",
+              color: "var(--color-text)",
+            }}
+          >
+            View all content
+            <FiArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {contentLoading ? (
+          <p style={{ color: "var(--color-text-secondary)" }}>
+            Loading content...
+          </p>
+        ) : recentContent.length === 0 ? (
+          <div className="flex items-center justify-between gap-3">
+            <p style={{ color: "var(--color-text-secondary)" }}>
+              No content yet. Generate your first content from Content Studio.
+            </p>
+            <button
+              onClick={() => router.push("/content")}
+              className="px-3 py-2 rounded-lg text-sm font-medium"
+              style={{
+                backgroundColor: "var(--color-text)",
+                color: "var(--color-background)",
+              }}
+            >
+              Create content
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {recentContent.map((content, index) => (
+              <button
+                key={`${content._id || content.contentId || content.ideaId || content.createdAt || "content"}-${index}`}
+                onClick={() => router.push("/content/library")}
+                className="text-left p-4 rounded-lg"
+                style={{
+                  border: "1px solid var(--color-border)",
+                  backgroundColor: "var(--color-background)",
+                }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span
+                    className="text-xs px-2 py-1 rounded capitalize"
+                    style={{
+                      backgroundColor: "var(--color-surface-hover)",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {content.contentType || "post"}
+                  </span>
+                  <span
+                    className="text-xs"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
+                    {getPlatformCount(content)} platforms
+                  </span>
+                </div>
+                <p
+                  className="text-sm font-medium line-clamp-2"
+                  style={{ color: "var(--color-text)" }}
+                >
+                  {content.topic || content.title || "Untitled Content"}
+                </p>
+                {content.createdAt && (
+                  <p
+                    className="text-xs mt-2"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
+                    {new Date(content.createdAt).toLocaleDateString()}
+                  </p>
+                )}
               </button>
             ))}
           </div>

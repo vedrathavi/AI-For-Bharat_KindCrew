@@ -8,8 +8,10 @@ import {
   getUserIdeasHandler,
   enrichIdeaResearchHandler,
 } from "../controllers/ideationController.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+router.use(authMiddleware);
 
 /**
  * Phase 1: Ideation & Research Routes

@@ -9,7 +9,35 @@ import {
   calculateScore,
   scoreIdeaWithLogic,
 } from "../services/ideationService.js";
-import { saveIdea, getIdeaById, getUserIdeas, updateIdeaResearch } from "../services/ddbIdeationService.js";
+import {
+  saveIdea,
+  getIdeaById,
+  getUserIdeas,
+  updateIdeaResearch,
+} from "../services/ddbIdeationService.js";
+import { hasContentForIdea } from "../services/ddbContentService.js";
+
+function resolveAuthenticatedUserId(req, res, payloadUserId) {
+  const authenticatedUserId = req.userId;
+
+  if (!authenticatedUserId) {
+    res.status(401).json({
+      success: false,
+      error: "Unauthorized",
+    });
+    return null;
+  }
+
+  if (payloadUserId && payloadUserId !== authenticatedUserId) {
+    res.status(403).json({
+      success: false,
+      error: "userId does not match authenticated user",
+    });
+    return null;
+  }
+
+  return authenticatedUserId;
+}
 
 function normalizeResearchPayload(raw) {
   const data = raw && typeof raw === "object" ? raw : {};
@@ -34,11 +62,21 @@ function normalizeResearchPayload(raw) {
   };
 
   return {
-    audiencePainPoints: normalizeArray(data.audiencePainPoints || data.audience_pain_points || data.painPoints),
-    competitorPatterns: normalizeArray(data.competitorPatterns || data.competitor_patterns || data.competitors),
-    recommendedStructure: normalizeString(data.recommendedStructure || data.recommended_structure || data.structure),
-    keyPoints: normalizeArray(data.keyPoints || data.key_points || data.keyInsights || data.insights),
-    yourAngleStrength: normalizeString(data.yourAngleStrength || data.your_angle_strength || data.angleStrength),
+    audiencePainPoints: normalizeArray(
+      data.audiencePainPoints || data.audience_pain_points || data.painPoints,
+    ),
+    competitorPatterns: normalizeArray(
+      data.competitorPatterns || data.competitor_patterns || data.competitors,
+    ),
+    recommendedStructure: normalizeString(
+      data.recommendedStructure || data.recommended_structure || data.structure,
+    ),
+    keyPoints: normalizeArray(
+      data.keyPoints || data.key_points || data.keyInsights || data.insights,
+    ),
+    yourAngleStrength: normalizeString(
+      data.yourAngleStrength || data.your_angle_strength || data.angleStrength,
+    ),
   };
 }
 
@@ -59,23 +97,28 @@ async function getCreatorProfileContext(userId) {
  */
 async function generateIdeas(req, res) {
   try {
-    const { userId, niche, audience, platforms, goal } = req.body;
+    const { userId: payloadUserId, niche, audience, platforms, goal } = req.body;
+    const userId = resolveAuthenticatedUserId(req, res, payloadUserId);
+    if (!userId) return;
 
-    if (!userId || !niche || !audience || !platforms) {
+    if (!niche || !audience || !platforms) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: userId, niche, audience, platforms",
+        error: "Missing required fields: niche, audience, platforms",
       });
     }
 
     const creatorProfile = await getCreatorProfileContext(userId);
 
-    const ideas = await generateZeroIdeas({
-      niche,
-      audience,
-      platforms,
-      goal,
-    }, creatorProfile);
+    const ideas = await generateZeroIdeas(
+      {
+        niche,
+        audience,
+        platforms,
+        goal,
+      },
+      creatorProfile,
+    );
 
     // Score ideas using deterministic logic + Google Trends competition.
     const scoredIdeas = await Promise.all(
@@ -89,10 +132,14 @@ async function generateIdeas(req, res) {
 
         return {
           ...idea,
-          platform: idea.platform || platforms?.[0] || creatorProfile?.platforms?.[0] || "youtube",
+          platform:
+            idea.platform ||
+            platforms?.[0] ||
+            creatorProfile?.platforms?.[0] ||
+            "youtube",
           scores: logicScores,
         };
-      })
+      }),
     );
 
     // Sort by score
@@ -115,22 +162,35 @@ async function generateIdeas(req, res) {
  */
 async function refineIdea(req, res) {
   try {
-    const { userId, roughIdea, audience, platform } = req.body;
+    const { userId: payloadUserId, roughIdea, audience, platform } = req.body;
+    const userId = resolveAuthenticatedUserId(req, res, payloadUserId);
+    if (!userId) return;
 
-    if (!userId || !roughIdea || !audience || !platform) {
+    if (!roughIdea || !audience || !platform) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: userId, roughIdea, audience, platform",
+        error: "Missing required fields: roughIdea, audience, platform",
       });
     }
 
     const creatorProfile = await getCreatorProfileContext(userId);
 
-    const refinedIdeas = await refineSomeIdea(roughIdea, audience, platform, creatorProfile);
+    const refinedIdeas = await refineSomeIdea(
+      roughIdea,
+      audience,
+      platform,
+      creatorProfile,
+    );
 
-    const normalizedIdeas = (Array.isArray(refinedIdeas) ? refinedIdeas : []).map((idea, index) => ({
-      title: (idea?.title || `${roughIdea} - Angle ${index + 1}`).toString().trim(),
-      angle: (idea?.angle || "Unique perspective for this audience").toString().trim(),
+    const normalizedIdeas = (
+      Array.isArray(refinedIdeas) ? refinedIdeas : []
+    ).map((idea, index) => ({
+      title: (idea?.title || `${roughIdea} - Angle ${index + 1}`)
+        .toString()
+        .trim(),
+      angle: (idea?.angle || "Unique perspective for this audience")
+        .toString()
+        .trim(),
       format: (idea?.format || "post").toString().trim(),
       hook: (idea?.hook || idea?.hookIdea || "").toString().trim(),
       platform,
@@ -149,7 +209,7 @@ async function refineIdea(req, res) {
           ...idea,
           scores: logicScores,
         };
-      })
+      }),
     );
 
     scoredIdeas.sort((a, b) => b.scores.overall - a.scores.overall);
@@ -171,18 +231,25 @@ async function refineIdea(req, res) {
  */
 async function evaluateIdea(req, res) {
   try {
-    const { userId, idea, audience, platform } = req.body;
+    const { userId: payloadUserId, idea, audience, platform } = req.body;
+    const userId = resolveAuthenticatedUserId(req, res, payloadUserId);
+    if (!userId) return;
 
-    if (!userId || !idea || !audience || !platform) {
+    if (!idea || !audience || !platform) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: userId, idea, audience, platform",
+        error: "Missing required fields: idea, audience, platform",
       });
     }
 
     const creatorProfile = await getCreatorProfileContext(userId);
 
-    const evaluation = await evaluateFullIdea(idea, audience, platform, creatorProfile);
+    const evaluation = await evaluateFullIdea(
+      idea,
+      audience,
+      platform,
+      creatorProfile,
+    );
 
     const logicScores = await scoreIdeaWithLogic(
       {
@@ -196,7 +263,7 @@ async function evaluateIdea(req, res) {
         goal: creatorProfile?.goals?.primaryGoal,
         niche: creatorProfile?.niche?.primary,
         fallbackKeyword: idea,
-      }
+      },
     );
 
     const result = {
@@ -208,7 +275,12 @@ async function evaluateIdea(req, res) {
       },
     };
 
-    result.scores.overall = calculateScore(result.scores.virality, 8.5, result.scores.clarity, result.scores.competition);
+    result.scores.overall = calculateScore(
+      result.scores.virality,
+      8.5,
+      result.scores.clarity,
+      result.scores.competition,
+    );
 
     res.json({
       success: true,
@@ -226,12 +298,14 @@ async function evaluateIdea(req, res) {
  */
 async function researchIdeaHandler(req, res) {
   try {
-    const { userId, idea, audience } = req.body;
+    const { userId: payloadUserId, idea, audience } = req.body;
+    const userId = resolveAuthenticatedUserId(req, res, payloadUserId);
+    if (!userId) return;
 
-    if (!userId || !idea || !audience) {
+    if (!idea || !audience) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: userId, idea, audience",
+        error: "Missing required fields: idea, audience",
       });
     }
 
@@ -254,9 +328,22 @@ async function researchIdeaHandler(req, res) {
  */
 async function selectIdea(req, res) {
   try {
-    const { userId, topic, angle, platform, contentType, targetAudience, hookIdea, keyPoints, scores, research } = req.body;
+    const {
+      userId: payloadUserId,
+      topic,
+      angle,
+      platform,
+      contentType,
+      targetAudience,
+      hookIdea,
+      keyPoints,
+      scores,
+      research,
+    } = req.body;
+    const userId = resolveAuthenticatedUserId(req, res, payloadUserId);
+    if (!userId) return;
 
-    if (!userId || !topic || !angle || !platform) {
+    if (!topic || !angle || !platform) {
       return res.status(400).json({
         success: false,
         error: "Missing required fields",
@@ -312,26 +399,26 @@ async function selectIdea(req, res) {
  */
 async function getUserIdeasHandler(req, res) {
   try {
-    const { userId } = req.query;
+    const userId = resolveAuthenticatedUserId(req, res, req.query.userId);
+    if (!userId) return;
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        error: "userId is required",
-      });
-    }
+    const ideas = await getUserIdeas(userId);
 
-    let ideas = await getUserIdeas(userId);
-    
-    // Backward compatibility fallback for legacy ideas saved under user-123.
-    if (ideas.length === 0 && userId !== 'user-123') {
-      ideas = await getUserIdeas('user-123');
-    }
+    // Check which ideas already have content generated
+    const ideasWithContentStatus = await Promise.all(
+      ideas.map(async (idea) => {
+        const hasContent = await hasContentForIdea(userId, idea.ideaId);
+        return {
+          ...idea,
+          hasContent,
+        };
+      }),
+    );
 
     res.json({
       success: true,
-      ideas,
-      count: ideas.length,
+      ideas: ideasWithContentStatus,
+      count: ideasWithContentStatus.length,
     });
   } catch (error) {
     console.error("Get user ideas error:", error);
@@ -345,26 +432,18 @@ async function getUserIdeasHandler(req, res) {
  */
 async function enrichIdeaResearchHandler(req, res) {
   try {
-    const { userId, ideaId } = req.body;
+    const { userId: payloadUserId, ideaId } = req.body;
+    const userId = resolveAuthenticatedUserId(req, res, payloadUserId);
+    if (!userId) return;
 
-    if (!userId || !ideaId) {
+    if (!ideaId) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: userId, ideaId",
+        error: "Missing required fields: ideaId",
       });
     }
 
-    let ownerUserId = userId;
-    let existingIdea = await getIdeaById(ownerUserId, ideaId);
-
-    // Support legacy fallback ideas that were stored under user-123
-    if (!existingIdea && userId !== "user-123") {
-      const legacyIdea = await getIdeaById("user-123", ideaId);
-      if (legacyIdea) {
-        existingIdea = legacyIdea;
-        ownerUserId = "user-123";
-      }
-    }
+    const existingIdea = await getIdeaById(userId, ideaId);
 
     if (!existingIdea) {
       return res.status(404).json({
@@ -383,7 +462,7 @@ async function enrichIdeaResearchHandler(req, res) {
     const normalizedResearch = normalizeResearchPayload(generatedResearch);
 
     const updatedIdea = await updateIdeaResearch(
-      ownerUserId,
+      userId,
       ideaId,
       normalizedResearch,
       normalizedResearch.keyPoints || [],

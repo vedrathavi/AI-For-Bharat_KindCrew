@@ -43,7 +43,9 @@ async function getRelatedQueries(keyword) {
 function analyzeTrendCompetition(trendData) {
   if (!trendData || trendData.length === 0) return 3; // Low competition
 
-  const avgValue = trendData.reduce((sum, d) => sum + parseInt(d.value || 0), 0) / trendData.length;
+  const avgValue =
+    trendData.reduce((sum, d) => sum + parseInt(d.value || 0), 0) /
+    trendData.length;
 
   if (avgValue > 70) return 8; // Very high competition
   if (avgValue > 50) return 7;

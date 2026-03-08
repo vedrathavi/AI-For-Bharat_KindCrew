@@ -1,5 +1,11 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  PutCommand,
+  GetCommand,
+  QueryCommand,
+  UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client, {
@@ -76,7 +82,12 @@ async function getUserIdeas(userId) {
 /**
  * Update research fields for an existing idea
  */
-async function updateIdeaResearch(userId, ideaId, research = {}, keyPoints = []) {
+async function updateIdeaResearch(
+  userId,
+  ideaId,
+  research = {},
+  keyPoints = [],
+) {
   try {
     const params = {
       TableName: IDEATION_TABLE,
@@ -84,7 +95,8 @@ async function updateIdeaResearch(userId, ideaId, research = {}, keyPoints = [])
         userId,
         ideaId,
       },
-      UpdateExpression: "SET research = :research, keyPoints = :keyPoints, updatedAt = :updatedAt",
+      UpdateExpression:
+        "SET research = :research, keyPoints = :keyPoints, updatedAt = :updatedAt",
       ExpressionAttributeValues: {
         ":research": research,
         ":keyPoints": Array.isArray(keyPoints) ? keyPoints : [],

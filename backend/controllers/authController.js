@@ -117,7 +117,9 @@ export const handleCallback = async (req, res) => {
 
     let redirectPath = "/onboarding";
     try {
-      const profile = await creatorProfileService.getProfileByUserId(user.userId);
+      const profile = await creatorProfileService.getProfileByUserId(
+        user.userId,
+      );
       if (profile) redirectPath = "/dashboard";
     } catch (_error) {
       // Default onboarding when profile lookup fails.

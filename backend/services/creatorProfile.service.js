@@ -20,24 +20,6 @@ const creatorProfileService = {
    */
   async createProfile(userId, profileData) {
     // Step 1: Validate data using model validation
-    console.log("📝 Creating profile for user:", userId);
-    console.log(
-      "📦 Profile data received - competitors field:",
-      profileData.competitors,
-    );
-    console.log(
-      "📦 Profile data received - competitors type:",
-      typeof profileData.competitors,
-    );
-    console.log(
-      "📦 Profile data received - competitors is array?",
-      Array.isArray(profileData.competitors),
-    );
-    console.log(
-      "📦 Profile data received - competitors length:",
-      profileData.competitors?.length,
-    );
-
     const validation = CreatorProfile.validate({
       userId,
       niche: profileData.niche,
@@ -57,32 +39,9 @@ const creatorProfileService = {
     const creatorId = `creator_${uuidv4()}`;
     const profileObject = CreatorProfile.create(creatorId, userId, profileData);
 
-    console.log(
-      "✅ Profile object created - competitors field:",
-      profileObject.competitors,
-    );
-    console.log(
-      "✅ Profile object created - competitors type:",
-      typeof profileObject.competitors,
-    );
-    console.log(
-      "✅ Profile object created - competitors length:",
-      profileObject.competitors?.length,
-    );
-    console.log("✅ Full profileObject keys:", Object.keys(profileObject));
-
     // Step 3: Save to database
     try {
       const savedProfile = await dynamodb.createCreatorProfile(profileObject);
-      console.log(`Creator profile created: ${creatorId} for user: ${userId}`);
-      console.log(
-        "💾 Saved profile - competitors field:",
-        savedProfile.competitors,
-      );
-      console.log(
-        "💾 Saved profile - competitors length:",
-        savedProfile.competitors?.length,
-      );
       return savedProfile;
     } catch (error) {
       console.error("Failed to create creator profile:", error);
@@ -145,12 +104,6 @@ const creatorProfileService = {
       throw new Error("Creator ID is required");
     }
 
-    console.log("📝 [SERVICE] updateProfile called");
-    console.log("📝 [SERVICE] creatorId:", creatorId);
-    console.log("📋 [SERVICE] updateData.competitors:", updateData.competitors);
-    console.log("📋 [SERVICE] updateData.platforms:", updateData.platforms);
-    console.log("📋 [SERVICE] updateData keys:", Object.keys(updateData));
-
     // Validate if certain fields are being updated
     if (
       updateData.niche ||
@@ -197,19 +150,10 @@ const creatorProfileService = {
         updatedAt: new Date().toISOString(),
       };
 
-      console.log(
-        "💾 [SERVICE] dataToSave.competitors:",
-        dataToSave.competitors,
-      );
-      console.log("💾 [SERVICE] dataToSave.platforms:", dataToSave.platforms);
-
       const updated = await dynamodb.updateCreatorProfile(
         creatorId,
         dataToSave,
       );
-      console.log(`Creator profile updated: ${creatorId}`);
-      console.log("✅ [SERVICE] Updated competitors:", updated.competitors);
-      console.log("✅ [SERVICE] Updated platforms:", updated.platforms);
       return updated;
     } catch (error) {
       console.error("Failed to update creator profile:", error);

@@ -12,10 +12,14 @@ export default function AuthenticatedLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated, authReady, logout } = useAuth();
+  const { isAuthenticated, authReady, logout, initializeAuth } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileClosing, setMobileClosing] = useState(false);
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   // Redirect to home if not authenticated
   useEffect(() => {
