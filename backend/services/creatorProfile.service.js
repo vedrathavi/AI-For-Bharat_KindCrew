@@ -41,6 +41,7 @@ const creatorProfileService = {
     const validation = CreatorProfile.validate({
       userId,
       niche: profileData.niche,
+      targetAudience: profileData.targetAudience,
       goals: profileData.goals,
       strategy: profileData.strategy,
       platforms: profileData.platforms,
@@ -153,6 +154,7 @@ const creatorProfileService = {
     // Validate if certain fields are being updated
     if (
       updateData.niche ||
+      updateData.targetAudience !== undefined ||
       updateData.goals ||
       updateData.strategy ||
       updateData.platforms ||
@@ -161,6 +163,7 @@ const creatorProfileService = {
       const validation = CreatorProfile.validate({
         userId: "temp", // Just for validation, userId won't be updated
         niche: updateData.niche,
+        targetAudience: updateData.targetAudience,
         goals: updateData.goals,
         strategy: updateData.strategy,
         platforms: updateData.platforms,
@@ -170,6 +173,11 @@ const creatorProfileService = {
       // Filter out validation errors for fields that aren't being updated
       const relevantErrors = validation.errors.filter((error) => {
         if (!updateData.niche && error.includes("niche")) return false;
+        if (
+          updateData.targetAudience === undefined &&
+          error.includes("Target audience")
+        )
+          return false;
         if (!updateData.goals && error.includes("goal")) return false;
         if (!updateData.strategy && error.includes("strategy")) return false;
         if (!updateData.platforms && error.includes("platform")) return false;

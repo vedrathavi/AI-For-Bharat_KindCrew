@@ -17,6 +17,7 @@ export type CreatorProfileData = {
     primary: string;
     secondary?: string;
   };
+  targetAudience: string;
   platforms?: Platform[];
   goals: {
     primaryGoal: "growth" | "monetization" | "engagement" | "brand-building";
@@ -39,9 +40,9 @@ export type CreatorProfileData = {
   };
   competitors?: Array<{
     competitorId: string;
-    name: string;
-    url: string;
-    notes?: string;
+    name: string | null;
+    url: string | null;
+    notes?: string | null;
   }>;
 };
 

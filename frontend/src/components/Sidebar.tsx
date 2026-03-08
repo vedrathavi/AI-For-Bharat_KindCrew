@@ -7,6 +7,7 @@ import {
   FiHome,
   FiUser,
   FiEdit,
+  FiCompass,
   FiBarChart2,
   FiSettings,
   FiLogOut,
@@ -33,6 +34,7 @@ export default function Sidebar({
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: FiHome },
+    { name: "Ideation", href: "/ideation", icon: FiCompass },
     { name: "Profile", href: "/profile", icon: FiUser },
     { name: "Content", href: "/content", icon: FiEdit },
     { name: "Analytics", href: "/analytics", icon: FiBarChart2 },

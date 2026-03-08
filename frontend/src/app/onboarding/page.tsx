@@ -39,6 +39,7 @@ export default function OnboardingPage() {
       primary: "",
       secondary: "",
     },
+    targetAudience: "",
     platforms: [],
     goals: {
       primaryGoal: "growth",
@@ -110,6 +111,7 @@ export default function OnboardingPage() {
       console.log("📂 [INIT] Loading profile data into form ONCE");
       setFormData({
         niche: creatorProfile.niche || { primary: "", secondary: "" },
+        targetAudience: creatorProfile.targetAudience || "",
         platforms: creatorProfile.platforms || [],
         goals: creatorProfile.goals || {
           primaryGoal: "growth",
@@ -197,10 +199,22 @@ export default function OnboardingPage() {
   }, [authReady, isAuthenticated, router]);
 
   useEffect(() => {
-    if (profileChecked && hasProfile && !isEditMode) {
+    // Only redirect if profile exists, not in edit mode, AND onboarding is already completed
+    if (
+      profileChecked &&
+      hasProfile &&
+      !isEditMode &&
+      creatorProfile?.settings?.onboardingCompleted
+    ) {
       router.replace("/dashboard");
     }
-  }, [profileChecked, hasProfile, isEditMode, router]);
+  }, [
+    profileChecked,
+    hasProfile,
+    isEditMode,
+    creatorProfile?.settings?.onboardingCompleted,
+    router,
+  ]);
 
   const handleAddPlatform = () => {
     if (newPlatform.name && newPlatform.handle) {
@@ -356,6 +370,10 @@ export default function OnboardingPage() {
       toast.error("Please select your primary niche");
       return false;
     }
+    if (!formData.targetAudience.trim()) {
+      toast.error("Please select your target audience");
+      return false;
+    }
     if (!formData.strategy.postingFrequency) {
       toast.error("Please enter your posting frequency");
       return false;
@@ -410,7 +428,14 @@ export default function OnboardingPage() {
       console.log("✅ Profile saved:", profile);
 
       if (profile?.creatorId) {
-        await completeOnboarding(token, profile.creatorId);
+        console.log("📋 Completing onboarding for:", profile.creatorId);
+        try {
+          await completeOnboarding(token, profile.creatorId);
+          console.log("✅ Onboarding completed successfully!");
+        } catch (onboardingError) {
+          console.error("❌ Failed to complete onboarding:", onboardingError);
+          toast.error("Profile saved but failed to mark onboarding as complete");
+        }
       }
       toast.success("Profile saved successfully!");
       router.push("/dashboard");
@@ -621,6 +646,56 @@ export default function OnboardingPage() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Target Audience Section */}
+          <div
+            className="p-4 sm:p-6 rounded-xl"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
+            <h2
+              className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6"
+              style={{ color: "var(--color-text)" }}
+            >
+              Target Audience
+            </h2>
+            <select
+              value={formData.targetAudience}
+              onChange={(e) =>
+                setFormData({ ...formData, targetAudience: e.target.value })
+              }
+              className="w-full px-4 py-3 pr-10 rounded-lg outline-none transition-colors text-sm sm:text-base"
+              style={{
+                backgroundColor: "var(--color-background)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text)",
+              }}
+            >
+              <option value="">Select your target audience</option>
+              <option value="students-general">Students (General)</option>
+              <option value="high-school-students">High School Students</option>
+              <option value="college-students">College/University Students</option>
+              <option value="graduate-students">Graduate Students</option>
+              <option value="recent-graduates">Recent Graduates</option>
+              <option value="career-changers">Career Changers</option>
+              <option value="entry-level-professionals">Entry-Level Professionals</option>
+              <option value="mid-level-professionals">Mid-Level Professionals</option>
+              <option value="senior-professionals">Senior Professionals/Executives</option>
+              <option value="entrepreneurs">Entrepreneurs/Founders</option>
+              <option value="solopreneurs">Solopreneurs/Freelancers</option>
+              <option value="small-business-owners">Small Business Owners</option>
+              <option value="corporate-enterprise">Corporate/Enterprise</option>
+              <option value="content-creators">Content Creators/Influencers</option>
+              <option value="coaches-consultants">Coaches/Consultants</option>
+              <option value="educators">Educators/Teachers</option>
+              <option value="parents">Parents</option>
+              <option value="retirees">Retirees</option>
+              <option value="hobbyists">Hobbyists/Enthusiasts</option>
+              <option value="general-audience">General Audience</option>
+            </select>
           </div>
 
           {/* Platforms Section */}

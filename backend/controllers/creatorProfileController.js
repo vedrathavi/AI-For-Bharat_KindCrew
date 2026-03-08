@@ -15,17 +15,6 @@ export const createProfile = async (req, res) => {
     const userId = req.userId || req.user?.userId; // From auth middleware
     const profileData = req.body;
 
-    console.log("🎯 [CONTROLLER] createProfile called");
-    console.log("👤 [CONTROLLER] userId:", userId);
-    console.log(
-      "📨 [CONTROLLER] req.body competitors:",
-      profileData?.competitors,
-    );
-    console.log(
-      "📊 [CONTROLLER] Full profileData keys:",
-      Object.keys(profileData || {}),
-    );
-
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -37,6 +26,17 @@ export const createProfile = async (req, res) => {
       return res.status(400).json({
         success: false,
         error: "Profile data is required",
+      });
+    }
+
+    if (
+      !profileData.targetAudience ||
+      typeof profileData.targetAudience !== "string" ||
+      !profileData.targetAudience.trim()
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "targetAudience is required",
       });
     }
 
@@ -144,18 +144,6 @@ export const updateProfile = async (req, res) => {
     const { creatorId } = req.params;
     const updateData = req.body;
 
-    console.log("🎯 [CONTROLLER] updateProfile called");
-    console.log("📝 [CONTROLLER] creatorId:", creatorId);
-    console.log(
-      "📨 [CONTROLLER] updateData competitors:",
-      updateData?.competitors,
-    );
-    console.log("📨 [CONTROLLER] updateData platforms:", updateData?.platforms);
-    console.log(
-      "📊 [CONTROLLER] updateData keys:",
-      Object.keys(updateData || {}),
-    );
-
     if (!creatorId) {
       return res.status(400).json({
         success: false,
@@ -167,6 +155,17 @@ export const updateProfile = async (req, res) => {
       return res.status(400).json({
         success: false,
         error: "Update data is required",
+      });
+    }
+
+    if (
+      !updateData.targetAudience ||
+      typeof updateData.targetAudience !== "string" ||
+      !updateData.targetAudience.trim()
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "targetAudience is required",
       });
     }
 

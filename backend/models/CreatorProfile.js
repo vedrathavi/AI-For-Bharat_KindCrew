@@ -13,6 +13,7 @@
  * @property {string} niche.primary - Primary niche (e.g., "tech", "fitness")
  * @property {string} niche.secondary - Secondary niche
  * @property {Array} platforms - Social media platforms
+ * @property {string} targetAudience - Primary audience segment for content
  * @property {Object} goals - Creator goals and level
  * @property {string} goals.primaryGoal - Primary goal (growth, monetization, engagement)
  * @property {string} goals.creatorLevel - Level (beginner, intermediate, advanced)
@@ -45,6 +46,7 @@ class CreatorProfile {
     this.creatorId = data.creatorId;
     this.userId = data.userId;
     this.niche = data.niche;
+    this.targetAudience = data.targetAudience;
     this.platforms = data.platforms || [];
     this.goals = data.goals;
     this.strategy = data.strategy;
@@ -73,6 +75,7 @@ class CreatorProfile {
         primary: profileData.niche?.primary || "unspecified",
         secondary: profileData.niche?.secondary || null,
       },
+      targetAudience: profileData.targetAudience?.trim(),
       platforms: profileData.platforms || [],
       goals: {
         primaryGoal: profileData.goals?.primaryGoal || "growth",
@@ -125,6 +128,15 @@ class CreatorProfile {
       typeof data.niche.primary !== "string"
     ) {
       errors.push("Primary niche is required");
+    }
+
+    // Validate target audience
+    if (
+      !data.targetAudience ||
+      typeof data.targetAudience !== "string" ||
+      !data.targetAudience.trim()
+    ) {
+      errors.push("Target audience is required");
     }
 
     // Validate goals

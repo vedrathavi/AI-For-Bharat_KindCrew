@@ -209,6 +209,22 @@ export default function ProfilePage() {
               </div>
             </div>
 
+            {/* Target Audience */}
+            <div>
+              <h3
+                className="text-lg font-semibold mb-3"
+                style={{ color: "var(--color-text)" }}
+              >
+                Target Audience
+              </h3>
+              <p
+                className="font-medium capitalize"
+                style={{ color: "var(--color-text)" }}
+              >
+                {creatorProfile.targetAudience?.replace(/-/g, " ") || "N/A"}
+              </p>
+            </div>
+
             {/* Platforms */}
             {creatorProfile.platforms &&
               creatorProfile.platforms.length > 0 && (

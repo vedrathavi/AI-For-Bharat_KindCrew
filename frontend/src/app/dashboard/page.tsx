@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useAppStore } from "@/store/useAppStore";
 import { extractUserFromToken } from "@/lib/jwtDecode";
+import { getUserIdeas, IdeaBrief } from "@/lib/api/ideation";
 import SetupBanner from "@/components/SetupBanner";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
-import { FiEdit3, FiBarChart2, FiUser } from "react-icons/fi";
+import { FiEdit3, FiBarChart2, FiUser, FiCompass, FiArrowRight } from "react-icons/fi";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -29,6 +30,17 @@ export default function DashboardPage() {
   } = useAppStore();
 
   const [showSetupBanner, setShowSetupBanner] = useState(true);
+  const [recentIdeas, setRecentIdeas] = useState<IdeaBrief[]>([]);
+  const [ideasLoading, setIdeasLoading] = useState(false);
+
+  const formatScore = (score: number | string | undefined) => {
+    if (typeof score === "number") return score.toFixed(1);
+    if (typeof score === "string") {
+      const parsed = Number.parseFloat(score);
+      return Number.isNaN(parsed) ? "0.0" : parsed.toFixed(1);
+    }
+    return "0.0";
+  };
 
   // Handle token from OAuth callback
   useEffect(() => {
@@ -59,6 +71,26 @@ export default function DashboardPage() {
     }
   }, [token, isAuthenticated, profileChecked, fetchProfile]);
 
+  useEffect(() => {
+    const loadRecentIdeas = async () => {
+      setIdeasLoading(true);
+      try {
+        const result = await getUserIdeas(userInfo?.userId || "user-123");
+        if (result.success) {
+          setRecentIdeas((result.ideas || []).slice(0, 3));
+        }
+      } catch (error) {
+        console.error("Failed to load recent ideas:", error);
+      } finally {
+        setIdeasLoading(false);
+      }
+    };
+
+    if (authReady && isAuthenticated()) {
+      loadRecentIdeas();
+    }
+  }, [authReady, isAuthenticated, userInfo?.userId]);
+
   // Redirect to root if not authenticated
   useEffect(() => {
     if (authReady && !isAuthenticated()) {
@@ -85,7 +117,9 @@ export default function DashboardPage() {
   }
 
   const shouldShowSetupBanner =
-    profileChecked && !hasProfile && showSetupBanner;
+    profileChecked &&
+    (!hasProfile || !creatorProfile?.settings?.onboardingCompleted) &&
+    showSetupBanner;
 
   const dashboardContent = (
     <div className="w-full max-w-7xl mx-auto overflow-x-hidden">
@@ -196,12 +230,57 @@ export default function DashboardPage() {
                 {creatorProfile.strategy.postingFrequency}
               </p>
             </div>
+            <div className="min-w-0">
+              <p
+                className="text-sm mb-1"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
+                Target Audience
+              </p>
+              <p
+                className="font-medium capitalize break-words"
+                style={{ color: "var(--color-text)" }}
+              >
+                {creatorProfile.targetAudience?.replace(/-/g, " ") || "N/A"}
+              </p>
+            </div>
           </div>
         </div>
       )}
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+        <button
+          onClick={() => router.push("/ideation")}
+          className="p-4 sm:p-6 rounded-xl text-left transition-all sm:hover:scale-[1.02]"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <div
+            className="w-11 h-11 rounded-lg flex items-center justify-center mb-3"
+            style={{
+              backgroundColor: "var(--color-surface-hover)",
+              color: "var(--color-text)",
+            }}
+          >
+            <FiCompass className="w-5 h-5" />
+          </div>
+          <h3
+            className="text-lg font-semibold mb-2"
+            style={{ color: "var(--color-text)" }}
+          >
+            Ideation
+          </h3>
+          <p
+            className="text-sm"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Generate, evaluate, and save your best content ideas
+          </p>
+        </button>
+
         <button
           onClick={() => router.push("/content")}
           className="p-4 sm:p-6 rounded-xl text-left transition-all sm:hover:scale-[1.02]"
@@ -296,6 +375,100 @@ export default function DashboardPage() {
               : "Complete your creator profile"}
           </p>
         </button>
+      </div>
+
+      <div
+        className="mt-6 sm:mt-8 rounded-xl p-4 sm:p-6"
+        style={{
+          backgroundColor: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
+        }}
+      >
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div>
+            <h2
+              className="text-lg sm:text-xl font-semibold"
+              style={{ color: "var(--color-text)" }}
+            >
+              Recent Saved Ideas
+            </h2>
+            <p
+              className="text-sm"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
+              Pick up where you left off.
+            </p>
+          </div>
+          <button
+            onClick={() => router.push("/ideation/my-ideas")}
+            className="px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            style={{
+              backgroundColor: "var(--color-surface-hover)",
+              color: "var(--color-text)",
+            }}
+          >
+            View all ideas
+            <FiArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {ideasLoading ? (
+          <p style={{ color: "var(--color-text-secondary)" }}>Loading ideas...</p>
+        ) : recentIdeas.length === 0 ? (
+          <div className="flex items-center justify-between gap-3">
+            <p style={{ color: "var(--color-text-secondary)" }}>
+              No saved ideas yet. Generate your first one from Ideation.
+            </p>
+            <button
+              onClick={() => router.push("/ideation")}
+              className="px-3 py-2 rounded-lg text-sm font-medium"
+              style={{
+                backgroundColor: "var(--color-text)",
+                color: "var(--color-background)",
+              }}
+            >
+              Start ideation
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {recentIdeas.map((idea) => (
+              <button
+                key={idea.ideaId}
+                onClick={() => router.push("/ideation/my-ideas")}
+                className="text-left p-4 rounded-lg"
+                style={{
+                  border: "1px solid var(--color-border)",
+                  backgroundColor: "var(--color-background)",
+                }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span
+                    className="text-xs px-2 py-1 rounded"
+                    style={{
+                      backgroundColor: "var(--color-surface-hover)",
+                      color: "var(--color-text-secondary)",
+                    }}
+                  >
+                    {idea.platform}
+                  </span>
+                  <span
+                    className="text-xs font-semibold"
+                    style={{ color: "var(--color-text)" }}
+                  >
+                    {formatScore(idea.scores?.overall)}/10
+                  </span>
+                </div>
+                <p
+                  className="text-sm font-medium line-clamp-2"
+                  style={{ color: "var(--color-text)" }}
+                >
+                  {idea.topic}
+                </p>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
