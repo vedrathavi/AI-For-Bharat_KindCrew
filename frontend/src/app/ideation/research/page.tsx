@@ -138,8 +138,6 @@ export default function ResearchPage() {
     setLoading(true);
     setError(null);
     
-    console.log('Researching idea for userId:', userInfo.userId);
-    
     try {
       const result = await researchIdea(userInfo.userId, {
         idea: selectedIdea.topic,
@@ -173,8 +171,6 @@ export default function ResearchPage() {
     }
 
     setLoading(true);
-    
-    console.log('Saving idea for userId:', userInfo.userId);
     
     try {
       const normalizedResearch = research ? normalizeResearchResponse(research) : null;

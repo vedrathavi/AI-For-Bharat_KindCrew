@@ -323,20 +323,9 @@ async function getUserIdeasHandler(req, res) {
 
     let ideas = await getUserIdeas(userId);
     
-    // Temporary fallback: if no ideas found and userId is not 'user-123',
-    // also check for ideas saved with 'user-123' (migration helper)
+    // Backward compatibility fallback for legacy ideas saved under user-123.
     if (ideas.length === 0 && userId !== 'user-123') {
-      console.log(`No ideas found for ${userId}, checking user-123 fallback...`);
       ideas = await getUserIdeas('user-123');
-      
-      if (ideas.length > 0) {
-        console.log(`⚠️  Found ${ideas.length} ideas with 'user-123'. These should be migrated to ${userId}.`);
-        // Mark these ideas as needing migration (for future cleanup)
-        ideas.forEach(idea => {
-          idea._needsMigration = true;
-          idea._actualUserId = userId;
-        });
-      }
     }
 
     res.json({

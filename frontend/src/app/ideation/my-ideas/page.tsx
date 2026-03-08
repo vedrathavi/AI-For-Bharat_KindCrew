@@ -130,13 +130,9 @@ export default function MyIdeasPage() {
     setLoading(true);
     setError(null);
     
-    console.log('Loading ideas for userId:', userInfo.userId);
-    
     try {
       const result = await getUserIdeas(userInfo.userId);
-      
-      console.log('API Response:', result);
-      
+
       if (result.success && result.ideas) {
         setIdeas(result.ideas);
       } else {

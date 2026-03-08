@@ -355,9 +355,6 @@ async function callBedrockAI(prompt, context = "") {
 
     const response = await client.send(command);
     
-    // Debug logging
-    console.log(`Bedrock response for ${context}:`, JSON.stringify(response, null, 2));
-    
     // Check if response has expected structure
     if (!response.output || !response.output.message || !response.output.message.content) {
       console.error("Unexpected response structure:", response);

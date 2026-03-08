@@ -19,8 +19,6 @@ export const exchangeCodeForTokens = async (code, redirectUri) => {
       `${COGNITO_CLIENT_ID}:${COGNITO_CLIENT_SECRET}`,
     ).toString("base64");
 
-    console.log("🔄 Exchanging auth code for tokens");
-
     const { data } = await axios.post(
       tokenUrl,
       new URLSearchParams({
@@ -36,8 +34,6 @@ export const exchangeCodeForTokens = async (code, redirectUri) => {
         },
       },
     );
-
-    console.log("✅ Token exchange successful");
 
     return {
       accessToken: data.access_token,
@@ -66,8 +62,6 @@ export const getCognitoUser = async (idToken) => {
     const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
 
     console.log("✅ User extracted from ID token:", payload.email);
-
-    // Determine the identity provider (Cognito native or Google)
     let identityProvider = "cognito";
     if (payload.identities && Array.isArray(payload.identities)) {
       // User logged in via federated provider (Google, Facebook, etc.)
