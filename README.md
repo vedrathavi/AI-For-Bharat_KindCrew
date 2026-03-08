@@ -1,283 +1,226 @@
-# 🚀 AI-For-Bharat KindCrew
+# ?? AI-For-Bharat KindCrew
 
-Full-stack application with Next.js (TypeScript) frontend and Express (ES6) backend.
+**An intelligent content creation platform powered by AI** - helping creators generate, refine, and distribute high-quality content across multiple platforms.
 
-## 📁 Project Structure
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16+-blue)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue)](https://www.typescriptlang.org/)
+[![AWS](https://img.shields.io/badge/AWS-DynamoDB%20%7C%20Cognito%20%7C%20Bedrock-orange)](https://aws.amazon.com/)
 
-```
-AI-For-Bharat_KindCrew/
-├── backend/              # Express Server (ES6 Modules)
-│   ├── config/
-│   │   └── app.js       # Express configuration
-│   ├── controllers/     # Request handlers (empty - ready for use)
-│   ├── middleware/
-│   │   └── errorHandler.js
-│   ├── routes/          # API routes (empty - ready for use)
-│   ├── utils/
-│   │   └── response.js  # Response formatters
-│   ├── .env
-│   ├── .gitignore
-│   ├── server.js        # Entry point
-│   └── package.json
-│
-└── frontend/             # Next.js 16 (TypeScript)
-    ├── src/
-    │   ├── app/         # Next.js App Router
-    │   │   ├── page.tsx
-    │   │   ├── layout.tsx
-    │   │   └── globals.css
-    │   ├── lib/
-    │   │   ├── apiClient.ts    # Axios instance
-    │   │   └── constants.ts    # API configuration
-    │   └── store/
-    │       └── useAppStore.ts  # Zustand store
-    ├── .env.local
-    └── package.json
-```
+## ?? Table of Contents
 
-## 🛠️ Tech Stack
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Running Locally](#running-locally)
+- [Deployment](#deployment)
+- [Project Structure](#project-structure)
+- [API Documentation](#api-documentation)
+- [Troubleshooting](#troubleshooting)
+- [Security](#security)
+
+## ? Features
+
+### Phase 1: Ideation & Research
+- **Zero Idea Flow**: Generate content ideas from scratch based on niche and audience
+- **Some Idea Flow**: Refine rough ideas into polished content concepts  
+- **Full Idea Flow**: Evaluate and score ideas based on virality, clarity, and competition
+- **AI Research**: Leverage Google Trends and market research data
+
+### Phase 2: Content Generation
+- **Multi-Platform Support**: Instagram, Twitter, LinkedIn, YouTube, TikTok
+- **Smart Variants**: Auto-generate platform-specific content variations
+- **Content Scheduling**: Schedule posts across multiple platforms
+- **Draft Management**: Save, edit, organize content drafts
+
+### Authentication & Analytics
+- **AWS Cognito**: Secure OAuth login with Google
+- **Dashboard Analytics**: Track content performance
+- **Creator Profiles**: Manage multiple creator accounts
+
+## ??? Tech Stack
 
 ### Frontend
-
-- **Next.js 16** - React framework with App Router
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Axios** - HTTP client
-- **Zustand** - State management
+- Next.js 16 + TypeScript 5 + Tailwind CSS 4
+- Zustand state management, Recharts visualization
+- Axios HTTP client, Sonner notifications
 
 ### Backend
+- Node.js 18+ with Express 5 (ES6 modules)
+- AWS SDK, DynamoDB, Cognito, Bedrock
 
-- **Express.js** - Web framework
-- **ES6 Modules** - Modern JavaScript
-- **CORS** - Cross-origin support
-- **Nodemon** - Auto-reload in development
+### Infrastructure
+- **Backend**: Render (free tier, Node.js)
+- **Frontend**: AWS Amplify (free tier, Next.js)
+- **Database**: AWS DynamoDB
+- **Auth**: AWS Cognito
+- **AI**: AWS Bedrock (Gemma 3)
+- **Region**: ap-south-1 (Mumbai)
 
-## 🚀 Getting Started
+## ?? Prerequisites
 
-### Prerequisites
+- Node.js 18.0.0+, npm 9.0.0+
+- AWS Account with DynamoDB, Cognito, Bedrock access
+- GitHub Account
 
-- Node.js 20+
-- npm
+## ?? Quick Start
 
-### Installation
+```bash
+# Clone
+git clone https://github.com/navyajain7105/AI-For-Bharat_KindCrew.git
+cd AI-For-Bharat_KindCrew
 
-1. **Clone the repository**
+# Backend (http://localhost:5000)
+cd backend && npm install && npm run dev
 
-   ```bash
-   git clone <repository-url>
-   cd AI-For-Bharat_KindCrew
-   ```
-
-2. **Setup Backend**
-
-   ```bash
-   cd backend
-   npm install
-   npm run dev
-   ```
-
-   Backend runs on: http://localhost:5000
-
-3. **Setup Frontend**
-   ```bash
-   cd frontend
-   npm install    # ensures new packages including react-calendar are installed
-   npm run dev
-   ```
-   Frontend runs on: http://localhost:3000
-
-## 📡 API Connection
-
-### Simple Usage
-
-```typescript
-import apiClient from "@/lib/apiClient";
-
-// GET request
-const { data } = await apiClient.get("/health");
-
-// POST request
-const { data } = await apiClient.post("/api/endpoint", { key: "value" });
+# Frontend (http://localhost:3000)
+cd ../frontend && npm install && npm run dev
 ```
 
-### Configuration
+## ?? Configuration
 
-Be **very careful** with the frontend API URL. If `NEXT_PUBLIC_API_URL` is missing or points to the frontend origin (e.g. `http://localhost:3000`), all calls in `src/lib/api/*` will hit the Next.js server instead of the Express backend and you’ll see
+### Backend (.env)
+```env
+PORT=5000
+NODE_ENV=development
+AWS_REGION=ap-south-1
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
 
+COGNITO_USER_POOL_ID=ap-south-1_AVgAOJlyL
+COGNITO_CLIENT_ID=your_client_id
+COGNITO_CLIENT_SECRET=your_secret
+COGNITO_DOMAIN=https://ap-south-1avgaojlyl.auth.ap-south-1.amazoncognito.com
+COGNITO_REDIRECT_URI=http://localhost:5000/api/auth/callback
+
+DYNAMODB_USERS_TABLE=KindCrew-Users
+DYNAMODB_CREATOR_PROFILES_TABLE=KindCrew-CreatorProfiles
+
+FRONTEND_URL=http://localhost:3000
+JWT_SECRET=your-secret-key
+BEDROCK_DEFAULT_MODEL=google.gemma-3-12b-it
 ```
-Requested resource not found
-```
 
-errors on the planning page or anywhere else.
-
-Frontend `.env.local` (must point at backend):
-
+### Frontend (.env.local)
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
-Backend `.env`:
-
+### Frontend (.env.production)
 ```env
-PORT=5000
-NODE_ENV=development
+NEXT_PUBLIC_API_URL=https://kindcrew-api.onrender.com
 ```
 
-## 📚 Documentation
+## ?? Deployment
 
-- [API Connection Guide](./docs/api-connection.md) - Detailed usage
-- [Design Document](./docs/design.md)
-- [Requirements](./docs/requirements.md)
+### Backend on Render
+See [DEPLOY_RENDER.md](DEPLOY_RENDER.md)
 
-## 🎯 Available Scripts
+Set environment variables:
+- `FRONTEND_URL=https://your-amplify-url.amplifyapp.com`
+- `COGNITO_REDIRECT_URI=https://kindcrew-api.onrender.com/api/auth/callback`
 
-### Backend
+### Frontend on AWS Amplify
+See [DEPLOY_AMPLIFY.md](DEPLOY_AMPLIFY.md)
 
-```bash
-npm run dev    # Start with nodemon (auto-reload)
-npm start      # Start production server
-```
+Set environment variable:
+- `NEXT_PUBLIC_API_URL=https://kindcrew-api.onrender.com`
 
-### Frontend
-
-```bash
-npm run dev    # Start development server
-npm run build  # Build for production
-npm start      # Start production server
-```
-
-## ✅ API Endpoints
-
-| Method | Endpoint                    | Description                      |
-| ------ | --------------------------- | -------------------------------- |
-| GET    | `/`                         | Welcome message                  |
-| GET    | `/health`                   | Health check                     |
-| POST   | `/api/publishing/schedule`  | Schedule content for posting     |
-| GET    | `/api/publishing/scheduled` | List user's scheduled posts      |
-| PUT    | `/api/publishing/:id`       | Update a scheduled post          |
-| POST   | `/api/publishing/:id/post`  | Trigger immediate posting (stub) |
-
-## 🔐 Environment Variables
-
-### Backend (.env)
-
-- `PORT` - Server port (default: 5000)
-- `NODE_ENV` - Environment (development/production)
-- `DYNAMODB_USERS_TABLE` - (optional) users table name
-- `DYNAMODB_PUBLISHING_TABLE` - (optional) schedules table name
-
-### Google Calendar Integration (optional)
-
-- `GOOGLE_CLIENT_ID` – OAuth client ID
-- `GOOGLE_CLIENT_SECRET` – OAuth client secret
-- `GOOGLE_REDIRECT_URI` – Callback URI used during auth
-
-### Frontend (.env.local)
-
-- `NEXT_PUBLIC_API_URL` - Backend API URL
-
-## 🚀 Deployment
-
-### 🎯 Recommended Deployment (Free Tier)
-
-**Deploy your full stack in 30 minutes - completely free!**
+## ?? Project Structure
 
 ```
-Backend  → Render (Free)
-Frontend → AWS Amplify (Free)
-Database → DynamoDB (Pay per use)
-Auth     → Cognito (Free tier)
-AI       → Bedrock (Pay per token)
++-- backend/
+�   +-- config/app.js          # Express setup
+�   +-- controllers/           # Request handlers
+�   +-- services/              # Business logic
+�   +-- utils/                 # Utilities
+�   +-- routes/
+�   +-- middleware/
+�   +-- server.js
+�   +-- package.json
+�
++-- frontend/
+�   +-- src/
+�   �   +-- app/               # Next.js App Router
+�   �   +-- lib/api/           # API clients
+�   �   +-- store/             # Zustand state
+�   �   +-- components/
+�   +-- amplify.yml            # Build config
+�   +-- package.json
+�
++-- docs/
+�   +-- design.md
+�   +-- requirements.md
+�
++-- DEPLOY_RENDER.md / DEPLOY_AMPLIFY.md
 ```
 
-### ⚡ Quick Start Guides
+## ?? API Endpoints
 
-#### Complete Deployment (Start Here!):
+**Auth:**
+- GET /api/auth/login - Start OAuth
+- GET /api/auth/callback - OAuth callback
+- GET /api/auth/logout - Logout
 
-**[📖 FULL_DEPLOYMENT_CHECKLIST.md](./FULL_DEPLOYMENT_CHECKLIST.md)** - Complete 30-minute checklist with all steps
+**Profiles:**
+- POST /api/creator-profiles - Create/update profile
+- GET /api/creator-profiles/:userId - Get profile
 
-#### Backend Deployment:
+**Ideation:**
+- POST /api/ideation/generate - Generate ideas
+- POST /api/ideation/refine - Refine ideas
+- POST /api/ideation/evaluate - Score ideas
+- POST /api/ideation/research - Research idea
 
-**[📖 DEPLOY_RENDER.md](./DEPLOY_RENDER.md)** - Deploy backend to Render (5 minutes, free tier)
+**Content:**
+- POST /api/content/from-idea - Create content
+- GET /api/content/user - List content
+- POST /api/content/update-status - Change status
 
-#### Frontend Deployment:
+## ?? Troubleshooting
 
-**[📖 DEPLOY_AMPLIFY.md](./DEPLOY_AMPLIFY.md)** - Deploy frontend to AWS Amplify (10 minutes, free tier)
+**OAuth `invalid_state` error:**
+- Ensure `app.set("trust proxy", 1)` in backend production config
+- Clear cookies + test in incognito mode
+- Verify HTTPS in production
 
-### 🏗️ Why This Stack?
+**Amplify build fails:**
+- Check `frontend/amplify.yml` uses `applications:` key
+- Verify `appRoot: frontend` is set
 
-**Backend on Render:**
+**CORS errors:**
+- Set `FRONTEND_URL` on backend
+- Verify URL matches exactly
 
-- ✅ **$0/month** - Free tier (750 hours)
-- ✅ **5-minute setup** - No CLI tools needed
-- ✅ **Auto-deploy** - Push to GitHub = Auto deploy
-- ✅ **SSL included** - Automatic HTTPS
+**DynamoDB errors:**
+- Check table names and region
+- Verify IAM permissions
 
-**Frontend on AWS Amplify:**
+## ?? Security
 
-- ✅ **Free tier** - 1000 build minutes/month
-- ✅ **Global CDN** - CloudFront distribution
-- ✅ **Perfect for Next.js** - SSR support
-- ✅ **Auto HTTPS** - Free SSL certificate
+- Never commit `.env` with credentials
+- Use AWS IAM roles in production
+- Rotate secrets regularly
+- Enable MFA on AWS accounts
+- Use HTTPS (enforced by Render/Amplify)
 
-**Total Cost: ~₹150-700/month (~$2-8/month)** for low-medium traffic
+See [SECURITY_NOTICE.md](SECURITY_NOTICE.md)
 
-### 📖 Alternative Deployment Options
+## ?? Contributing
 
-**For Production Scale:**
+1. `git checkout -b feature/your-feature`
+2. `git commit -m "feat: Add feature"`
+3. `git push origin feature/your-feature`
+4. Open PR
 
-- **[DEPLOY_NOW.md](./DEPLOY_NOW.md)** - Deploy backend to AWS Elastic Beanstalk
-- **[YOUR_DEPLOYMENT_COMMANDS.md](./YOUR_DEPLOYMENT_COMMANDS.md)** - Detailed AWS guide with pre-filled credentials
+## ?? Support
 
-**Comparison:**
-
-- **[RENDER_VS_AWS.md](./RENDER_VS_AWS.md)** - Detailed comparison to help you choose
-
-**Additional Resources:**
-
-- **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - 30-minute AWS deployment guide
-- **[DEPLOY_BACKEND_FROM_GITHUB.md](./DEPLOY_BACKEND_FROM_GITHUB.md)** - GitHub CI/CD options
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment documentation
-- **[SECURITY_NOTICE.md](./SECURITY_NOTICE.md)** - Important security best practices
-
-### Auto-configured files:
-
-- ✅ `frontend/amplify.yml` - Amplify build configuration
-- ✅ `backend/.ebignore` - Elastic Beanstalk ignore rules
-- ✅ `.github/workflows/deploy-backend.yml` - CI/CD pipeline
-
-### Deployment Architecture:
-
-```
-Users → AWS Route 53 (DNS)
-         ↓
-    AWS CloudFront (CDN)
-         ↓
-    AWS Amplify (Frontend)
-         ↓
-    AWS Elastic Beanstalk (Backend API)
-         ↓
-    ┌─────────────────────────┐
-    │ DynamoDB (Database)     │
-    │ Cognito (Auth)          │
-    │ Bedrock (AI)            │
-    └─────────────────────────┘
-```
-
-See the guides above for detailed step-by-step instructions!
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the ISC License.
+- [GitHub Issues](https://github.com/navyajain7105/AI-For-Bharat_KindCrew/issues)
+- Check [DEPLOY_RENDER.md](DEPLOY_RENDER.md) & [DEPLOY_AMPLIFY.md](DEPLOY_AMPLIFY.md)
+- Review `/docs` folder
 
 ---
 
-**Happy Coding! 🎉**
+**Version:** 1.0.0 | **Updated:** March 8, 2026 | **Maintained by:** AI-For-Bharat Team
