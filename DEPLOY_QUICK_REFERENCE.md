@@ -19,6 +19,7 @@ GitHub Repo:        https://github.com/navyajain7105/AI-For-Bharat_KindCrew
 ## ⚡ Deploy Backend to Render (5 mins)
 
 ### Step 1: Create Service
+
 1. Go to: https://render.com/
 2. Sign up with GitHub
 3. New Web Service → Connect repo: `navyajain7105/AI-For-Bharat_KindCrew`
@@ -33,6 +34,7 @@ GitHub Repo:        https://github.com/navyajain7105/AI-For-Bharat_KindCrew
    ```
 
 ### Step 2: Environment Variables
+
 ```bash
 NODE_ENV=production
 PORT=10000
@@ -54,6 +56,7 @@ FRONTEND_URL=http://localhost:3000
 ```
 
 ### Step 3: Deploy & Test
+
 ```powershell
 # Deploy happens automatically!
 # Test: Open your Render URL
@@ -65,6 +68,7 @@ curl https://YOUR-RENDER-URL/health
 ## ⚡ Deploy Frontend to AWS Amplify (10 mins)
 
 ### Step 1: Create App
+
 1. Go to: https://ap-south-1.console.aws.amazon.com/amplify/
 2. New app → Host web app → GitHub
 3. Authorize AWS Amplify
@@ -74,6 +78,7 @@ curl https://YOUR-RENDER-URL/health
 7. Root directory: `frontend`
 
 ### Step 2: Environment Variables
+
 ```bash
 NEXT_PUBLIC_API_URL=https://YOUR-RENDER-BACKEND-URL
 NEXT_PUBLIC_COGNITO_DOMAIN=https://ap-south-1avgaojlyl.auth.ap-south-1.amazoncognito.com
@@ -83,6 +88,7 @@ NEXT_PUBLIC_COGNITO_REDIRECT_URI=https://YOUR-RENDER-BACKEND-URL/api/auth/callba
 ```
 
 ### Step 3: Deploy & Test
+
 ```powershell
 # Deploy happens automatically! (5-10 mins)
 # Test: Open your Amplify URL in browser
@@ -93,17 +99,20 @@ NEXT_PUBLIC_COGNITO_REDIRECT_URI=https://YOUR-RENDER-BACKEND-URL/api/auth/callba
 ## 🔄 Update Cross-References
 
 ### Update Render (Backend):
+
 ```bash
 FRONTEND_URL=https://main.XXXXX.amplifyapp.com
 COGNITO_REDIRECT_URI=https://kindcrew-api-XXXXX.onrender.com/api/auth/callback
 ```
 
 ### Update Amplify (Frontend):
+
 ```bash
 NEXT_PUBLIC_API_URL=https://kindcrew-api-XXXXX.onrender.com
 ```
 
 ### Update Cognito:
+
 1. Go to: https://ap-south-1.console.aws.amazon.com/cognito/v2/idp/user-pools
 2. Select: `ap-south-1_AVgAOJlyL`
 3. App client: `6sf5ji9pqp4bqgg8i009jtgti3`
@@ -144,6 +153,7 @@ curl https://YOUR-RENDER-URL/health
 ## 🔍 Useful Commands
 
 ### Git Commands
+
 ```powershell
 # Push changes (triggers auto-deploy)
 git add .
@@ -158,12 +168,14 @@ git checkout main
 ```
 
 ### View Logs
+
 ```
 Render:   Dashboard → Logs tab
 Amplify:  Console → Build history → Click build → View logs
 ```
 
 ### Manual Deploy
+
 ```
 Render:   Dashboard → Manual Deploy → Deploy latest commit
 Amplify:  Console → Redeploy this version
@@ -173,13 +185,13 @@ Amplify:  Console → Redeploy this version
 
 ## 🚨 Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Backend sleeps | Expected on free tier (30s wake time) |
-| CORS errors | Update `FRONTEND_URL` in Render |
-| API 404 errors | Check `NEXT_PUBLIC_API_URL` in Amplify |
-| Login redirect fails | Update Cognito callback URLs |
-| Build fails | Check logs, verify dependencies |
+| Issue                | Solution                               |
+| -------------------- | -------------------------------------- |
+| Backend sleeps       | Expected on free tier (30s wake time)  |
+| CORS errors          | Update `FRONTEND_URL` in Render        |
+| API 404 errors       | Check `NEXT_PUBLIC_API_URL` in Amplify |
+| Login redirect fails | Update Cognito callback URLs           |
+| Build fails          | Check logs, verify dependencies        |
 
 ---
 
@@ -209,6 +221,7 @@ Total:                    ~₹150-700/month ($2-8)
 ## 🎉 You're Done!
 
 Your app is live at:
+
 - **Frontend:** https://main.XXXXX.amplifyapp.com
 - **Backend:** https://kindcrew-api-XXXXX.onrender.com
 

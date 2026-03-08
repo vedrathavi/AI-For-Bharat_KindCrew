@@ -123,7 +123,6 @@ PORT=5000
 NODE_ENV=development
 ```
 
-
 ## 📚 Documentation
 
 - [API Connection Guide](./docs/api-connection.md) - Detailed usage
@@ -149,15 +148,14 @@ npm start      # Start production server
 
 ## ✅ API Endpoints
 
-| Method | Endpoint  | Description     |
-| ------ | --------- | --------------- |
-| GET    | `/`       | Welcome message |
-| GET    | `/health` | Health check    |
-| POST   | `/api/publishing/schedule` | Schedule content for posting |
-| GET    | `/api/publishing/scheduled` | List user's scheduled posts |
-| PUT    | `/api/publishing/:id` | Update a scheduled post |
-| POST   | `/api/publishing/:id/post` | Trigger immediate posting (stub) |
-
+| Method | Endpoint                    | Description                      |
+| ------ | --------------------------- | -------------------------------- |
+| GET    | `/`                         | Welcome message                  |
+| GET    | `/health`                   | Health check                     |
+| POST   | `/api/publishing/schedule`  | Schedule content for posting     |
+| GET    | `/api/publishing/scheduled` | List user's scheduled posts      |
+| PUT    | `/api/publishing/:id`       | Update a scheduled post          |
+| POST   | `/api/publishing/:id/post`  | Trigger immediate posting (stub) |
 
 ## 🔐 Environment Variables
 
@@ -195,23 +193,28 @@ AI       → Bedrock (Pay per token)
 ### ⚡ Quick Start Guides
 
 #### Complete Deployment (Start Here!):
+
 **[📖 FULL_DEPLOYMENT_CHECKLIST.md](./FULL_DEPLOYMENT_CHECKLIST.md)** - Complete 30-minute checklist with all steps
 
 #### Backend Deployment:
+
 **[📖 DEPLOY_RENDER.md](./DEPLOY_RENDER.md)** - Deploy backend to Render (5 minutes, free tier)
 
 #### Frontend Deployment:
+
 **[📖 DEPLOY_AMPLIFY.md](./DEPLOY_AMPLIFY.md)** - Deploy frontend to AWS Amplify (10 minutes, free tier)
 
 ### 🏗️ Why This Stack?
 
 **Backend on Render:**
+
 - ✅ **$0/month** - Free tier (750 hours)
 - ✅ **5-minute setup** - No CLI tools needed
 - ✅ **Auto-deploy** - Push to GitHub = Auto deploy
 - ✅ **SSL included** - Automatic HTTPS
 
 **Frontend on AWS Amplify:**
+
 - ✅ **Free tier** - 1000 build minutes/month
 - ✅ **Global CDN** - CloudFront distribution
 - ✅ **Perfect for Next.js** - SSR support
@@ -222,24 +225,29 @@ AI       → Bedrock (Pay per token)
 ### 📖 Alternative Deployment Options
 
 **For Production Scale:**
+
 - **[DEPLOY_NOW.md](./DEPLOY_NOW.md)** - Deploy backend to AWS Elastic Beanstalk
 - **[YOUR_DEPLOYMENT_COMMANDS.md](./YOUR_DEPLOYMENT_COMMANDS.md)** - Detailed AWS guide with pre-filled credentials
 
 **Comparison:**
+
 - **[RENDER_VS_AWS.md](./RENDER_VS_AWS.md)** - Detailed comparison to help you choose
 
 **Additional Resources:**
+
 - **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - 30-minute AWS deployment guide
 - **[DEPLOY_BACKEND_FROM_GITHUB.md](./DEPLOY_BACKEND_FROM_GITHUB.md)** - GitHub CI/CD options
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment documentation
 - **[SECURITY_NOTICE.md](./SECURITY_NOTICE.md)** - Important security best practices
 
 ### Auto-configured files:
+
 - ✅ `frontend/amplify.yml` - Amplify build configuration
 - ✅ `backend/.ebignore` - Elastic Beanstalk ignore rules
 - ✅ `.github/workflows/deploy-backend.yml` - CI/CD pipeline
 
 ### Deployment Architecture:
+
 ```
 Users → AWS Route 53 (DNS)
          ↓

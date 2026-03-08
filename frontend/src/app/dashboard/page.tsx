@@ -52,7 +52,10 @@ export default function DashboardPage() {
     ) {
       return content.distribution.platformTargets.length;
     }
-    if (content?.platformVariants && typeof content.platformVariants === "object") {
+    if (
+      content?.platformVariants &&
+      typeof content.platformVariants === "object"
+    ) {
       return Object.keys(content.platformVariants).length;
     }
     return 0;
@@ -612,11 +615,11 @@ export default function DashboardPage() {
                 </div>
                 <p
                   className="text-sm font-medium line-clamp-2 flex-grow break-words overflow-hidden"
-                  style={{ 
+                  style={{
                     color: "var(--color-text)",
                     wordBreak: "break-word",
                     overflowWrap: "break-word",
-                    hyphens: "auto"
+                    hyphens: "auto",
                   }}
                 >
                   {content.topic || content.title || "Untitled Content"}

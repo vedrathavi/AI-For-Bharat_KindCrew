@@ -3,6 +3,7 @@
 Render is **free** and much simpler than AWS for testing! Deploy in 5 minutes.
 
 ## Why Render First?
+
 - ✅ **Free tier** - Perfect for testing
 - ✅ **Auto-deploy** from GitHub (push to deploy)
 - ✅ **Simple setup** - No CLI tools needed
@@ -104,6 +105,7 @@ Click **"Create Web Service"**
 ⏳ **Wait 3-5 minutes** for deployment to complete.
 
 You'll see:
+
 ```
 Your service is live at https://kindcrew-api.onrender.com 🎉
 ```
@@ -164,6 +166,7 @@ NEXT_PUBLIC_API_URL=https://YOUR-RENDER-URL.onrender.com
 ```
 
 Restart your frontend:
+
 ```powershell
 cd frontend
 npm run dev
@@ -180,18 +183,23 @@ Every push to `main` branch will **automatically deploy** to Render!
 ## 🔍 Useful Features
 
 ### View Logs
+
 Dashboard → **Logs** tab → Real-time logs
 
 ### Check Metrics
+
 Dashboard → **Metrics** tab → CPU, Memory, Response times
 
 ### Manual Deploy
+
 Dashboard → **Manual Deploy** → Pick branch → **Deploy**
 
 ### Shell Access
+
 Dashboard → **Shell** tab → Access your container
 
 ### Custom Domain
+
 Dashboard → **Settings** → **Custom Domain** → Add your domain
 
 ---
@@ -199,6 +207,7 @@ Dashboard → **Settings** → **Custom Domain** → Add your domain
 ## 💰 Cost Comparison
 
 ### Render Free Tier:
+
 - ✅ **$0/month**
 - 750 hours/month (enough for testing)
 - 512 MB RAM
@@ -206,12 +215,14 @@ Dashboard → **Settings** → **Custom Domain** → Add your domain
 - Auto-wakes on request (30 seconds delay)
 
 ### Render Paid ($7/month):
+
 - 24/7 uptime (no sleeping)
 - 512 MB RAM
 - Unlimited hours
 - Better for production
 
 ### AWS Elastic Beanstalk:
+
 - ~₹2000-2500/month (~$24-30)
 - t3.small instance
 - Full control
@@ -228,6 +239,7 @@ Dashboard → **Settings** → **Custom Domain** → Add your domain
 - **Next requests are instant**
 
 To prevent sleeping (optional):
+
 - Upgrade to paid plan ($7/month)
 - Or use an uptime monitor (e.g., UptimeRobot) to ping every 10 minutes
 
@@ -238,6 +250,7 @@ To prevent sleeping (optional):
 ### Issue: "Build failed"
 
 **Solution:** Check `backend/package.json` has:
+
 ```json
 {
   "scripts": {
@@ -253,14 +266,17 @@ To prevent sleeping (optional):
 ### Issue: "Port already in use"
 
 **Solution:** Render automatically sets `PORT=10000`. Your code should use:
+
 ```javascript
 const PORT = process.env.PORT || 5000;
 ```
+
 ✅ You already have this in `server.js`!
 
 ### Issue: "Cannot connect to DynamoDB"
 
 **Solution:** Double-check environment variables:
+
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 - `AWS_REGION=ap-south-1`
@@ -274,8 +290,8 @@ const PORT = process.env.PORT || 5000;
 ## 🔄 Auto-Deploy Workflow
 
 ```
-You push to GitHub → Render detects push → 
-Builds backend → Runs npm install → 
+You push to GitHub → Render detects push →
+Builds backend → Runs npm install →
 Starts with npm start → Live in 3-5 mins! ✅
 ```
 
@@ -286,6 +302,7 @@ No GitHub Actions needed - Render handles everything!
 ## 📝 When to Migrate to AWS
 
 Migrate to AWS Elastic Beanstalk when:
+
 - ✅ You need 24/7 uptime with no cold starts
 - ✅ You need more than 512 MB RAM
 - ✅ You expect high traffic (>10,000 requests/day)
@@ -333,6 +350,7 @@ Want to deploy frontend on Render too?
    ```
 
 **OR use Vercel** (better for Next.js):
+
 - Connect GitHub → Vercel auto-detects Next.js
 - Add `NEXT_PUBLIC_API_URL` in Vercel dashboard
 - Deploy! (2 minutes)

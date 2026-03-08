@@ -14,11 +14,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      console.error(
-        "API Error:",
-        error.response.status,
-        error.response.data,
-      );
+      console.error("API Error:", error.response.status, error.response.data);
     } else if (error.request) {
       console.error("Network Error: No response from server");
     } else {

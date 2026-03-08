@@ -6,29 +6,29 @@ services:
   - type: web
     name: kindcrew-api
     runtime: node
-    region: singapore  # Closest to ap-south-1 (Mumbai)
-    plan: free  # Change to 'starter' for $7/month with no sleeping
+    region: singapore # Closest to ap-south-1 (Mumbai)
+    plan: free # Change to 'starter' for $7/month with no sleeping
     branch: main
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
-    
+
     envVars:
       # Node Configuration
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
-      
+
       # AWS Configuration
       - key: AWS_REGION
         value: ap-south-1
       - key: AWS_ACCESS_KEY_ID
-        sync: false  # Add manually in Render dashboard for security
+        sync: false # Add manually in Render dashboard for security
       - key: AWS_SECRET_ACCESS_KEY
-        sync: false  # Add manually in Render dashboard for security
-      
+        sync: false # Add manually in Render dashboard for security
+
       # Cognito Configuration
       - key: COGNITO_USER_POOL_ID
         value: ap-south-1_AVgAOJlyL
@@ -40,11 +40,11 @@ services:
         value: ap-south-1
       - key: COGNITO_REDIRECT_URI
         value: https://kindcrew-api.onrender.com/api/auth/callback
-      
+
       # JWT Secret
       - key: JWT_SECRET
-        generateValue: true  # Render will generate a random secret
-      
+        generateValue: true # Render will generate a random secret
+
       # DynamoDB Tables
       - key: DYNAMODB_USERS_TABLE
         value: KindCrew-Users
@@ -54,11 +54,11 @@ services:
         value: KindCrew-ContentIdeas
       - key: CONTENT_TABLE
         value: KindCrew-ContentItems
-      
+
       # AWS Bedrock
       - key: BEDROCK_DEFAULT_MODEL
         value: google.gemma-3-12b-it
-      
+
       # Frontend URL (update after deploying frontend)
       - key: FRONTEND_URL
         value: http://localhost:3000
@@ -73,7 +73,7 @@ services:
 #   rootDir: frontend
 #   buildCommand: npm install && npm run build
 #   startCommand: npm start
-#   
+#
 #   envVars:
 #     - key: NEXT_PUBLIC_API_URL
 #       fromService:

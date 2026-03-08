@@ -1485,7 +1485,14 @@ function OnboardingPageContent() {
 
 export default function OnboardingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen" style={{ backgroundColor: "var(--color-background)" }} />}>
+    <Suspense
+      fallback={
+        <div
+          className="min-h-screen"
+          style={{ backgroundColor: "var(--color-background)" }}
+        />
+      }
+    >
       <OnboardingPageContent />
     </Suspense>
   );

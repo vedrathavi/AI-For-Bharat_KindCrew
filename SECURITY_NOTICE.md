@@ -3,6 +3,7 @@
 ## Your AWS Credentials Are Exposed in .env Files
 
 **Current Status:**
+
 - ✅ `.env` files are in `.gitignore` (not committed to Git)
 - ✅ GitHub Secrets configured for CI/CD (credentials are safely stored)
 - ⚠️ AWS credentials are in plaintext in your local `.env` files
@@ -12,6 +13,7 @@
 ## 🔒 Recommendations:
 
 ### 1. **Keep .env Files Local Only**
+
 Never commit `.env` or `.env.local` to version control:
 
 ```bash
@@ -33,6 +35,7 @@ eb setenv AWS_ACCESS_KEY_ID="" AWS_SECRET_ACCESS_KEY=""
 ```
 
 **Steps:**
+
 1. Go to: https://console.aws.amazon.com/iam/home?region=ap-south-1#/roles
 2. Create role for "Elastic Beanstalk" or "EC2"
 3. Attach policies:
@@ -57,13 +60,16 @@ Instead of environment variables, store secrets in AWS Secrets Manager:
 
 ```javascript
 // backend/config/secrets.js
-import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from "@aws-sdk/client-secrets-manager";
 
 const client = new SecretsManagerClient({ region: "ap-south-1" });
 
 export async function getSecret(secretName) {
   const response = await client.send(
-    new GetSecretValueCommand({ SecretId: secretName })
+    new GetSecretValueCommand({ SecretId: secretName }),
   );
   return JSON.parse(response.SecretString);
 }
@@ -74,6 +80,7 @@ export async function getSecret(secretName) {
 ### 5. **Enable MFA on Your AWS Root Account**
 
 Protect your AWS account with Multi-Factor Authentication:
+
 - Go to: https://console.aws.amazon.com/iam/home#/security_credentials
 - Enable MFA for root account
 - Enable MFA for IAM users
@@ -115,16 +122,19 @@ Protect your AWS account with Multi-Factor Authentication:
 ## 💡 Best Practices Summary
 
 **For Development:**
+
 - Use `.env` files (already doing this ✅)
 - Never commit to Git (already protected ✅)
 
 **For Production:**
+
 - Use IAM roles (recommended)
 - Or use AWS Secrets Manager
 - Enable CloudTrail logging
 - Rotate keys every 90 days
 
 **For CI/CD:**
+
 - Use GitHub Secrets (already doing this ✅)
 - Limit permissions to minimum required
 - Use separate credentials for CI/CD if possible

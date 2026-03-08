@@ -3,6 +3,7 @@
 Deploy your Next.js frontend to AWS Amplify with automatic HTTPS and global CDN!
 
 ## Why AWS Amplify?
+
 - ✅ **Optimized for Next.js** - Built-in SSR support
 - ✅ **Global CDN** - Fast worldwide with CloudFront
 - ✅ **Auto HTTPS** - Free SSL certificate
@@ -16,6 +17,7 @@ Deploy your Next.js frontend to AWS Amplify with automatic HTTPS and global CDN!
 
 **Backend API (Render):** Update after deploying backend  
 **Cognito Configuration:**
+
 - Pool ID: `ap-south-1_AVgAOJlyL`
 - Client ID: `6sf5ji9pqp4bqgg8i009jtgti3`
 - Domain: `https://ap-south-1avgaojlyl.auth.ap-south-1.amazoncognito.com`
@@ -65,6 +67,7 @@ Amplify should **auto-detect Next.js**. Verify the settings:
 **App name:** `kindcrew-frontend`
 
 **Build settings** should show:
+
 ```yaml
 version: 1
 frontend:
@@ -78,7 +81,7 @@ frontend:
   artifacts:
     baseDirectory: .next
     files:
-      - '**/*'
+      - "**/*"
   cache:
     paths:
       - node_modules/**/*
@@ -88,6 +91,7 @@ frontend:
 **✅ This is already configured in your `frontend/amplify.yml`!**
 
 **Advanced settings:**
+
 - Monorepo root directory: `frontend`
 - Build command: `npm run build`
 - Output directory: `.next` (auto-detected)
@@ -116,6 +120,7 @@ NEXT_PUBLIC_COGNITO_REDIRECT_URI=https://your-render-backend-url.onrender.com/ap
 **⚠️ Important:** Replace `your-render-backend-url` with your actual Render backend URL!
 
 If you don't have the Render backend URL yet:
+
 - Deploy backend to Render first (see [DEPLOY_RENDER.md](./DEPLOY_RENDER.md))
 - Or use `http://localhost:5000` for now (update later)
 
@@ -127,6 +132,7 @@ If you don't have the Render backend URL yet:
 ⏳ **Wait 5-10 minutes** for the first deployment.
 
 You'll see:
+
 ```
 Provision → Build → Deploy → Verify
 ```
@@ -149,6 +155,7 @@ https://main.d1a2b3c4d5e6f7.amplifyapp.com
 ### 1. Test Your Frontend
 
 Open your Amplify URL in a browser:
+
 ```
 https://main.XXXXX.amplifyapp.com
 ```
@@ -182,6 +189,7 @@ Update your Render backend environment variable:
 3. **App integration** → **App client: 6sf5ji9pqp4bqgg8i009jtgti3** → **Edit**
 
 4. **Update Callback URLs** (add your Amplify URL):
+
    ```
    https://main.XXXXX.amplifyapp.com/
    https://your-render-backend-url.onrender.com/api/auth/callback
@@ -190,6 +198,7 @@ Update your Render backend environment variable:
    ```
 
 5. **Update Sign out URLs** (add your Amplify URL):
+
    ```
    https://main.XXXXX.amplifyapp.com/
    https://your-render-backend-url.onrender.com/
@@ -217,6 +226,7 @@ Update your Render backend environment variable:
 4. **Wait for SSL certificate** (5-30 minutes)
 
 **Example:**
+
 ```
 www.kindcrew.com → Your frontend
 api.kindcrew.com → Your backend (configure in Render)
@@ -227,17 +237,21 @@ api.kindcrew.com → Your backend (configure in Render)
 ## 📊 Monitoring Your App
 
 ### View Build Logs
+
 - **Amplify Console** → Your app → **Build history**
 - Click any build to see detailed logs
 
 ### View Real-Time Logs
+
 - **Amplify Console** → Your app → **Monitoring** → **Logs**
 
 ### View Metrics
+
 - **Amplify Console** → Your app → **Monitoring**
 - See: Requests, Data transfer, Errors, Latency
 
 ### Performance Monitoring
+
 - Amplify includes CloudFront CDN
 - Global edge locations for fast loading
 - Automatic image optimization
@@ -249,13 +263,14 @@ api.kindcrew.com → Your backend (configure in Render)
 **Already configured!** Every push to your selected branch auto-deploys.
 
 ```
-You push to GitHub → Amplify detects push → 
+You push to GitHub → Amplify detects push →
 Builds frontend → Deploys to CDN → Live in 5 mins! ✅
 ```
 
 ### Disable Auto-Deploy (Optional)
 
 If you want manual control:
+
 1. **Amplify Console** → Your app → **Build settings**
 2. **Edit** → Uncheck "Automatically deploy updates"
 
@@ -268,16 +283,19 @@ If you want manual control:
 ## 💰 Cost Estimate (AWS Amplify)
 
 ### Free Tier (12 months):
+
 - ✅ **1000 build minutes/month** - Free
 - ✅ **15 GB data transfer out/month** - Free
 - ✅ **5 GB storage** - Free
 
 ### After Free Tier:
+
 - **Build minutes:** $0.01/minute (~₹0.83/minute)
 - **Hosting:** $0.15/GB data transfer out (~₹12.45/GB)
 - **Storage:** $0.023/GB/month (~₹1.90/GB/month)
 
 ### Typical Monthly Cost:
+
 - **Low traffic:** $0-5/month (₹0-415/month)
 - **Medium traffic:** $5-20/month (₹415-1660/month)
 - **High traffic:** $20-100/month (₹1660-8300/month)
@@ -288,18 +306,19 @@ If you want manual control:
 
 ## 🆚 Amplify vs Vercel
 
-| Feature | AWS Amplify | Vercel |
-|---------|-------------|--------|
-| **Free Tier** | 1000 build mins | 100 GB bandwidth |
-| **Cost** | Pay per use | Free for hobby |
-| **Next.js Support** | ✅ Good | ✅ Excellent |
-| **AWS Integration** | ✅✅ Native | ❌ External |
-| **Setup Time** | 10 minutes | 5 minutes |
-| **Custom Domain** | ✅ Free SSL | ✅ Free SSL |
-| **Global CDN** | CloudFront | Vercel Edge |
-| **Region Control** | ✅ Choose region | ❌ Auto |
+| Feature             | AWS Amplify      | Vercel           |
+| ------------------- | ---------------- | ---------------- |
+| **Free Tier**       | 1000 build mins  | 100 GB bandwidth |
+| **Cost**            | Pay per use      | Free for hobby   |
+| **Next.js Support** | ✅ Good          | ✅ Excellent     |
+| **AWS Integration** | ✅✅ Native      | ❌ External      |
+| **Setup Time**      | 10 minutes       | 5 minutes        |
+| **Custom Domain**   | ✅ Free SSL      | ✅ Free SSL      |
+| **Global CDN**      | CloudFront       | Vercel Edge      |
+| **Region Control**  | ✅ Choose region | ❌ Auto          |
 
 **For your project:** Amplify is better because:
+
 - Your backend is on AWS (Cognito, DynamoDB, Bedrock)
 - Easy integration with AWS services
 - More control over region (ap-south-1)
@@ -311,6 +330,7 @@ If you want manual control:
 ### Issue: "Build failed - Module not found"
 
 **Solution:** Make sure `frontend/package.json` has all dependencies:
+
 ```powershell
 cd frontend
 npm install
@@ -322,6 +342,7 @@ git push
 ### Issue: "API calls failing with CORS error"
 
 **Solution:** Update backend `FRONTEND_URL` environment variable in Render:
+
 ```bash
 FRONTEND_URL=https://main.XXXXX.amplifyapp.com
 ```
@@ -329,6 +350,7 @@ FRONTEND_URL=https://main.XXXXX.amplifyapp.com
 ### Issue: "Environment variables not updating"
 
 **Solution:** After changing variables in Amplify:
+
 1. **Amplify Console** → Your app
 2. Click **"Redeploy this version"**
 3. Wait 3-5 minutes
@@ -336,6 +358,7 @@ FRONTEND_URL=https://main.XXXXX.amplifyapp.com
 ### Issue: "Cognito login redirects to localhost"
 
 **Solution:** Update `NEXT_PUBLIC_COGNITO_REDIRECT_URI` in Amplify:
+
 ```bash
 NEXT_PUBLIC_COGNITO_REDIRECT_URI=https://your-render-backend-url.onrender.com/api/auth/callback
 ```
@@ -351,15 +374,18 @@ Subsequent builds: 2-4 minutes
 ## 🔐 Security Best Practices
 
 ### 1. Environment Variables
+
 - ✅ All `NEXT_PUBLIC_*` variables are safe to expose
 - ⚠️ Never put secrets in `NEXT_PUBLIC_*` variables
 - ✅ Amplify encrypts environment variables
 
 ### 2. HTTPS
+
 - ✅ Automatic HTTPS with free SSL certificate
 - ✅ Redirects HTTP → HTTPS automatically
 
 ### 3. Headers
+
 Add security headers in `next.config.ts`:
 
 ```typescript
@@ -367,19 +393,19 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
+            key: "X-Frame-Options",
+            value: "DENY",
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
           },
         ],
       },
@@ -395,12 +421,14 @@ const nextConfig: NextConfig = {
 As your traffic grows:
 
 ### Use Amplify's Built-in Features:
+
 1. **CloudFront CDN** - Automatically enabled
 2. **Image Optimization** - Automatic
 3. **Caching** - Configured via headers
 4. **Rate Limiting** - Configure in AWS WAF
 
 ### Add AWS WAF (Optional):
+
 - Protect against DDoS
 - Rate limiting per IP
 - Geographic restrictions
@@ -489,6 +517,7 @@ npm start
 ---
 
 **Next Steps:**
+
 1. Deploy backend to Render: [DEPLOY_RENDER.md](./DEPLOY_RENDER.md)
 2. Deploy frontend to Amplify: Follow this guide
 3. Test everything!

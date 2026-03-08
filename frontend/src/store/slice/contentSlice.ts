@@ -56,7 +56,10 @@ export type ContentSlice = {
     contentData: Record<string, unknown>,
   ) => Promise<ContentItem | null>;
   fetchUserContent: (userId: string) => Promise<ContentItem[]>;
-  fetchContentById: (userId: string, contentId: string) => Promise<ContentItem | null>;
+  fetchContentById: (
+    userId: string,
+    contentId: string,
+  ) => Promise<ContentItem | null>;
   selectContent: (content: ContentItem) => void;
   setGeneratedContent: (content: Record<string, unknown> | null) => void;
   clearContent: () => void;
@@ -103,7 +106,7 @@ export const createContentSlice: StateCreator<
         set({ loading: false, error: errorMsg });
         return null;
       }
-      
+
       const result = await createContentFromIdea(token, ideaId, options);
       if (result.success && result.content) {
         const newContent = result.content as ContentItem;
@@ -140,7 +143,7 @@ export const createContentSlice: StateCreator<
         set({ loading: false, error: errorMsg });
         return null;
       }
-      
+
       const result = await createContentFromManual(token, contentData);
       if (result.success && result.content) {
         const newContent = result.content as ContentItem;
@@ -177,7 +180,7 @@ export const createContentSlice: StateCreator<
         set({ loading: false, error: errorMsg });
         return [];
       }
-      
+
       const result = await getUserContent(token);
       if (result.success && result.content) {
         const content = result.content as ContentItem[];
@@ -211,7 +214,7 @@ export const createContentSlice: StateCreator<
         set({ loading: false, error: errorMsg });
         return null;
       }
-      
+
       const result = await getContentById(token, contentId);
       if (result.success && result.content) {
         const content = result.content as ContentItem;
