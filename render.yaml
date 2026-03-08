@@ -64,6 +64,7 @@ services:
       - key: FRONTEND_URL
         sync: false # MUST set this manually in Render dashboard with your Amplify URL
 
+
 # Optional: Frontend service (uncomment if you want to deploy frontend on Render too)
 # - type: web
 #   name: kindcrew-frontend
