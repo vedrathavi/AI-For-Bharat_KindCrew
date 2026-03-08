@@ -81,6 +81,12 @@ function formatDisplayValue(value: unknown): string {
   }
 }
 
+function asNonEmptyString(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export default function ContentPage() {
   const router = useRouter();
   const { isAuthenticated, authReady, userInfo, token } = useAuth();
@@ -193,6 +199,37 @@ export default function ContentPage() {
     return Object.entries(generatedContent.scripts);
   }, [generatedContent]);
 
+  const generatedOutline = useMemo(() => {
+    if (!generatedContent?.outline || typeof generatedContent.outline !== "object" || Array.isArray(generatedContent.outline)) {
+      return null;
+    }
+
+    return generatedContent.outline as Record<string, unknown>;
+  }, [generatedContent]);
+
+  const outlineSections = useMemo(() => {
+    if (!generatedOutline || !Array.isArray(generatedOutline.sections)) {
+      return [] as unknown[];
+    }
+
+    return generatedOutline.sections;
+  }, [generatedOutline]);
+
+  const generatedDraftText = useMemo(() => {
+    const draft = generatedContent?.draft;
+
+    if (typeof draft === "string") {
+      return draft;
+    }
+
+    if (draft && typeof draft === "object" && "text" in draft) {
+      const text = (draft as { text?: unknown }).text;
+      return typeof text === "string" ? text : "";
+    }
+
+    return "";
+  }, [generatedContent]);
+
   // Deduplicate merged saved content - prefer server content over local
   const mergedSavedContent = useMemo(() => {
     const serverContentIds = new Set(contentList.map(item => item.contentId));
@@ -241,29 +278,34 @@ export default function ContentPage() {
     if (!generatedContent || !userInfo?.userId) return;
 
     const localKey = `kindcrew-content-local-${userInfo.userId}`;
-    
-    // Generate or use existing contentId
-    const contentIdToUse = generatedContent.contentId || `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    
+
+    // Generate or use existing contentId, but only if it is a valid non-empty string.
+    const contentIdToUse =
+      asNonEmptyString(generatedContent.contentId) ||
+      `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    const topicFromGenerated = asNonEmptyString(generatedContent.topic);
+    const contentTypeFromGenerated = asNonEmptyString(generatedContent.contentType);
+
     // Check if this content is already saved (prevent duplicates)
     const alreadySaved = localSavedContent.some(item => item.contentId === contentIdToUse);
-    
+
     if (alreadySaved) {
       setSaveMessage("This content is already saved in your library.");
       setTimeout(() => setSaveMessage(""), 1800);
       return;
     }
-    
+
     const nextItem: SavedContentItem = {
       ...(generatedContent as SavedContentItem),
       contentId: contentIdToUse,
       topic:
-        generatedContent.topic ||
+        topicFromGenerated ||
         manualInput.topic ||
         selectedIdea?.topic ||
         selectedIdea?.title ||
         "Untitled Content",
-      contentType: generatedContent.contentType || manualInput.contentType || "post",
+      contentType: contentTypeFromGenerated || manualInput.contentType || "post",
       createdAt: new Date().toISOString(),
       source: "local",
     };
@@ -506,10 +548,10 @@ export default function ContentPage() {
                           }}
                         >
                           <p className="text-sm font-semibold truncate" style={{ color: "var(--color-text)" }}>
-                            {safeText(idea.topic) || safeText(idea.title) || "Untitled Idea"}
+                            {safeText(idea.topic) || "Untitled Idea"}
                           </p>
                           <p className="text-xs mt-1 line-clamp-2" style={{ color: "var(--color-text-secondary)" }}>
-                            {safeText(idea.angle) || safeText(idea.description) || "No angle added"}
+                            {safeText(idea.angle) || safeText(idea.targetAudience) || "No angle added"}
                           </p>
                           {typeof idea.scores?.virality === "number" && (
                             <span className="inline-block mt-2 text-xs px-2 py-1 rounded" style={{ ...baseFieldStyle, color: "var(--color-text-secondary)" }}>
@@ -765,7 +807,7 @@ export default function ContentPage() {
                       Generated Output
                     </p>
                     <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-                      Topic: {generatedContent.topic || manualInput.topic || selectedIdea?.topic || "-"}
+                      Topic: {asNonEmptyString(generatedContent.topic) || manualInput.topic || selectedIdea?.topic || "-"}
                     </p>
                   </div>
                   <button
@@ -777,14 +819,14 @@ export default function ContentPage() {
                   </button>
                 </div>
 
-                {generatedContent.outline && (
+                {generatedOutline && (
                   <div className="mb-5 rounded-xl p-4" style={baseFieldStyle}>
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
                         Outline
                       </p>
                       <button
-                        onClick={() => copyContent("outline", generatedContent.outline)}
+                        onClick={() => copyContent("outline", generatedOutline)}
                         className="text-xs px-2.5 py-1.5 rounded-md inline-flex items-center gap-1"
                         style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
                       >
@@ -792,21 +834,21 @@ export default function ContentPage() {
                         {copiedBlock === "outline" ? "Copied" : "Copy All"}
                       </button>
                     </div>
-                    {generatedContent.outline.title && (
+                    {asNonEmptyString(generatedOutline.title) && (
                       <p className="text-sm mb-2" style={{ color: "var(--color-text-secondary)" }}>
-                        <span style={{ color: "var(--color-text)" }}>Title:</span> {generatedContent.outline.title}
+                        <span style={{ color: "var(--color-text)" }}>Title:</span> {asNonEmptyString(generatedOutline.title)}
                       </p>
                     )}
-                    {generatedContent.outline.hook && (
+                    {asNonEmptyString(generatedOutline.hook) && (
                       <p className="text-sm mb-2" style={{ color: "var(--color-text-secondary)" }}>
-                        <span style={{ color: "var(--color-text)" }}>Hook:</span> {generatedContent.outline.hook}
+                        <span style={{ color: "var(--color-text)" }}>Hook:</span> {asNonEmptyString(generatedOutline.hook)}
                       </p>
                     )}
-                    {Array.isArray(generatedContent.outline.sections) && generatedContent.outline.sections.length > 0 && (
+                    {outlineSections.length > 0 && (
                       <div className="mb-2">
                         <p className="text-sm font-medium mb-1" style={{ color: "var(--color-text)" }}>Sections</p>
                         <ul className="space-y-1">
-                          {generatedContent.outline.sections.map((point: unknown, index: number) => (
+                          {outlineSections.map((point: unknown, index: number) => (
                             <li key={index} className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
                               {index + 1}. {formatDisplayValue(point)}
                             </li>
@@ -814,29 +856,22 @@ export default function ContentPage() {
                         </ul>
                       </div>
                     )}
-                    {generatedContent.outline.cta && (
+                    {asNonEmptyString(generatedOutline.cta) && (
                       <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                        <span style={{ color: "var(--color-text)" }}>CTA:</span> {generatedContent.outline.cta}
+                        <span style={{ color: "var(--color-text)" }}>CTA:</span> {asNonEmptyString(generatedOutline.cta)}
                       </p>
                     )}
                   </div>
                 )}
 
-                {(typeof generatedContent.draft === "string" || typeof generatedContent.draft?.text === "string") && (
+                {generatedDraftText && (
                   <div className="mb-5 rounded-xl p-4" style={baseFieldStyle}>
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
                         Draft
                       </p>
                       <button
-                        onClick={() =>
-                          copyContent(
-                            "draft",
-                            typeof generatedContent.draft === "string"
-                              ? generatedContent.draft
-                              : generatedContent.draft?.text || ""
-                          )
-                        }
+                        onClick={() => copyContent("draft", generatedDraftText)}
                         className="text-xs px-2.5 py-1.5 rounded-md inline-flex items-center gap-1"
                         style={{ backgroundColor: "var(--color-surface-hover)", color: "var(--color-text)" }}
                       >
@@ -845,9 +880,7 @@ export default function ContentPage() {
                       </button>
                     </div>
                     <p className="text-sm whitespace-pre-wrap" style={{ color: "var(--color-text-secondary)" }}>
-                      {typeof generatedContent.draft === "string"
-                        ? generatedContent.draft
-                        : generatedContent.draft?.text}
+                      {generatedDraftText}
                     </p>
                   </div>
                 )}

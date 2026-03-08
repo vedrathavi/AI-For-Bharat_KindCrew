@@ -96,7 +96,7 @@ export const createContentSlice: StateCreator<
     set({ loading: true, error: null });
     try {
       // Get token from auth state
-      const state = get() as AuthState;
+      const state = get() as unknown as AuthState;
       const token = state.token;
       if (!token) {
         const errorMsg = "No authentication token available";
@@ -133,7 +133,7 @@ export const createContentSlice: StateCreator<
     set({ loading: true, error: null });
     try {
       // Get token from auth state
-      const state = get() as AuthState;
+      const state = get() as unknown as AuthState;
       const token = state.token;
       if (!token) {
         const errorMsg = "No authentication token available";
@@ -170,7 +170,7 @@ export const createContentSlice: StateCreator<
     set({ loading: true, error: null });
     try {
       // Get token from auth state
-      const state = get() as AuthState;
+      const state = get() as unknown as AuthState;
       const token = state.token;
       if (!token) {
         const errorMsg = "No authentication token available";
@@ -204,7 +204,7 @@ export const createContentSlice: StateCreator<
     set({ loading: true, error: null });
     try {
       // Get token from auth state
-      const state = get() as AuthState;
+      const state = get() as unknown as AuthState;
       const token = state.token;
       if (!token) {
         const errorMsg = "No authentication token available";

@@ -61,7 +61,6 @@ export const getCognitoUser = async (idToken) => {
 
     const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
 
-    console.log("✅ User extracted from ID token:", payload.email);
     let identityProvider = "cognito";
     if (payload.identities && Array.isArray(payload.identities)) {
       // User logged in via federated provider (Google, Facebook, etc.)
