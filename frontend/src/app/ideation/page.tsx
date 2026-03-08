@@ -14,6 +14,18 @@ export default function IdeationPage() {
   const [recentIdeas, setRecentIdeas] = useState<IdeaBrief[]>([]);
   const [ideasLoading, setIdeasLoading] = useState(false);
 
+  const safeText = (val: any): string => {
+    if (val == null) return "";
+    if (typeof val === "object") {
+      try {
+        return JSON.stringify(val);
+      } catch {
+        return String(val);
+      }
+    }
+    return String(val);
+  };
+
   const formatScore = (score: number | string | undefined) => {
     if (typeof score === "number") return score.toFixed(1);
     if (typeof score === "string") {
@@ -209,7 +221,7 @@ export default function IdeationPage() {
                         color: "var(--color-text-secondary)",
                       }}
                     >
-                      {idea.platform}
+                      {safeText(idea.platform)}
                     </span>
                     <span
                       className="text-xs font-semibold"
@@ -222,7 +234,7 @@ export default function IdeationPage() {
                     className="text-sm font-medium line-clamp-2"
                     style={{ color: "var(--color-text)" }}
                   >
-                    {idea.topic}
+                    {safeText(idea.topic)}
                   </p>
                 </button>
               ))}

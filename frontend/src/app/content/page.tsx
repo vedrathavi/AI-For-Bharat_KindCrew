@@ -94,6 +94,18 @@ export default function ContentPage() {
     fetchUserContent,
     setGeneratedContent,
   } = useContent();
+
+  const safeText = (val: any): string => {
+    if (val == null) return "";
+    if (typeof val === "object") {
+      try {
+        return JSON.stringify(val);
+      } catch {
+        return String(val);
+      }
+    }
+    return String(val);
+  };
   const [savedIdeas, setSavedIdeas] = useState<IdeaBrief[]>([]);
   const [loadingIdeas, setLoadingIdeas] = useState(false);
 
@@ -494,10 +506,10 @@ export default function ContentPage() {
                           }}
                         >
                           <p className="text-sm font-semibold truncate" style={{ color: "var(--color-text)" }}>
-                            {idea.topic || idea.title || "Untitled Idea"}
+                            {safeText(idea.topic) || safeText(idea.title) || "Untitled Idea"}
                           </p>
                           <p className="text-xs mt-1 line-clamp-2" style={{ color: "var(--color-text-secondary)" }}>
-                            {idea.angle || idea.description || "No angle added"}
+                            {safeText(idea.angle) || safeText(idea.description) || "No angle added"}
                           </p>
                           {typeof idea.scores?.virality === "number" && (
                             <span className="inline-block mt-2 text-xs px-2 py-1 rounded" style={{ ...baseFieldStyle, color: "var(--color-text-secondary)" }}>

@@ -33,6 +33,18 @@ export default function ZeroIdeaPage() {
     clearIdeas,
   } = useIdeation();
 
+  const renderValue = (val: any) => {
+    if (val == null) return "";
+    if (typeof val === "object") {
+      try {
+        return JSON.stringify(val);
+      } catch {
+        return String(val);
+      }
+    }
+    return String(val);
+  };
+
   const handleGenerate = async () => {
     if (!userInfo?.userId || !token) {
       return;
@@ -281,7 +293,7 @@ export default function ZeroIdeaPage() {
                         backgroundColor: "var(--color-surface-hover)",
                       }}
                     >
-                      {idea.platform}
+                      {renderValue(idea.platform)}
                     </span>
                     <span
                       className={`text-2xl font-bold ${getScoreColor(idea.scores.overall)}`}
@@ -295,7 +307,7 @@ export default function ZeroIdeaPage() {
                     className="text-lg font-semibold mb-2"
                     style={{ color: "var(--color-text)" }}
                   >
-                    {idea.title}
+                    {renderValue(idea.title)}
                   </h3>
 
                   {/* Description */}
@@ -303,7 +315,7 @@ export default function ZeroIdeaPage() {
                     className="text-sm mb-4"
                     style={{ color: "var(--color-text-secondary)" }}
                   >
-                    {idea.description}
+                    {renderValue(idea.description)}
                   </p>
 
                   {/* Format & Angle */}
@@ -315,7 +327,7 @@ export default function ZeroIdeaPage() {
                         color: "var(--color-text-secondary)",
                       }}
                     >
-                      {idea.format}
+                      {renderValue(idea.format)}
                     </span>
                     <span
                       className="text-xs px-2 py-1 rounded"
@@ -324,7 +336,7 @@ export default function ZeroIdeaPage() {
                         color: "var(--color-text-secondary)",
                       }}
                     >
-                      {idea.angle}
+                      {renderValue(idea.angle)}
                     </span>
                   </div>
 

@@ -30,6 +30,19 @@ function toErrorMessage(error: unknown): string {
   return "Something went wrong";
 }
 
+// helper for rendering arbitrary values safely
+function safeText(val: any): string {
+  if (val == null) return "";
+  if (typeof val === "object") {
+    try {
+      return JSON.stringify(val);
+    } catch {
+      return String(val);
+    }
+  }
+  return String(val);
+}
+
 // Helper to safely format scores
 const formatScore = (score: number | string | undefined): string => {
   if (typeof score === "number") return score.toFixed(1);
@@ -472,7 +485,7 @@ export default function MyIdeasPage() {
                       className="font-bold text-base leading-snug break-words"
                       style={{ color: "var(--color-text)" }}
                     >
-                      {idea.topic || "Untitled idea"}
+                      {safeText(idea.topic) || "Untitled idea"}
                     </h3>
                   </div>
 
@@ -489,7 +502,7 @@ export default function MyIdeasPage() {
                         }}
                       >
                         <div className="leading-7">
-                          <ReactMarkdown>{idea.hookIdea}</ReactMarkdown>
+                          <ReactMarkdown>{safeText(idea.hookIdea)}</ReactMarkdown>
                         </div>
                       </div>
                     )}
@@ -504,7 +517,7 @@ export default function MyIdeasPage() {
                           borderColor: "var(--color-border)",
                         }}
                       >
-                        {idea.platform}
+                        {safeText(idea.platform)}
                       </span>
                       <span
                         className="px-3 py-1.5 text-xs font-medium rounded-xl max-w-full break-words border"
@@ -514,7 +527,7 @@ export default function MyIdeasPage() {
                           borderColor: "var(--color-border)",
                         }}
                       >
-                        {idea.contentType}
+                        {safeText(idea.contentType)}
                       </span>
                       <span
                         className="px-3 py-1.5 text-xs font-medium rounded-full max-w-full break-words border"
@@ -524,7 +537,7 @@ export default function MyIdeasPage() {
                           borderColor: "var(--color-border)",
                         }}
                       >
-                        {idea.targetAudience}
+                        {safeText(idea.targetAudience)}
                       </span>
                     </div>
 
@@ -663,7 +676,7 @@ export default function MyIdeasPage() {
                             style={{ color: "var(--color-text)" }}
                           >
                             <ReactMarkdown>
-                              {idea.angle || "No angle specified"}
+                              {safeText(idea.angle) || "No angle specified"}
                             </ReactMarkdown>
                           </div>
                         </div>

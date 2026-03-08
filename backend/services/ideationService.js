@@ -79,18 +79,45 @@ Target Audience: ${audience}
 Platforms: ${platforms.join(", ")}
 Goal: ${goal}
 
-For each idea, return a JSON object with:
-- title: content title
-- description: short description
-- platform: recommended platform
+For each idea, return a JSON object with exactly these keys:
+- title: content title (string)
+- description: short description (a single string, not an object or array)
+- platform: recommended platform (string)
 - format: content format (list-post, story, carousel, how-to, etc)
-- angle: unique angle
+- angle: unique angle (string)
 
+Do NOT nest additional objects or arrays inside any of the values – all values should be primitive strings.  
 Return as a valid JSON array. ONLY return the JSON array, no other text.`;
 
   const finalPrompt = `${prompt}${profileContext}`;
 
-  return await callBedrockAI(finalPrompt, "Generate ideas");
+  {
+    const rawIdeas = await callBedrockAI(finalPrompt, "Generate ideas");
+    // sanitize in case the model returned an object under description or other keys
+    if (Array.isArray(rawIdeas)) {
+      return rawIdeas.map((idea) => {
+        if (idea && typeof idea === "object") {
+          if (idea.description && typeof idea.description === "object") {
+            idea.description = JSON.stringify(idea.description);
+          }
+          if (idea.title && typeof idea.title === "object") {
+            idea.title = JSON.stringify(idea.title);
+          }
+          if (idea.angle && typeof idea.angle === "object") {
+            idea.angle = JSON.stringify(idea.angle);
+          }
+          if (idea.platform && typeof idea.platform === "object") {
+            idea.platform = JSON.stringify(idea.platform);
+          }
+          if (idea.format && typeof idea.format === "object") {
+            idea.format = JSON.stringify(idea.format);
+          }
+        }
+        return idea;
+      });
+    }
+    return rawIdeas;
+  }
 }
 
 /**

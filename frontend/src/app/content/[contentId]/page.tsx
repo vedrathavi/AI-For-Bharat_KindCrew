@@ -65,6 +65,18 @@ export default function ContentDetailPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("");
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
 
+  const safeText = (val: any): string => {
+    if (val == null) return "";
+    if (typeof val === "object") {
+      try {
+        return JSON.stringify(val);
+      } catch {
+        return String(val);
+      }
+    }
+    return String(val);
+  };
+
   useEffect(() => {
     if (authReady && !isAuthenticated()) {
       router.replace("/");
@@ -162,7 +174,7 @@ export default function ContentDetailPage() {
               </button>
             </div>
             <div style={{ color: "var(--color-text)" }}>
-              <ReactMarkdown>{variant.postText}</ReactMarkdown>
+              <ReactMarkdown>{safeText(variant.postText)}</ReactMarkdown>
             </div>
           </div>
         )}
@@ -204,7 +216,7 @@ export default function ContentDetailPage() {
                   </button>
                 </div>
                 <p className="text-sm" style={{ color: "var(--color-text)" }}>
-                  {tweet}
+                  {safeText(tweet)}
                 </p>
               </div>
             ))}
@@ -239,7 +251,7 @@ export default function ContentDetailPage() {
               </button>
             </div>
             <p className="text-sm whitespace-pre-wrap" style={{ color: "var(--color-text)" }}>
-              {variant.caption}
+              {safeText(variant.caption)}
             </p>
           </div>
         )}
@@ -281,7 +293,7 @@ export default function ContentDetailPage() {
                     color: "var(--color-text)",
                   }}
                 >
-                  {tag}
+                  {safeText(tag)}
                 </span>
               ))}
             </div>
@@ -362,7 +374,7 @@ export default function ContentDetailPage() {
                 className="text-3xl font-bold mb-2"
                 style={{ color: "var(--color-text)" }}
               >
-                {content.outline?.title || content.topic}
+                {safeText(content.outline?.title) || safeText(content.topic)}
               </h1>
               <p style={{ color: "var(--color-text-secondary)" }}>
                 Created {formatDate(content.createdAt)}
@@ -377,7 +389,7 @@ export default function ContentDetailPage() {
                   border: "1px solid var(--color-border)",
                 }}
               >
-                {content.contentType}
+                {safeText(content.contentType)}
               </span>
               <span
                 className="px-3 py-1 rounded-full text-sm font-medium"

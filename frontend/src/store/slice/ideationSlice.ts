@@ -79,12 +79,30 @@ export type IdeationSlice = {
   setError: (error: string) => void;
 };
 
+
+function sanitizeIdea(idea: any): any {
+  // convert any object-valued fields to JSON strings to avoid React render errors
+  if (!idea || typeof idea !== "object") return idea;
+  const clean: any = { ...idea };
+  ["title", "description", "angle", "platform", "format"].forEach((key) => {
+    if (clean[key] && typeof clean[key] === "object") {
+      try {
+        clean[key] = JSON.stringify(clean[key]);
+      } catch {
+        clean[key] = String(clean[key]);
+      }
+    }
+  });
+  return clean;
+}
+
 export const createIdeationSlice: StateCreator<
   IdeationSlice,
   [],
   [],
   IdeationSlice
 > = (set, get) => ({
+
   ideas: [],
   selectedIdea: null,
   loading: false,
@@ -107,13 +125,14 @@ export const createIdeationSlice: StateCreator<
     try {
       const result = await generateIdeas(userId, profile);
       if (result.success && result.ideas) {
+        const cleaned = (result.ideas as any[]).map(sanitizeIdea) as Idea[];
         set({
-          ideas: result.ideas as Idea[],
+          ideas: cleaned,
           profile,
           loading: false,
           error: null,
         });
-        return result.ideas as Idea[];
+        return cleaned;
       } else {
         const errorMsg = result.error || "Failed to generate ideas";
         set({ loading: false, error: errorMsg });
@@ -151,12 +170,13 @@ export const createIdeationSlice: StateCreator<
       });
 
       if (result.success && result.ideas) {
+        const cleaned = (result.ideas as any[]).map(sanitizeIdea) as Idea[];
         set({
-          ideas: result.ideas as Idea[],
+          ideas: cleaned,
           loading: false,
           error: null,
         });
-        return result.ideas as Idea[];
+        return cleaned;
       }
 
       const errorMsg = result.error || "Failed to refine idea";
