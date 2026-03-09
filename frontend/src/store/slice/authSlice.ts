@@ -1,5 +1,6 @@
 import { StateCreator } from "zustand";
 import { extractUserFromToken } from "@/lib/jwtDecode";
+import { API_URL } from "@/lib/constants";
 
 type UserInfo = {
   userId: string;
@@ -104,7 +105,10 @@ export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (
 
       // Call backend logout to destroy session and redirect to Cognito logout
       // This will clear Cognito session cookies and redirect back to login
-      window.location.href = "http://localhost:5000/api/auth/logout";
+      const logoutUrl = API_URL
+        ? `${API_URL.replace(/\/$/, "")}/api/auth/logout`
+        : "/api/auth/logout";
+      window.location.href = logoutUrl;
     } catch (error) {
       console.error("Logout error:", error);
       // Fallback: clear local state and redirect manually

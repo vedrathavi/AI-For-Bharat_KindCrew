@@ -3,8 +3,8 @@
  * Publishing API client
  * communicates with backend scheduling endpoints
  */
+import { API_URL } from "@/lib/constants";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const API_BASE = `${API_URL.replace(/\/$/, "").replace(/\/api$/, "")}/api`;
 
 export type SchedulePayload = {

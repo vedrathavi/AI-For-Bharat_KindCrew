@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { buildApiUrl } from "@/lib/constants";
 
 export default function HomePage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function HomePage() {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const backendLoginUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/login`;
+      const backendLoginUrl = buildApiUrl("/api/auth/login");
       window.location.href = backendLoginUrl;
     } catch (error) {
       console.error("Login error:", error);

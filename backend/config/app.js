@@ -19,8 +19,13 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // CORS configuration
+const configuredOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: configuredOrigins.length > 0 ? configuredOrigins : true,
   credentials: true,
   optionsSuccessStatus: 200,
 };

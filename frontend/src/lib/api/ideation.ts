@@ -1,6 +1,7 @@
 // Phase 1: Ideation & Research API Client
+import { API_URL } from "@/lib/constants";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE_URL = API_URL || "";
 
 async function parseErrorMessage(response: Response, fallbackMessage: string) {
   try {
