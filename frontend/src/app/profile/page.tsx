@@ -87,29 +87,31 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 gap-4">
         <div className="p-6 rounded-2xl border border-border bg-surface">
           <div className="flex items-start gap-5 flex-col sm:flex-row">
-          {userInfo?.profileImage ? (
-            <img
-              src={userInfo.profileImage}
-              alt={userInfo.name}
-              className="w-24 h-24 rounded-full ring-2 ring-gray-700"
-            />
-          ) : (
-            <div
-              className="w-24 h-24 rounded-full flex items-center justify-center text-3xl"
-              style={{ backgroundColor: "var(--color-surface-hover)" }}
-            >
-              <span style={{ color: "var(--color-text)" }}>
-                {(userInfo?.givenName || userInfo?.name)?.charAt(0) || "U"}
-              </span>
-            </div>
-          )}
+            {userInfo?.profileImage ? (
+              <img
+                src={userInfo.profileImage}
+                alt={userInfo.name}
+                className="w-24 h-24 rounded-full ring-2 ring-gray-700"
+              />
+            ) : (
+              <div
+                className="w-24 h-24 rounded-full flex items-center justify-center text-3xl"
+                style={{ backgroundColor: "var(--color-surface-hover)" }}
+              >
+                <span style={{ color: "var(--color-text)" }}>
+                  {(userInfo?.givenName || userInfo?.name)?.charAt(0) || "U"}
+                </span>
+              </div>
+            )}
             <div className="flex-1">
               <h2 className="text-2xl font-semibold">
                 {userInfo?.givenName && userInfo?.familyName
                   ? `${userInfo.givenName} ${userInfo.familyName}`
                   : userInfo?.name || "User"}
               </h2>
-              <p className="text-gray-400 mt-1">{userInfo?.email || "No email"}</p>
+              <p className="text-gray-400 mt-1">
+                {userInfo?.email || "No email"}
+              </p>
 
               <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="rounded-xl border border-border bg-background p-3">
@@ -152,7 +154,9 @@ export default function ProfilePage() {
               </p>
             </div>
             <div className="rounded-xl border border-border bg-background p-4">
-              <p className="text-xs text-gray-400 mb-1">Content Strategy Type</p>
+              <p className="text-xs text-gray-400 mb-1">
+                Content Strategy Type
+              </p>
               <p className="text-base font-medium text-gray-100 capitalize">
                 {creatorProfile.strategy?.contentStrategy || "N/A"}
               </p>
@@ -178,7 +182,8 @@ export default function ProfilePage() {
                   </span>
                 </div>
               ))}
-              {(!creatorProfile.platforms || creatorProfile.platforms.length === 0) && (
+              {(!creatorProfile.platforms ||
+                creatorProfile.platforms.length === 0) && (
                 <p className="text-sm text-gray-400">No platforms added yet.</p>
               )}
             </div>
@@ -190,7 +195,8 @@ export default function ProfilePage() {
               <div className="p-4 rounded-xl border border-border bg-background">
                 <p className="text-xs text-gray-400">Primary Goal</p>
                 <p className="text-sm text-gray-100 capitalize mt-1">
-                  {creatorProfile.goals?.primaryGoal?.replace("-", " ") || "N/A"}
+                  {creatorProfile.goals?.primaryGoal?.replace("-", " ") ||
+                    "N/A"}
                 </p>
               </div>
               <div className="p-4 rounded-xl border border-border bg-background">
@@ -216,16 +222,20 @@ export default function ProfilePage() {
                   <p className="text-xs text-gray-400 mb-2">Tones</p>
                   <div className="flex flex-wrap gap-2">
                     {(creatorProfile.preferences.tones || []).length > 0 ? (
-                      (creatorProfile.preferences.tones || []).map((tone, index) => (
-                        <span
-                          key={`${tone}-${index}`}
-                          className="px-3 py-1 rounded-lg text-sm border border-border bg-surface text-gray-200"
-                        >
-                          {tone}
-                        </span>
-                      ))
+                      (creatorProfile.preferences.tones || []).map(
+                        (tone, index) => (
+                          <span
+                            key={`${tone}-${index}`}
+                            className="px-3 py-1 rounded-lg text-sm border border-border bg-surface text-gray-200"
+                          >
+                            {tone}
+                          </span>
+                        ),
+                      )
                     ) : (
-                      <span className="text-sm text-gray-400">No tones selected</span>
+                      <span className="text-sm text-gray-400">
+                        No tones selected
+                      </span>
                     )}
                   </div>
                 </div>
@@ -234,16 +244,20 @@ export default function ProfilePage() {
                   <p className="text-xs text-gray-400 mb-2">Formats</p>
                   <div className="flex flex-wrap gap-2">
                     {(creatorProfile.preferences.formats || []).length > 0 ? (
-                      (creatorProfile.preferences.formats || []).map((format, index) => (
-                        <span
-                          key={`${format}-${index}`}
-                          className="px-3 py-1 rounded-lg text-sm border border-border bg-surface text-gray-200"
-                        >
-                          {format}
-                        </span>
-                      ))
+                      (creatorProfile.preferences.formats || []).map(
+                        (format, index) => (
+                          <span
+                            key={`${format}-${index}`}
+                            className="px-3 py-1 rounded-lg text-sm border border-border bg-surface text-gray-200"
+                          >
+                            {format}
+                          </span>
+                        ),
+                      )
                     ) : (
-                      <span className="text-sm text-gray-400">No formats selected</span>
+                      <span className="text-sm text-gray-400">
+                        No formats selected
+                      </span>
                     )}
                   </div>
                 </div>
@@ -253,7 +267,8 @@ export default function ProfilePage() {
                 <div className="rounded-xl border border-border bg-background p-3">
                   <p className="text-xs text-gray-400">CTA Strength</p>
                   <p className="text-sm text-gray-100 capitalize mt-1">
-                    {creatorProfile.preferences.constraints?.ctaStrength || "N/A"}
+                    {creatorProfile.preferences.constraints?.ctaStrength ||
+                      "N/A"}
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-background p-3">
@@ -296,7 +311,9 @@ export default function ProfilePage() {
                       {competitor.url || "No URL"}
                     </p>
                     {competitor.notes && (
-                      <p className="text-sm text-gray-300 mt-2">{competitor.notes}</p>
+                      <p className="text-sm text-gray-300 mt-2">
+                        {competitor.notes}
+                      </p>
                     )}
                   </div>
                 ))}
@@ -341,7 +358,9 @@ export default function ProfilePage() {
                 : "Onboarding Incomplete"}
             </span>
             {profileLoading && (
-              <span className="text-sm text-gray-400">Refreshing profile...</span>
+              <span className="text-sm text-gray-400">
+                Refreshing profile...
+              </span>
             )}
           </div>
         </div>
@@ -352,7 +371,8 @@ export default function ProfilePage() {
           </div>
           <p className="text-lg mb-2 text-gray-200">No creator profile found</p>
           <p className="text-sm text-gray-400 mb-6">
-            Complete onboarding once to unlock ideation, planning, and insights tailored to your niche.
+            Complete onboarding once to unlock ideation, planning, and insights
+            tailored to your niche.
           </p>
           <button
             onClick={() => router.push("/onboarding")}

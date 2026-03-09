@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,7 +9,14 @@ import { addCalendarEvent } from "@/lib/api/publishing";
 // UI libraries
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { FiCalendar, FiClock, FiEdit, FiCheck, FiX, FiPlus } from "react-icons/fi";
+import {
+  FiCalendar,
+  FiClock,
+  FiEdit,
+  FiCheck,
+  FiX,
+  FiPlus,
+} from "react-icons/fi";
 
 export default function PlanningPage() {
   const { token, isAuthenticated, authReady } = useAuth();
@@ -43,7 +49,11 @@ export default function PlanningPage() {
   // library items state (could come from API later)
   const initialReady = [
     { id: "1", title: "Your SaaS is Leaking Money", platform: "Twitter" },
-    { id: "2", title: "How I use AI for content creation", platform: "YouTube" },
+    {
+      id: "2",
+      title: "How I use AI for content creation",
+      platform: "YouTube",
+    },
   ];
   const initialDrafts = [
     { id: "3", title: "Idea about AI and creativity", platform: "Blog" },
@@ -62,7 +72,9 @@ export default function PlanningPage() {
 
     // simple client validation
     if (!newContentTitle || !newPlatform || !newDate) {
-      alert("Please fill in content title, platform, and date/time before scheduling.");
+      alert(
+        "Please fill in content title, platform, and date/time before scheduling.",
+      );
       return;
     }
 
@@ -100,14 +112,10 @@ export default function PlanningPage() {
     }
   };
 
-
-
-
   // identify schedules for selected date
   const schedulesForDate = schedules.filter(
     (s) =>
-      new Date(s.scheduledTime).toDateString() ===
-      selectedDate.toDateString(),
+      new Date(s.scheduledTime).toDateString() === selectedDate.toDateString(),
   );
 
   return (
@@ -117,7 +125,9 @@ export default function PlanningPage() {
           <FiCalendar className="text-gray-400" size={32} />
           <div>
             <h1 className="text-3xl font-bold">Publishing & Planning</h1>
-            <p className="text-gray-400 mt-1">Schedule your content and post consistently.</p>
+            <p className="text-gray-400 mt-1">
+              Schedule your content and post consistently.
+            </p>
           </div>
         </div>
         <button
@@ -139,7 +149,7 @@ export default function PlanningPage() {
           <div className="w-full h-full flex justify-center items-center">
             <Calendar
               onChange={(val) => {
-                if (val && !(Array.isArray(val))) {
+                if (val && !Array.isArray(val)) {
                   setSelectedDate(val as Date);
                 }
               }}
@@ -182,13 +192,19 @@ export default function PlanningPage() {
           <div className="flex items-center gap-2 mb-3">
             <FiClock className="text-gray-400" size={20} />
             <p className="font-semibold text-lg">
-              Scheduled for <span className="text-gray-300">{formatLongDate(selectedDate)}</span>
+              Scheduled for{" "}
+              <span className="text-gray-300">
+                {formatLongDate(selectedDate)}
+              </span>
             </p>
           </div>
           <p className="text-gray-400 text-sm mb-4">
-            {schedulesForDate.length} post{schedulesForDate.length === 1 ? '' : 's'} scheduled.
+            {schedulesForDate.length} post
+            {schedulesForDate.length === 1 ? "" : "s"} scheduled.
           </p>
-          {schedulesForDate.length === 0 && <p className="text-gray-400">No posts scheduled.</p>}
+          {schedulesForDate.length === 0 && (
+            <p className="text-gray-400">No posts scheduled.</p>
+          )}
           {schedulesForDate.map((s) => (
             <div
               key={s.scheduleId}
@@ -286,7 +302,9 @@ export default function PlanningPage() {
           <button
             onClick={() => setActiveTab("ready")}
             className={`flex items-center gap-2 pb-2 transition-colors ${
-              activeTab === "ready" ? "border-b-2 border-gray-500 text-white" : "text-gray-400 hover:text-gray-300"
+              activeTab === "ready"
+                ? "border-b-2 border-gray-500 text-white"
+                : "text-gray-400 hover:text-gray-300"
             }`}
           >
             <FiCheck size={16} />
@@ -295,7 +313,9 @@ export default function PlanningPage() {
           <button
             onClick={() => setActiveTab("drafts")}
             className={`flex items-center gap-2 pb-2 transition-colors ${
-              activeTab === "drafts" ? "border-b-2 border-gray-500 text-white" : "text-gray-400 hover:text-gray-300"
+              activeTab === "drafts"
+                ? "border-b-2 border-gray-500 text-white"
+                : "text-gray-400 hover:text-gray-300"
             }`}
           >
             <FiEdit size={16} />
@@ -334,12 +354,17 @@ export default function PlanningPage() {
         {activeTab === "drafts" && (
           <div className="space-y-3">
             {draftItems.map((item) => (
-              <div key={item.id} className="p-4 border border-border rounded-xl bg-background hover:bg-surface-hover transition-colors">
+              <div
+                key={item.id}
+                className="p-4 border border-border rounded-xl bg-background hover:bg-surface-hover transition-colors"
+              >
                 <div className="flex items-start gap-2">
                   <FiEdit className="text-gray-400 mt-1" size={16} />
                   <div>
                     <p className="font-medium">{item.title}</p>
-                    <p className="text-sm text-gray-400 mt-1">{item.platform}</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      {item.platform}
+                    </p>
                   </div>
                 </div>
               </div>

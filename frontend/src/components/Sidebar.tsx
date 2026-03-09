@@ -87,7 +87,7 @@ export default function Sidebar({
             </span>
           </div>
         )}
-        
+
         {/* Desktop Collapse Toggle */}
         {setCollapsed && (
           <button

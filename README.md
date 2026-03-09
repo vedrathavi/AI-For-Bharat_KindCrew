@@ -28,24 +28,28 @@ An AI-powered content creation platform that helps creators ideate, generate, an
 ## ✨ Features
 
 ### Content Ideation
+
 - **AI Idea Generation**: Generate content ideas based on your niche and target audience
 - **Idea Refinement**: Polish rough concepts into structured content ideas
 - **Google Trends Integration**: Research trending topics in your niche
 - **Idea Evaluation**: Score ideas based on virality potential and clarity
 
 ### Content Creation
+
 - **Multi-Platform Support**: Create content for Instagram, Twitter, LinkedIn, YouTube, and TikTok
 - **AI Content Generation**: Generate platform-specific content with customizable tones
 - **Draft Management**: Save and organize your content ideas
 - **Content Library**: Manage all your created content in one place
 
 ### Planning & Analytics
+
 - **Calendar View**: Visualize your content schedule
 - **Publishing Scheduler**: Plan when to publish your content (scheduling features in development)
 - **Performance Tracking**: Track basic content metrics
 - **AI Insights**: Get suggestions to improve your content (in development)
 
 ### User Management
+
 - **Secure Authentication**: OAuth login via AWS Cognito
 - **Creator Profiles**: Set up and manage your creator profile with niche, audience, and preferences
 - **Multi-Platform Integration**: Connect and manage multiple social media platforms
@@ -53,6 +57,7 @@ An AI-powered content creation platform that helps creators ideate, generate, an
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework**: Next.js 16 (App Router) with TypeScript
 - **Styling**: Tailwind CSS 4 with custom theme tokens
 - **State Management**: Zustand
@@ -61,6 +66,7 @@ An AI-powered content creation platform that helps creators ideate, generate, an
 - **Calendar**: React Calendar for scheduling
 
 ### Backend
+
 - **Runtime**: Node.js 18+ with Express 5
 - **Database**: AWS DynamoDB
 - **Authentication**: AWS Cognito
@@ -68,6 +74,7 @@ An AI-powered content creation platform that helps creators ideate, generate, an
 - **APIs**: Google Trends integration
 
 ### Deployment
+
 - **Frontend**: AWS Amplify
 - **Backend**: Render (free tier)
 - **Region**: ap-south-1 (Mumbai for low latency)
@@ -75,6 +82,7 @@ An AI-powered content creation platform that helps creators ideate, generate, an
 ## 📦 Prerequisites
 
 Before you begin, ensure you have:
+
 - Node.js 18.0.0 or higher
 - npm 9.0.0 or higher
 - AWS Account with access to DynamoDB, Cognito, and Bedrock
@@ -83,12 +91,14 @@ Before you begin, ensure you have:
 ## 🚀 Quick Start
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/navyajain7105/AI-For-Bharat_KindCrew.git
 cd AI-For-Bharat_KindCrew
 ```
 
 2. **Set up the backend**
+
 ```bash
 cd backend
 npm install
@@ -97,6 +107,7 @@ npm run dev  # Runs on http://localhost:5000
 ```
 
 3. **Set up the frontend**
+
 ```bash
 cd ../frontend
 npm install
@@ -141,32 +152,38 @@ AI-For-Bharat_KindCrew/
 ## 🔌 API Overview
 
 ### Authentication
+
 - `GET /api/auth/login` - Initiate OAuth flow
 - `GET /api/auth/callback` - Handle OAuth callback
 - `POST /api/auth/logout` - Logout user
 
 ### Creator Profiles
+
 - `POST /api/creator-profiles` - Create/update profile
 - `GET /api/creator-profiles/:userId` - Get profile
 
 ### Ideation
+
 - `POST /api/ideation/generate` - Generate content ideas
 - `POST /api/ideation/refine` - Refine existing ideas
 - `POST /api/ideation/evaluate` - Score and evaluate ideas
 - `POST /api/ideation/research` - Research trends for ideas
 
 ### Content Management
+
 - `POST /api/content/from-idea` - Create content from idea
 - `GET /api/content/user` - List user's content
 - `POST /api/content/update-status` - Update content status
 
 ### Publishing (In Development)
+
 - `POST /api/publishing/schedule` - Schedule content
 - `GET /api/publishing/schedules` - Get scheduled content
 
 ## 🚢 Deployment
 
 ### Backend (Render)
+
 1. Connect your GitHub repository to Render
 2. Configure environment variables in Render dashboard
 3. Deploy from `main` branch
@@ -174,6 +191,7 @@ AI-For-Bharat_KindCrew/
 See [DEPLOY_RENDER.md](DEPLOY_RENDER.md) for detailed instructions.
 
 ### Frontend (AWS Amplify)
+
 1. Connect your GitHub repository to AWS Amplify
 2. Configure build settings using `amplify.yml`
 3. Set environment variables in Amplify console
@@ -184,23 +202,27 @@ See [DEPLOY_AMPLIFY.md](DEPLOY_AMPLIFY.md) for detailed instructions.
 ## 🐛 Troubleshooting
 
 ### OAuth Issues
+
 - Ensure callback URLs match exactly in AWS Cognito settings
 - Clear browser cookies and cache
 - Verify HTTPS is used in production
 - Check `trust proxy` setting in Express config
 
 ### Build Failures
+
 - Verify Node.js version matches requirements
 - Check all environment variables are set
 - Review build logs for specific errors
 - Ensure `amplify.yml` is properly configured
 
 ### API Connection Issues
+
 - Verify CORS settings in backend
 - Check that frontend `NEXT_PUBLIC_API_URL` points to correct backend
 - Ensure backend is running and accessible
 
 ### DynamoDB Errors
+
 - Verify AWS credentials and permissions
 - Check table names and region configuration
 - Ensure tables exist with correct schema

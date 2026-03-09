@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { buildApiUrl } from "@/lib/constants";
 import { FaHeart, FaGithub } from "react-icons/fa";
-import { FiZap, FiShield, FiTrendingUp, FiEdit, FiCalendar, FiBarChart } from "react-icons/fi";
+import {
+  FiZap,
+  FiShield,
+  FiTrendingUp,
+  FiEdit,
+  FiCalendar,
+  FiBarChart,
+} from "react-icons/fi";
 
 export default function HomePage() {
   const router = useRouter();

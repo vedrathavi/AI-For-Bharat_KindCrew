@@ -13,7 +13,13 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
-import { FiTrendingUp, FiEye, FiHeart, FiBarChart2, FiZap } from "react-icons/fi";
+import {
+  FiTrendingUp,
+  FiEye,
+  FiHeart,
+  FiBarChart2,
+  FiZap,
+} from "react-icons/fi";
 
 export default function AnalyticsPage() {
   const router = useRouter();
@@ -38,9 +44,27 @@ export default function AnalyticsPage() {
 
   // sample published posts with metrics
   const initialPosts = [
-    { id: "1", title: "Your SaaS is Leaking Money", platform: "Twitter", views: 5430, likes: 1200 },
-    { id: "2", title: "The 'Lazy' Way to Build a Startup", platform: "LinkedIn", views: 1205, likes: 234 },
-    { id: "3", title: "From 0 to 10k Followers", platform: "Instagram", views: 0, likes: 0 },
+    {
+      id: "1",
+      title: "Your SaaS is Leaking Money",
+      platform: "Twitter",
+      views: 5430,
+      likes: 1200,
+    },
+    {
+      id: "2",
+      title: "The 'Lazy' Way to Build a Startup",
+      platform: "LinkedIn",
+      views: 1205,
+      likes: 234,
+    },
+    {
+      id: "3",
+      title: "From 0 to 10k Followers",
+      platform: "Instagram",
+      views: 0,
+      likes: 0,
+    },
   ];
   const [posts, setPosts] = useState(initialPosts);
 
@@ -50,7 +74,9 @@ export default function AnalyticsPage() {
     );
   };
 
-  const [selectedForSuggestions, setSelectedForSuggestions] = useState<string | null>(null);
+  const [selectedForSuggestions, setSelectedForSuggestions] = useState<
+    string | null
+  >(null);
 
   return (
     <AuthenticatedLayout>
@@ -61,7 +87,9 @@ export default function AnalyticsPage() {
             <h1 className="text-3xl sm:text-4xl font-bold">
               Analysis & Feedback
             </h1>
-            <p className="text-gray-400 mt-1">Learn what works and improve future content.</p>
+            <p className="text-gray-400 mt-1">
+              Learn what works and improve future content.
+            </p>
           </div>
         </div>
 
@@ -75,8 +103,14 @@ export default function AnalyticsPage() {
             {/* dark chart container */}
             <div className="w-full h-40 bg-background rounded-xl p-2 border border-border">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={posts} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <BarChart
+                  data={posts}
+                  margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--color-border)"
+                  />
                   <XAxis
                     dataKey="title"
                     tick={{ fill: "var(--color-text-secondary)", fontSize: 12 }}
@@ -84,7 +118,9 @@ export default function AnalyticsPage() {
                     angle={0}
                     textAnchor="middle"
                   />
-                  <YAxis tick={{ fill: "var(--color-text-secondary)", fontSize: 12 }} />
+                  <YAxis
+                    tick={{ fill: "var(--color-text-secondary)", fontSize: 12 }}
+                  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "var(--color-surface)",
@@ -111,9 +147,12 @@ export default function AnalyticsPage() {
             {selectedForSuggestions ? (
               <div className="text-sm text-gray-400">
                 <p className="font-medium text-white mb-2">
-                  Suggestions for: {posts.find((p) => p.id === selectedForSuggestions)?.title}
+                  Suggestions for:{" "}
+                  {posts.find((p) => p.id === selectedForSuggestions)?.title}
                 </p>
-                <p className="mt-2">[AI tips would appear here based on metrics]</p>
+                <p className="mt-2">
+                  [AI tips would appear here based on metrics]
+                </p>
               </div>
             ) : (
               <p className="text-sm text-gray-400">
