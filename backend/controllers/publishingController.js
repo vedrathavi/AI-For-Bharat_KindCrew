@@ -1,103 +1,124 @@
-
 import publishingService from "../services/publishing.service.js";
 
 /**
- * Schedule new content
+ * POST /schedule/create
  */
-export const scheduleContent = async (req, res) => {
+export const createEvent = async (req, res) => {
   try {
-    const userId = req.userId || req.user?.userId;
-    const payload = req.body;
-
-    if (!userId) {
-      return res.status(401).json({ success: false, error: "Unauthorized" });
-    }
-
-    const result = await publishingService.scheduleContent(userId, payload);
+    const userId = req.userId;
+    const result = await publishingService.createEvent(
+      userId,
+      req.body,
+      req.userEmail,
+    );
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    console.error("Error in scheduleContent:", error);
+    console.error("createEvent error:", error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
 
 /**
- * List scheduled items for user
+ * GET /schedule/events
  */
-export const listSchedules = async (req, res) => {
+export const getEvents = async (req, res) => {
   try {
-    const userId = req.userId || req.user?.userId;
-    if (!userId) {
-      return res.status(401).json({ success: false, error: "Unauthorized" });
-    }
-
-    const items = await publishingService.listSchedules(userId);
+    const userId = req.userId;
+    const items = await publishingService.getEvents(userId);
     res.status(200).json({ success: true, data: items });
   } catch (error) {
-    console.error("Error in listSchedules:", error);
+    console.error("getEvents error:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
 /**
- * Update existing schedule
+ * GET /schedule/:eventId
  */
-export const updateSchedule = async (req, res) => {
+export const getEvent = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
-    const updated = await publishingService.updateSchedule(id, updates);
-    res.status(200).json({ success: true, data: updated });
+    const userId = req.userId;
+    const { eventId } = req.params;
+    const item = await publishingService.getEvent(userId, eventId);
+    res.status(200).json({ success: true, data: item });
   } catch (error) {
-    console.error("Error in updateSchedule:", error);
-    res.status(400).json({ success: false, error: error.message });
+    console.error("getEvent error:", error);
+    res.status(404).json({ success: false, error: error.message });
   }
 };
 
 /**
- * Trigger immediate posting (stub)
+ * PATCH /schedule/update
  */
-export const postNow = async (req, res) => {
+export const updateEvent = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updated = await publishingService.postNow(id);
-    res.status(200).json({ success: true, data: updated });
-  } catch (error) {
-    console.error("Error in postNow:", error);
-    res.status(400).json({ success: false, error: error.message });
-  }
-};
-
-/**
- * Format content for a specific platform (stubbed)
- */
-export const formatContent = async (req, res) => {
-  try {
-    const { id, platform } = req.params;
-    // in a real implementation you would look up the content etc
-    res.status(200).json({ success: true, data: { platform, formatted: "" } });
-  } catch (error) {
-    console.error("Error in formatContent:", error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-/**
- * Create calendar event for existing schedule
- */
-export const addCalendarEvent = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { accessToken } = req.body;
-    if (!accessToken) {
+    const userId = req.userId;
+    const { eventId, ...updates } = req.body;
+    if (!eventId)
       return res
         .status(400)
-        .json({ success: false, error: "accessToken is required" });
-    }
-    const event = await publishingService.addCalendarEvent(id, accessToken);
-    res.status(200).json({ success: true, data: event });
+        .json({ success: false, error: "eventId is required" });
+    const updated = await publishingService.updateEvent(
+      userId,
+      eventId,
+      updates,
+      req.userEmail,
+    );
+    res.status(200).json({ success: true, data: updated });
   } catch (error) {
-    console.error("Error in addCalendarEvent:", error);
+    console.error("updateEvent error:", error);
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * DELETE /schedule/:eventId
+ */
+export const deleteEvent = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { eventId } = req.params;
+    await publishingService.deleteEvent(userId, eventId, req.userEmail);
+    res.status(200).json({ success: true, message: "Event deleted" });
+  } catch (error) {
+    console.error("deleteEvent error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /schedule/suggest-time
+ * Uses Bedrock AI + optional creator profile context
+ */
+import dynamoDBService from "../services/dynamodb.service.js";
+
+export const suggestTime = async (req, res) => {
+  try {
+    const userId = req.userId;
+    let profileCtx = {};
+    try {
+      const profile = await dynamoDBService.getCreatorProfileByUserId(userId);
+      if (profile) {
+        profileCtx = {
+          audience:
+            profile.audience?.targetAudience ||
+            profile.niche?.primary ||
+            "general",
+          creatorLevel: profile.creatorLevel || "beginner",
+        };
+      }
+    } catch (_) {
+      // profile lookup is best-effort
+    }
+    const result = await publishingService.suggestTime({
+      platform: req.body.platform,
+      topic: req.body.topic,
+      timezone: req.body.timezone || "Asia/Kolkata",
+      ...profileCtx,
+    });
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    console.error("suggestTime error:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };

@@ -12,7 +12,11 @@ import {
   createPublishingSlice,
 } from "./slice/publishingSlice";
 
-type AppState = AuthSlice & CreatorProfileSlice & IdeationSlice & ContentSlice & PublishingSlice;
+type AppState = AuthSlice &
+  CreatorProfileSlice &
+  IdeationSlice &
+  ContentSlice &
+  PublishingSlice;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -35,6 +39,7 @@ export const useAppStore = create<AppState>()(
         ideas: state.ideas,
         profile: state.profile,
         contentList: state.contentList,
+        schedules: state.schedules,
       }),
     },
   ),

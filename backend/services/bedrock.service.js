@@ -9,7 +9,12 @@ const client = new BedrockRuntimeClient({
 });
 
 // Simple converse method - matches Amazon's example
-export async function converse(messages, modelId, systemPrompt = null) {
+export async function converse(
+  messages,
+  modelId,
+  systemPrompt = null,
+  temperature = 0.8,
+) {
   try {
     const commandParams = {
       modelId,
@@ -17,6 +22,10 @@ export async function converse(messages, modelId, systemPrompt = null) {
         role: msg.role,
         content: [{ text: msg.content }],
       })),
+      inferenceConfig: {
+        temperature,
+        maxTokens: 512,
+      },
     };
 
     // Add system prompt if provided
@@ -43,7 +52,12 @@ export async function converse(messages, modelId, systemPrompt = null) {
 }
 
 // Generate text with simple interface
-export async function generateText(userMessage, modelId, systemPrompt = null) {
+export async function generateText(
+  userMessage,
+  modelId,
+  systemPrompt = null,
+  temperature = 0.8,
+) {
   const messages = [
     {
       role: "user",
@@ -51,5 +65,5 @@ export async function generateText(userMessage, modelId, systemPrompt = null) {
     },
   ];
 
-  return converse(messages, modelId, systemPrompt);
+  return converse(messages, modelId, systemPrompt, temperature);
 }

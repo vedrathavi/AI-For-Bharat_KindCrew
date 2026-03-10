@@ -53,12 +53,20 @@ interface ContentItem {
   updatedAt?: string;
 }
 
+type OutlineSection =
+  | string
+  | {
+      title?: string;
+      estimatedWordCount?: number;
+      content?: string;
+    };
+
 export default function ContentDetailPage() {
   const router = useRouter();
   const params = useParams();
   const contentId = params?.contentId as string;
   const { isAuthenticated, authReady, userInfo, token } = useAuth();
-  
+
   const [content, setContent] = useState<ContentItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -75,6 +83,36 @@ export default function ContentDetailPage() {
       }
     }
     return String(val);
+  };
+
+  const renderOutlineSection = (section: OutlineSection) => {
+    if (typeof section === "string") {
+      return <span>{section}</span>;
+    }
+
+    if (section && typeof section === "object") {
+      const title = safeText(section.title).trim();
+      const content = safeText(section.content).trim();
+      const wordCount =
+        typeof section.estimatedWordCount === "number"
+          ? section.estimatedWordCount
+          : null;
+
+      return (
+        <div className="space-y-1">
+          {title && <p className="font-medium">{title}</p>}
+          {content && <p>{content}</p>}
+          {wordCount !== null && (
+            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+              Approx. {wordCount} words
+            </p>
+          )}
+          {!title && !content && <p>{safeText(section)}</p>}
+        </div>
+      );
+    }
+
+    return <span>{safeText(section)}</span>;
   };
 
   useEffect(() => {
@@ -140,7 +178,10 @@ export default function ContentDetailPage() {
     });
   };
 
-  const renderPlatformContent = (platform: string, variant: PlatformVariant) => {
+  const renderPlatformContent = (
+    platform: string,
+    variant: PlatformVariant,
+  ) => {
     return (
       <div className="space-y-4">
         {variant.postText && (
@@ -159,10 +200,15 @@ export default function ContentDetailPage() {
                 Post Text
               </h4>
               <button
-                onClick={() => handleCopy(variant.postText!, `${platform}-post`)}
+                onClick={() =>
+                  handleCopy(variant.postText!, `${platform}-post`)
+                }
                 className="p-2 rounded-lg transition-colors"
                 style={{
-                  backgroundColor: copiedSection === `${platform}-post` ? "var(--color-surface)" : "transparent",
+                  backgroundColor:
+                    copiedSection === `${platform}-post`
+                      ? "var(--color-surface)"
+                      : "transparent",
                   color: "var(--color-text)",
                 }}
               >
@@ -204,7 +250,9 @@ export default function ContentDetailPage() {
                     Tweet {index + 1}
                   </span>
                   <button
-                    onClick={() => handleCopy(tweet, `${platform}-tweet-${index}`)}
+                    onClick={() =>
+                      handleCopy(tweet, `${platform}-tweet-${index}`)
+                    }
                     className="p-1 rounded transition-colors"
                     style={{ color: "var(--color-text)" }}
                   >
@@ -239,7 +287,9 @@ export default function ContentDetailPage() {
                 Caption
               </h4>
               <button
-                onClick={() => handleCopy(variant.caption!, `${platform}-caption`)}
+                onClick={() =>
+                  handleCopy(variant.caption!, `${platform}-caption`)
+                }
                 className="p-2 rounded-lg transition-colors"
                 style={{ color: "var(--color-text)" }}
               >
@@ -250,7 +300,10 @@ export default function ContentDetailPage() {
                 )}
               </button>
             </div>
-            <p className="text-sm whitespace-pre-wrap" style={{ color: "var(--color-text)" }}>
+            <p
+              className="text-sm whitespace-pre-wrap"
+              style={{ color: "var(--color-text)" }}
+            >
               {safeText(variant.caption)}
             </p>
           </div>
@@ -272,7 +325,12 @@ export default function ContentDetailPage() {
                 Hashtags
               </h4>
               <button
-                onClick={() => handleCopy(variant.hashtags!.join(" "), `${platform}-hashtags`)}
+                onClick={() =>
+                  handleCopy(
+                    variant.hashtags!.join(" "),
+                    `${platform}-hashtags`,
+                  )
+                }
                 className="p-2 rounded-lg transition-colors"
                 style={{ color: "var(--color-text)" }}
               >
@@ -314,8 +372,13 @@ export default function ContentDetailPage() {
               border: "1px solid var(--color-border)",
             }}
           >
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: "var(--color-text)" }}></div>
-            <p style={{ color: "var(--color-text-secondary)" }}>Loading content...</p>
+            <div
+              className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
+              style={{ borderColor: "var(--color-text)" }}
+            ></div>
+            <p style={{ color: "var(--color-text-secondary)" }}>
+              Loading content...
+            </p>
           </div>
         </div>
       </AuthenticatedLayout>
@@ -343,11 +406,15 @@ export default function ContentDetailPage() {
               border: "1px solid var(--color-border)",
             }}
           >
-            <p className="text-lg font-semibold mb-2" style={{ color: "var(--color-text)" }}>
+            <p
+              className="text-lg font-semibold mb-2"
+              style={{ color: "var(--color-text)" }}
+            >
               Content Not Found
             </p>
             <p style={{ color: "var(--color-text-secondary)" }}>
-              {error || "The content you're looking for doesn't exist or you don't have access to it."}
+              {error ||
+                "The content you're looking for doesn't exist or you don't have access to it."}
             </p>
           </div>
         </div>
@@ -394,12 +461,14 @@ export default function ContentDetailPage() {
               <span
                 className="px-3 py-1 rounded-full text-sm font-medium"
                 style={{
-                  backgroundColor: content.distribution?.status === "published" 
-                    ? "#dcfce7" 
-                    : "var(--color-surface-hover)",
-                  color: content.distribution?.status === "published" 
-                    ? "#166534" 
-                    : "var(--color-text)",
+                  backgroundColor:
+                    content.distribution?.status === "published"
+                      ? "#dcfce7"
+                      : "var(--color-surface-hover)",
+                  color:
+                    content.distribution?.status === "published"
+                      ? "#166534"
+                      : "var(--color-text)",
                   border: "1px solid var(--color-border)",
                 }}
               >
@@ -427,7 +496,7 @@ export default function ContentDetailPage() {
                 >
                   Outline
                 </h2>
-                
+
                 {content.outline.hook && (
                   <div className="mb-4">
                     <h3
@@ -436,36 +505,42 @@ export default function ContentDetailPage() {
                     >
                       Hook
                     </h3>
-                    <p className="text-sm" style={{ color: "var(--color-text)" }}>
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--color-text)" }}
+                    >
                       {content.outline.hook}
                     </p>
                   </div>
                 )}
 
-                {content.outline.sections && content.outline.sections.length > 0 && (
-                  <div className="mb-4">
-                    <h3
-                      className="text-sm font-semibold mb-2"
-                      style={{ color: "var(--color-text-muted)" }}
-                    >
-                      Sections
-                    </h3>
-                    <ul className="space-y-2">
-                      {content.outline.sections.map((section, index) => (
-                        <li
-                          key={index}
-                          className="text-sm flex gap-2"
-                          style={{ color: "var(--color-text)" }}
-                        >
-                          <span style={{ color: "var(--color-text-muted)" }}>
-                            {index + 1}.
-                          </span>
-                          {section}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                {content.outline.sections &&
+                  content.outline.sections.length > 0 && (
+                    <div className="mb-4">
+                      <h3
+                        className="text-sm font-semibold mb-2"
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
+                        Sections
+                      </h3>
+                      <ul className="space-y-2">
+                        {content.outline.sections.map((section, index) => (
+                          <li
+                            key={index}
+                            className="text-sm flex gap-2"
+                            style={{ color: "var(--color-text)" }}
+                          >
+                            <span style={{ color: "var(--color-text-muted)" }}>
+                              {index + 1}.
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              {renderOutlineSection(section as OutlineSection)}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                 {content.outline.cta && (
                   <div>
@@ -475,7 +550,10 @@ export default function ContentDetailPage() {
                     >
                       Call to Action
                     </h3>
-                    <p className="text-sm" style={{ color: "var(--color-text)" }}>
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--color-text)" }}
+                    >
                       {content.outline.cta}
                     </p>
                   </div>
@@ -499,26 +577,36 @@ export default function ContentDetailPage() {
               </h2>
               <div className="space-y-3 text-sm">
                 <div>
-                  <span style={{ color: "var(--color-text-muted)" }}>Audience:</span>{" "}
+                  <span style={{ color: "var(--color-text-muted)" }}>
+                    Audience:
+                  </span>{" "}
                   <span style={{ color: "var(--color-text)" }}>
                     {content.targetAudience}
                   </span>
                 </div>
                 {content.angle && (
                   <div>
-                    <span style={{ color: "var(--color-text-muted)" }}>Angle:</span>{" "}
-                    <span style={{ color: "var(--color-text)" }}>{content.angle}</span>
+                    <span style={{ color: "var(--color-text-muted)" }}>
+                      Angle:
+                    </span>{" "}
+                    <span style={{ color: "var(--color-text)" }}>
+                      {content.angle}
+                    </span>
                   </div>
                 )}
                 <div>
-                  <span style={{ color: "var(--color-text-muted)" }}>Source:</span>{" "}
+                  <span style={{ color: "var(--color-text-muted)" }}>
+                    Source:
+                  </span>{" "}
                   <span style={{ color: "var(--color-text)" }}>
                     {content.source === "phase1" ? "From Idea" : "Manual"}
                   </span>
                 </div>
                 {content.ideaId && (
                   <div>
-                    <span style={{ color: "var(--color-text-muted)" }}>Idea ID:</span>{" "}
+                    <span style={{ color: "var(--color-text-muted)" }}>
+                      Idea ID:
+                    </span>{" "}
                     <span
                       className="text-xs font-mono"
                       style={{ color: "var(--color-text)" }}
@@ -574,14 +662,15 @@ export default function ContentDetailPage() {
               </div>
 
               {/* Platform Content */}
-              {selectedPlatform && content.platformVariants[selectedPlatform] && (
-                <div>
-                  {renderPlatformContent(
-                    selectedPlatform,
-                    content.platformVariants[selectedPlatform]
-                  )}
-                </div>
-              )}
+              {selectedPlatform &&
+                content.platformVariants[selectedPlatform] && (
+                  <div>
+                    {renderPlatformContent(
+                      selectedPlatform,
+                      content.platformVariants[selectedPlatform],
+                    )}
+                  </div>
+                )}
             </div>
           </div>
         </div>

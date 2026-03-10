@@ -5,10 +5,12 @@ import {
   ScanCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import docClient, {
   usersTable,
   creatorProfilesTable,
   publishingSchedulesTable,
+  scheduledPostsTable,
 } from "../config/dynamodb.js";
 import { v4 as uuidv4 } from "uuid";
 
@@ -462,6 +464,79 @@ class DynamoDBService {
 
   async getAllCreatorProfiles(limit = null) {
     return this.scanAllItems(creatorProfilesTable, limit);
+  }
+
+  // ============ SCHEDULED POSTS (Phase 3) ============
+  // Table: KindCrew-ScheduledPosts  |  PK: userId  |  SK: eventId
+
+  async createScheduledPost(item) {
+    await docClient.send(
+      new PutCommand({ TableName: scheduledPostsTable, Item: item }),
+    );
+    return item;
+  }
+
+  async getScheduledPost(userId, eventId) {
+    const result = await docClient.send(
+      new GetCommand({
+        TableName: scheduledPostsTable,
+        Key: { userId, eventId },
+      }),
+    );
+    return result.Item || null;
+  }
+
+  async getScheduledPostsByUser(userId) {
+    const result = await docClient.send(
+      new QueryCommand({
+        TableName: scheduledPostsTable,
+        KeyConditionExpression: "userId = :uid",
+        ExpressionAttributeValues: { ":uid": userId },
+        ScanIndexForward: false, // newest first
+      }),
+    );
+    return result.Items || [];
+  }
+
+  async updateScheduledPost(userId, eventId, updates) {
+    const updateExpr = [];
+    const attrNames = {};
+    const attrValues = {};
+
+    Object.keys(updates).forEach((key, i) => {
+      if (key !== "userId" && key !== "eventId") {
+        const n = `#k${i}`;
+        const v = `:v${i}`;
+        updateExpr.push(`${n} = ${v}`);
+        attrNames[n] = key;
+        attrValues[v] = updates[key];
+      }
+    });
+
+    updateExpr.push("#updatedAt = :updatedAt");
+    attrNames["#updatedAt"] = "updatedAt";
+    attrValues[":updatedAt"] = new Date().toISOString();
+
+    const result = await docClient.send(
+      new UpdateCommand({
+        TableName: scheduledPostsTable,
+        Key: { userId, eventId },
+        UpdateExpression: `SET ${updateExpr.join(", ")}`,
+        ExpressionAttributeNames: attrNames,
+        ExpressionAttributeValues: attrValues,
+        ReturnValues: "ALL_NEW",
+      }),
+    );
+    return result.Attributes;
+  }
+
+  async deleteScheduledPost(userId, eventId) {
+    await docClient.send(
+      new DeleteCommand({
+        TableName: scheduledPostsTable,
+        Key: { userId, eventId },
+      }),
+    );
   }
 }
 

@@ -43,4 +43,8 @@ export const creatorProfilesTable =
 export const publishingSchedulesTable =
   process.env.DYNAMODB_PUBLISHING_TABLE || "KindCrew-PublishingSchedules";
 
+// Phase 3: Scheduled posts table (userId PK + eventId SK)
+export const scheduledPostsTable =
+  process.env.DYNAMODB_SCHEDULED_POSTS_TABLE || "KindCrew-ScheduledPosts";
+
 export default docClient;

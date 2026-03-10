@@ -1,23 +1,22 @@
-
 import express from "express";
 import {
-  scheduleContent,
-  listSchedules,
-  updateSchedule,
-  postNow,
-  formatContent,
-  addCalendarEvent,
+  createEvent,
+  getEvents,
+  getEvent,
+  updateEvent,
+  deleteEvent,
+  suggestTime,
 } from "../controllers/publishingController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// All publishing routes require authentication for now
-router.post("/publishing/schedule", authMiddleware, scheduleContent);
-router.get("/publishing/scheduled", authMiddleware, listSchedules);
-router.put("/publishing/:id", authMiddleware, updateSchedule);
-router.post("/publishing/:id/post", authMiddleware, postNow);
-router.get("/publishing/:id/format/:platform", authMiddleware, formatContent);
-router.post("/publishing/:id/calendar", authMiddleware, addCalendarEvent);
+// Phase 3 – Planning & Scheduling routes
+router.post("/schedule/create", authMiddleware, createEvent);
+router.post("/schedule/suggest-time", authMiddleware, suggestTime);
+router.get("/schedule/events", authMiddleware, getEvents);
+router.get("/schedule/:eventId", authMiddleware, getEvent);
+router.patch("/schedule/update", authMiddleware, updateEvent);
+router.delete("/schedule/:eventId", authMiddleware, deleteEvent);
 
 export default router;
