@@ -11,7 +11,6 @@ An AI-powered content creation platform that helps creators ideate, generate, an
 
 **Demo:** [https://main.d2bnn3uoz2jafb.amplifyapp.com/](https://main.d2bnn3uoz2jafb.amplifyapp.com/)
 
-> **Note:** This is an early-stage project built for learning and experimentation. Features are actively being developed.
 
 ## 📋 Table of Contents
 
