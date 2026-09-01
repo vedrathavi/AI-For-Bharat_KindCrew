@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useIdeation } from "@/hooks/useIdeation";
 import { useCreatorProfile } from "@/hooks/useCreatorProfile";
 import { MarkdownRenderer } from "@/components/ui/MarkdownRenderer";
-import { Badge } from "@/components/ui/Badge";
+import { interpretScore } from "@/lib/scoring/scoreInterpreter";
+import { PlatformBadge, FormatBadge, getPlatformIcon, getPlatformDisplayName } from "@/lib/platformConfig";
 import {
   FiArrowLeft,
   FiArrowRight,
@@ -17,16 +18,11 @@ import {
   FiLayers,
 } from "react-icons/fi";
 
-const formatScore = (score: number | string | undefined): string => {
-  if (typeof score === "number") return score.toFixed(1);
-  if (typeof score === "string") return parseFloat(score).toFixed(1);
-  return "0.0";
-};
-
 export default function ZeroIdeaPage() {
   const router = useRouter();
   const { userInfo, token, authReady } = useAuth();
   const authenticated = !!token && !!userInfo;
+  const [enableLiveWebSearch, setEnableLiveWebSearch] = useState(false);
   const {
     ideas,
     selectedIdea,
@@ -76,7 +72,7 @@ export default function ZeroIdeaPage() {
 
   const handleGenerate = async () => {
     if (!userInfo?.userId) return;
-    await generateIdeas(userInfo.userId, profile);
+    await generateIdeas(userInfo.userId, { ...profile, enableLiveWebSearch });
   };
 
   const handleSelectIdea = (idea: (typeof ideas)[0]) => {
@@ -205,6 +201,28 @@ export default function ZeroIdeaPage() {
               </div>
             </div>
 
+            {/* Live Web Research Toggle */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/60">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-zinc-200">Live Web Research</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400">Optional</span>
+                </div>
+                <p className="text-[11px] text-zinc-400">
+                  Search current web conversations and sources for fresher opportunities.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={enableLiveWebSearch}
+                  onChange={(e) => setEnableLiveWebSearch(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+              </label>
+            </div>
+
             <button
               type="button"
               onClick={handleGenerate}
@@ -212,7 +230,7 @@ export default function ZeroIdeaPage() {
               className="w-full py-3 px-6 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs sm:text-sm font-semibold transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center justify-center gap-2"
             >
               <FiCompass className="w-4 h-4" />
-              {loading ? "Synthesizing 10 Viral Concepts..." : "Generate 10 Viral Concepts"}
+              {loading ? "Synthesizing High-Impact Concepts..." : "Generate Concepts"}
             </button>
           </div>
         )}
@@ -248,13 +266,21 @@ export default function ZeroIdeaPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {ideas.map((idea, index) => {
+              {[...ideas]
+                .sort((a, b) => {
+                  const scoreA = Number(a.scores?.opportunityScore ?? a.scores?.overall ?? 0);
+                  const scoreB = Number(b.scores?.opportunityScore ?? b.scores?.overall ?? 0);
+                  return scoreB - scoreA;
+                })
+                .map((idea, index) => {
                 const isSelected = selectedIdea === idea;
                 const platformVal = renderValue(idea.platform);
                 const formatVal = renderValue(idea.format);
                 const angleVal = renderValue(idea.angle);
                 const descVal = renderValue(idea.description);
                 const titleVal = renderValue(idea.title);
+                const oppScore = Number(idea.scores?.opportunityScore || idea.scores?.overall || 0);
+                const scoreInterpretation = interpretScore(oppScore);
 
                 return (
                   <div
@@ -269,18 +295,17 @@ export default function ZeroIdeaPage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Badge variant="default" className="text-[10px]">
-                            {platformVal || "linkedin"}
-                          </Badge>
-                          {formatVal && (
-                            <Badge variant="secondary" className="text-[10px]">
-                              {formatVal}
-                            </Badge>
-                          )}
+                          <PlatformBadge platform={platformVal} />
+                          {formatVal && <FormatBadge format={formatVal} />}
                         </div>
-                        <span className={`text-lg font-bold ${getScoreColor(Number(idea.scores?.overall || 0))}`}>
-                          {formatScore(idea.scores?.overall)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${scoreInterpretation.badgeColor}`}>
+                            {scoreInterpretation.label}
+                          </span>
+                          <span className="text-base font-bold text-zinc-100">
+                            {oppScore > 0 ? oppScore.toFixed(1) : "—"}
+                          </span>
+                        </div>
                       </div>
 
                       <h3 className="text-sm sm:text-base font-bold text-zinc-100 leading-snug">
@@ -295,35 +320,13 @@ export default function ZeroIdeaPage() {
 
                       {angleVal && (
                         <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800/80 text-xs text-zinc-300">
-                          <span className="font-semibold text-amber-400">Angle: </span>
+                          <span className="font-semibold text-zinc-200">Angle: </span>
                           <MarkdownRenderer content={angleVal} className="inline" />
                         </div>
                       )}
                     </div>
 
                     <div className="space-y-3 pt-3 border-t border-zinc-800/60">
-                      {/* Sub Scores */}
-                      <div className="grid grid-cols-3 gap-2 text-center">
-                        <div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-800/60">
-                          <p className="text-[9px] uppercase font-bold text-zinc-500">Virality</p>
-                          <p className={`text-xs font-bold ${getScoreColor(Number(idea.scores?.virality || 0))}`}>
-                            {formatScore(idea.scores?.virality)}
-                          </p>
-                        </div>
-                        <div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-800/60">
-                          <p className="text-[9px] uppercase font-bold text-zinc-500">Clarity</p>
-                          <p className={`text-xs font-bold ${getScoreColor(Number(idea.scores?.clarity || 0))}`}>
-                            {formatScore(idea.scores?.clarity)}
-                          </p>
-                        </div>
-                        <div className="p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-800/60">
-                          <p className="text-[9px] uppercase font-bold text-zinc-500">Comp</p>
-                          <p className={`text-xs font-bold ${getScoreColor(10 - Number(idea.scores?.competition || 0))}`}>
-                            {formatScore(idea.scores?.competition)}
-                          </p>
-                        </div>
-                      </div>
-
                       {isSelected && (
                         <button
                           type="button"

@@ -47,4 +47,7 @@ export const publishingSchedulesTable =
 export const scheduledPostsTable =
   process.env.DYNAMODB_SCHEDULED_POSTS_TABLE || "KindCrew-ScheduledPosts";
 
+export const researchSnapshotsTable =
+  process.env.DYNAMODB_RESEARCH_SNAPSHOTS_TABLE || "KindCrew-ResearchSnapshots";
+
 export default docClient;

@@ -53,6 +53,10 @@ export async function authenticatedFetch(
   input: RequestInfo | URL,
   init: RequestInit = {},
 ): Promise<Response> {
+  const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const method = (init.method || "GET").toUpperCase();
+  const urlStr = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
+
   const headers = new Headers(init.headers);
   const token = getAccessToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
@@ -62,6 +66,11 @@ export async function authenticatedFetch(
     headers,
     credentials: "include",
   });
+
+  const duration = Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime);
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[API] ${method} ${urlStr} status=${response.status} duration=${duration}ms`);
+  }
 
   if (response.status !== 401 || String(input).includes("/api/auth/refresh")) {
     return response;

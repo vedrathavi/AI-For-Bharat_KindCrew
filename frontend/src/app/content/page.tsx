@@ -17,6 +17,7 @@ import {
   FiLayers,
   FiZap,
 } from "react-icons/fi";
+import { formatStructuredContent } from "@/components/ui/MarkdownRenderer";
 
 type InputMode = "idea" | "manual";
 
@@ -27,7 +28,7 @@ type IdeaItem = {
   title?: string;
   angle?: string;
   description?: string;
-  scores?: { virality?: number };
+  scores?: any;
 };
 
 type SavedContentItem = {
@@ -112,15 +113,7 @@ export default function ContentPage() {
   } = useContent();
 
   const safeText = (val: any): string => {
-    if (val == null) return "";
-    if (typeof val === "object") {
-      try {
-        return JSON.stringify(val);
-      } catch {
-        return String(val);
-      }
-    }
-    return String(val);
+    return formatStructuredContent(val);
   };
   const [savedIdeas, setSavedIdeas] = useState<IdeaBrief[]>([]);
   const [loadingIdeas, setLoadingIdeas] = useState(false);

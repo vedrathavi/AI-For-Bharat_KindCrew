@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FiCheckCircle, FiCircle, FiTrendingUp } from "react-icons/fi";
+import { FiCheck, FiCheckCircle, FiCircle, FiTrendingUp } from "react-icons/fi";
 import { useAppStore } from "@/store/useAppStore";
 
 type SetupBannerProps = {
@@ -12,17 +12,30 @@ export default function SetupBanner({ onDismiss }: SetupBannerProps) {
   const creatorProfile = useAppStore((state) => state.creatorProfile);
   const hasProfile = useAppStore((state) => state.hasProfile);
 
-  // Derived Checklist values
-  const hasNiche = !!creatorProfile?.niche?.primary;
-  const hasAudience = !!creatorProfile?.targetAudience;
-  const hasPlatforms = !!(creatorProfile?.platforms && creatorProfile.platforms.length > 0);
-  const hasStrategy = !!(
-    creatorProfile?.strategy?.postingFrequency &&
-    creatorProfile.strategy.postingFrequency !== "1/week"
+  // Derived Checklist values supporting both full DynamoDB CreatorProfile and legacy formats
+  const hasNiche = Boolean(
+    creatorProfile?.niche?.primary ||
+    (typeof (creatorProfile as any)?.niche === "string" && (creatorProfile as any).niche.trim().length > 0)
   );
-  const hasVoice = !!(
+  const hasAudience = Boolean(
+    creatorProfile?.targetAudience ||
+    (creatorProfile as any)?.audience
+  );
+  const hasPlatforms = Boolean(
+    creatorProfile?.platforms && creatorProfile.platforms.length > 0
+  );
+  const hasStrategy = Boolean(
+    creatorProfile?.strategy?.postingFrequency ||
+    creatorProfile?.strategy?.contentStrategy ||
+    (creatorProfile?.strategy?.contentPillars && creatorProfile.strategy.contentPillars.length > 0) ||
+    creatorProfile?.goals?.primaryGoal ||
+    (creatorProfile as any)?.goal
+  );
+  const hasVoice = Boolean(
     creatorProfile?.preferences?.voiceTone ||
-    (creatorProfile?.preferences?.tones && creatorProfile.preferences.tones.length > 1)
+    (creatorProfile?.preferences?.tones && creatorProfile.preferences.tones.length > 0) ||
+    creatorProfile?.preferences?.contentStyle ||
+    (creatorProfile as any)?.tone
   );
 
   const checklistItems = [
@@ -36,6 +49,11 @@ export default function SetupBanner({ onDismiss }: SetupBannerProps) {
 
   const completedCount = checklistItems.filter((i) => i.completed).length;
   const progressPercent = Math.round((completedCount / checklistItems.length) * 100);
+
+  // If user has completed 100% of their setup data, do not display the banner
+  if (progressPercent >= 100) {
+    return null;
+  }
 
   return (
     <div
@@ -63,7 +81,7 @@ export default function SetupBanner({ onDismiss }: SetupBannerProps) {
             {checklistItems.map((item, idx) => (
               <div key={idx} className="flex items-center gap-1.5 text-xs">
                 {item.completed ? (
-                  <FiCheckCircle className="w-3.5 h-3.5 text-green-400" />
+                  <FiCheck className="w-3.5 h-3.5 text-green-400" />
                 ) : (
                   <FiCircle className="w-3.5 h-3.5 text-slate-600" />
                 )}
@@ -75,19 +93,19 @@ export default function SetupBanner({ onDismiss }: SetupBannerProps) {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-row md:flex-col lg:flex-row gap-3 min-w-[200px]">
+        {/* Action Buttons - Always in one line */}
+        <div className="flex items-center gap-3 shrink-0">
           {onDismiss && (
             <button
               onClick={onDismiss}
-              className="flex-1 px-4 py-2.5 rounded-lg font-medium border border-slate-700 text-slate-300 hover:bg-slate-900 transition-colors text-sm"
+              className="px-4 py-2.5 rounded-lg font-medium border border-slate-700 text-slate-300 hover:bg-slate-900 transition-colors text-sm whitespace-nowrap"
             >
               Dismiss
             </button>
           )}
           <Link
             href={hasProfile ? "/settings" : "/onboarding"}
-            className="flex-1 px-5 py-2.5 rounded-lg font-medium text-center bg-white text-slate-950 hover:bg-slate-200 transition-colors text-sm flex items-center justify-center gap-1"
+            className="px-5 py-2.5 rounded-lg font-medium text-center bg-white text-slate-950 hover:bg-slate-200 transition-colors text-sm flex items-center justify-center gap-1 whitespace-nowrap shrink-0"
           >
             {hasProfile ? "Optimize Settings" : "Configure Wizard"}
           </Link>

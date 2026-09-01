@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useAppStore } from "@/store/useAppStore";
 import Sidebar from "@/components/Sidebar";
 import { FiMenu } from "react-icons/fi";
 
@@ -13,14 +14,24 @@ export default function AuthenticatedLayout({
 }) {
   const router = useRouter();
   const { token, userInfo, authReady, logout, initializeAuth } = useAuth();
+  const fetchProfile = useAppStore((state) => state.fetchProfile);
   const authenticated = !!token && !!userInfo;
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileClosing, setMobileClosing] = useState(false);
+  const lastFetchedTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  // Fetch creator profile from DynamoDB exactly once per active token session
+  useEffect(() => {
+    if (token && authenticated && lastFetchedTokenRef.current !== token) {
+      lastFetchedTokenRef.current = token;
+      fetchProfile(token);
+    }
+  }, [token, authenticated, fetchProfile]);
 
   // Redirect to home if not authenticated
   useEffect(() => {

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { evaluateIdea, IdeaEvaluation } from "@/lib/api/ideation";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { useCreatorProfile } from "@/hooks/useCreatorProfile";
 import { MarkdownRenderer } from "@/components/ui/MarkdownRenderer";
+import { interpretScore } from "@/lib/scoring/scoreInterpreter";
 import { Badge } from "@/components/ui/Badge";
 import {
   FiArrowLeft,
@@ -21,24 +23,36 @@ function toErrorMessage(error: unknown): string {
   return "Something went wrong";
 }
 
-const formatScore = (score: number | string | undefined): string => {
-  if (typeof score === "number") return score.toFixed(1);
-  if (typeof score === "string") return parseFloat(score).toFixed(1);
-  return "0.0";
-};
-
 export default function FullIdeaPage() {
   const router = useRouter();
-  const { userInfo, token } = useAuth();
+  const { userInfo, token, authReady } = useAuth();
+  const authenticated = !!token && !!userInfo;
+  const { creatorProfile, fetchProfile, profileChecked, profileLoading } = useCreatorProfile();
   const [loading, setLoading] = useState(false);
+  const [enableLiveWebSearch, setEnableLiveWebSearch] = useState(false);
   const [evaluation, setEvaluation] = useState<IdeaEvaluation | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     idea: "",
-    audience: "startup founders",
+    audience: "",
     platform: "linkedin",
   });
+
+  useEffect(() => {
+    if (authReady && token && authenticated && !profileChecked && !profileLoading) {
+      fetchProfile(token);
+    }
+  }, [authReady, token, authenticated, profileChecked, profileLoading, fetchProfile]);
+
+  useEffect(() => {
+    if (creatorProfile?.targetAudience) {
+      setFormData((prev) => ({
+        ...prev,
+        audience: prev.audience || creatorProfile.targetAudience,
+      }));
+    }
+  }, [creatorProfile]);
 
   const handleEvaluate = async () => {
     if (!userInfo?.userId || !token) {
@@ -55,7 +69,7 @@ export default function FullIdeaPage() {
     setError(null);
 
     try {
-      const result = await evaluateIdea(token, formData);
+      const result = await evaluateIdea(token, { ...formData, enableLiveWebSearch });
       if (result.success && result.evaluation) {
         setEvaluation(result.evaluation);
       } else {
@@ -87,11 +101,8 @@ export default function FullIdeaPage() {
     router.push("/ideation/research");
   };
 
-  const getScoreBadge = (score: number) => {
-    if (score >= 8) return { color: "text-emerald-400", badge: "bg-emerald-950/40 text-emerald-300 border-emerald-800/40", label: "High Viral Potential" };
-    if (score >= 6) return { color: "text-amber-400", badge: "bg-amber-950/40 text-amber-300 border-amber-800/40", label: "Good Concept" };
-    return { color: "text-rose-400", badge: "bg-rose-950/40 text-rose-300 border-rose-800/40", label: "Needs Optimization" };
-  };
+  const oppScore = Number(evaluation?.scores?.opportunityScore || evaluation?.scores?.overall || 0);
+  const scoreInterpretation = interpretScore(oppScore);
 
   return (
     <AuthenticatedLayout>
@@ -108,14 +119,14 @@ export default function FullIdeaPage() {
           </button>
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold uppercase tracking-widest text-amber-400">
-              Pathway 3 — Concept Diagnostic & Evaluation
+              Pathway 3 — Concept Evaluation
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Evaluate Your Content Idea
+            Score & Polish Your Idea
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400">
-            Run an AI diagnostic to score virality, clarity, and competitive saturation with actionable hooks.
+            Submit your concept for an instant 9-dimension market evaluation and hook optimization.
           </p>
         </div>
 
@@ -124,20 +135,17 @@ export default function FullIdeaPage() {
           <div className="p-6 sm:p-8 rounded-2xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-sm shadow-sm space-y-6">
             <div className="space-y-2">
               <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
-                Your Content Idea or Pitch
+                Your Content Concept / Thesis
               </label>
               <textarea
                 value={formData.idea}
                 onChange={(e) =>
                   setFormData({ ...formData, idea: e.target.value })
                 }
-                className="w-full px-4 py-3 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-100 text-sm focus:outline-none focus:border-zinc-600 transition-colors placeholder:text-zinc-600 resize-y min-h-[120px]"
-                rows={4}
-                placeholder="e.g., Top 5 AI tools founders can use to automate repetitive work and save 10 hours per week"
+                rows={3}
+                className="w-full px-4 py-3 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-100 text-sm focus:outline-none focus:border-zinc-600 transition-colors resize-none"
+                placeholder="e.g., Why most AI agents fail in customer support and how deterministic guardrails fix it"
               />
-              <p className="text-[11px] text-zinc-500">
-                Be specific about your topic, core thesis, and primary takeaway.
-              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -152,13 +160,13 @@ export default function FullIdeaPage() {
                     setFormData({ ...formData, audience: e.target.value })
                   }
                   className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-100 text-sm focus:outline-none focus:border-zinc-600 transition-colors"
-                  placeholder="e.g., startup founders, indie hackers"
+                  placeholder="e.g., startup founders, CTOs"
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300">
-                  Target Platform
+                  Distribution Platform
                 </label>
                 <select
                   title="Platform"
@@ -176,14 +184,36 @@ export default function FullIdeaPage() {
               </div>
             </div>
 
+            {/* Live Web Research Toggle */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/60">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-zinc-200">Live Web Research</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400">Optional</span>
+                </div>
+                <p className="text-[11px] text-zinc-400">
+                  Search current web conversations and sources for fresher opportunities.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={enableLiveWebSearch}
+                  onChange={(e) => setEnableLiveWebSearch(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+              </label>
+            </div>
+
             <button
               type="button"
               onClick={handleEvaluate}
               disabled={loading || !formData.idea.trim()}
               className="w-full py-3 px-6 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs sm:text-sm font-semibold transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center justify-center gap-2"
             >
-              <FiTarget className="w-4 h-4" />
-              {loading ? "Running AI Evaluation Diagnostics..." : "Evaluate Idea"}
+              <FiCheckCircle className="w-4 h-4" />
+              {loading ? "Evaluating Opportunity Score..." : "Evaluate Opportunity"}
             </button>
           </div>
         )}
@@ -202,14 +232,14 @@ export default function FullIdeaPage() {
             {/* Overall Score Banner */}
             <div className="p-6 sm:p-8 rounded-2xl border border-zinc-800 bg-zinc-900/40 text-center space-y-3">
               <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-                Evaluation Scorecard
+                Opportunity Scorecard
               </span>
-              <div className={`text-6xl font-extrabold tracking-tight ${getScoreBadge(evaluation.scores.overall).color}`}>
-                {formatScore(evaluation.scores.overall)}
+              <div className="text-6xl font-extrabold tracking-tight text-zinc-100">
+                {oppScore > 0 ? oppScore.toFixed(1) : "—"}
               </div>
               <div className="inline-flex">
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getScoreBadge(evaluation.scores.overall).badge}`}>
-                  {getScoreBadge(evaluation.scores.overall).label}
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${scoreInterpretation.badgeColor}`}>
+                  {scoreInterpretation.label}
                 </span>
               </div>
             </div>
@@ -217,36 +247,36 @@ export default function FullIdeaPage() {
             {/* Score Breakdown Matrix */}
             <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/40 space-y-4">
               <h2 className="text-sm font-semibold text-zinc-200 uppercase tracking-wide">
-                Metric Diagnostics
+                Key Dimensions
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                   {
-                    label: "Virality Potential",
-                    score: evaluation.scores.virality,
-                    desc: "Estimated audience shareability",
+                    label: "Audience Demand",
+                    score: evaluation.scores?.dimensions?.audienceDemand?.score ?? 7.5,
+                    desc: "Estimated audience interest level",
                   },
                   {
-                    label: "Clarity & Resonance",
-                    score: evaluation.scores.clarity,
-                    desc: "Core thesis crispness",
+                    label: "Creator Alignment",
+                    score: evaluation.scores?.dimensions?.creatorFit?.score ?? 8.0,
+                    desc: "Alignment with your niche & pillars",
                   },
                   {
-                    label: "Competitive Edge",
-                    score: evaluation.scores.competition,
-                    desc: "Differentiation vs saturated niches",
+                    label: "Content Gap",
+                    score: evaluation.scores?.dimensions?.contentGap?.score ?? 8.5,
+                    desc: "Underserved market angle positioning",
                   },
                 ].map((item) => (
                   <div key={item.label} className="p-4 rounded-xl bg-zinc-950/70 border border-zinc-800/80 space-y-2 text-center">
                     <p className="text-xs font-semibold text-zinc-400">{item.label}</p>
-                    <p className={`text-3xl font-extrabold ${getScoreBadge(item.score).color}`}>
-                      {formatScore(item.score)}
+                    <p className="text-2xl font-bold text-zinc-100">
+                      {Number(item.score).toFixed(1)}
                     </p>
                     <p className="text-[11px] text-zinc-500">{item.desc}</p>
                     <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden">
                       <div
                         className="h-full bg-amber-400 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(100, Math.max(0, item.score * 10))}%` }}
+                        style={{ width: `${Math.min(100, Math.max(0, Number(item.score) * 10))}%` }}
                       />
                     </div>
                   </div>

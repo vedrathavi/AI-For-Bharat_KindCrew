@@ -9,6 +9,12 @@ import { getUserContent, regenerateVariant, updateDistributionStatus } from "@/l
 import { MarkdownRenderer } from "@/components/ui/MarkdownRenderer";
 import { Badge } from "@/components/ui/Badge";
 import {
+  getPlatformIcon,
+  getPlatformDisplayName,
+  PlatformBadge,
+  FormatBadge,
+} from "@/lib/platformConfig";
+import {
   FiArrowLeft,
   FiCopy,
   FiCheck,
@@ -187,16 +193,175 @@ export default function ContentLibrary() {
   );
 
   const renderPlatformVariant = (platform: string, variant: PlatformVariant) => {
-    switch (platform) {
+    switch (platform.toLowerCase()) {
+      case "youtube":
+        return (
+          <div className="space-y-4 text-left">
+            {variant.title && (
+              <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-amber-400 uppercase">Video Title</span>
+                  {copyButton("youtube-title", variant.title)}
+                </div>
+                <p className="text-xs font-bold text-white">{variant.title}</p>
+              </div>
+            )}
+
+            {variant.description && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Description</span>
+                  {copyButton("youtube-desc", variant.description)}
+                </div>
+                <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
+                  <MarkdownRenderer content={variant.description} />
+                </div>
+              </div>
+            )}
+
+            {variant.chapters && Array.isArray(variant.chapters) && variant.chapters.length > 0 && (
+              <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1.5">
+                <span className="text-[10px] font-bold uppercase text-zinc-400">Chapters</span>
+                <ul className="space-y-1 text-xs text-zinc-300">
+                  {variant.chapters.map((chap: any, i: number) => {
+                    const time = typeof chap === "object" ? (chap.start || chap.timestamp || chap.time || "") : "";
+                    const label = typeof chap === "object" ? (chap.label || chap.title || chap.name || chap.text || "") : String(chap || "");
+                    return (
+                      <li key={i} className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                        {time && <span className="font-mono text-amber-300 font-semibold">{time}</span>}
+                        <span className="text-zinc-200">{label}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
+            {(variant.thumbnailText || variant.shortHook) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                {variant.thumbnailText && (
+                  <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 space-y-1">
+                    <span className="text-[10px] font-bold text-amber-400 uppercase">Thumbnail Text</span>
+                    <p className="text-zinc-200 font-semibold">
+                      {typeof variant.thumbnailText === "object" ? JSON.stringify(variant.thumbnailText) : variant.thumbnailText}
+                    </p>
+                  </div>
+                )}
+                {variant.shortHook && (
+                  <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 space-y-1">
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase">Shorts Hook</span>
+                    <p className="text-zinc-200 font-semibold">
+                      {typeof variant.shortHook === "object" ? JSON.stringify(variant.shortHook) : variant.shortHook}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {Array.isArray(variant.tags) && variant.tags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {variant.tags.map((tag: any, i: number) => {
+                  const tagStr = typeof tag === "object" ? (tag.tag || tag.name || tag.label || JSON.stringify(tag)) : String(tag || "");
+                  return (
+                    <span key={i} className="text-xs font-medium text-amber-400 bg-amber-950/30 px-2 py-0.5 rounded-md border border-amber-800/40">
+                      {tagStr.startsWith("#") ? tagStr : `#${tagStr}`}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+
+      case "reddit":
+        return (
+          <div className="space-y-4 text-left">
+            {variant.title && (
+              <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-[#FF4500] uppercase">Reddit Title</span>
+                  {copyButton("reddit-title", variant.title)}
+                </div>
+                <p className="text-xs font-bold text-white">{variant.title}</p>
+              </div>
+            )}
+
+            {variant.postBody && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Discussion Post</span>
+                  {copyButton("reddit-post", variant.postBody)}
+                </div>
+                <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
+                  <MarkdownRenderer content={variant.postBody} />
+                </div>
+              </div>
+            )}
+
+            {Array.isArray(variant.subredditSuggestions) && variant.subredditSuggestions.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {variant.subredditSuggestions.map((sub: any, i: number) => {
+                  const subStr = typeof sub === "object" ? (sub.name || sub.subreddit || JSON.stringify(sub)) : String(sub || "");
+                  return (
+                    <span key={i} className="text-xs font-medium text-[#FF4500] bg-zinc-950 px-2 py-0.5 rounded-md border border-zinc-800">
+                      r/{subStr.replace(/^r\//, "")}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+
+      case "medium":
+      case "blog":
+        return (
+          <div className="space-y-4 text-left">
+            {variant.title && (
+              <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-amber-400 uppercase">Article Title</span>
+                  {copyButton("medium-title", variant.title)}
+                </div>
+                <p className="text-xs font-bold text-white">{variant.title}</p>
+                {variant.subtitle && <p className="text-[11px] text-zinc-400 italic">{variant.subtitle}</p>}
+              </div>
+            )}
+
+            {(variant.body || variant.postText) && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Article Content</span>
+                  {copyButton("medium-body", variant.body || variant.postText || "")}
+                </div>
+                <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
+                  <MarkdownRenderer content={variant.body || variant.postText || ""} />
+                </div>
+              </div>
+            )}
+
+            {Array.isArray(variant.tags) && variant.tags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {variant.tags.map((tag: string, i: number) => (
+                  <span key={i} className="text-xs font-medium text-amber-400 bg-amber-950/30 px-2 py-0.5 rounded-md border border-amber-800/40">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
       case "linkedin":
         return (
-          <div className="space-y-4">
+          <div className="space-y-4 text-left">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Post Text</span>
                 {copyButton("linkedin-post", variant.postText || "")}
               </div>
-              <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+              <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
                 <MarkdownRenderer content={variant.postText || ""} />
               </div>
             </div>
@@ -214,7 +379,7 @@ export default function ContentLibrary() {
 
       case "twitter":
         return (
-          <div className="space-y-4">
+          <div className="space-y-4 text-left">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
                 Thread ({variant.tweetCount || variant.thread?.length || 0} tweets)
@@ -223,7 +388,7 @@ export default function ContentLibrary() {
             </div>
             <div className="space-y-3">
               {variant.thread?.map((tweet: string, index: number) => (
-                <div key={index} className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2">
+                <div key={index} className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold text-amber-400 uppercase">Tweet {index + 1}</span>
                     {copyButton(`twitter-tweet-${index}`, tweet)}
@@ -236,21 +401,31 @@ export default function ContentLibrary() {
         );
 
       case "instagram":
+      case "tiktok":
         return (
-          <div className="space-y-4">
+          <div className="space-y-4 text-left">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Caption</span>
                 {copyButton("instagram-caption", variant.caption || "")}
               </div>
-              <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+              <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
                 <MarkdownRenderer content={variant.caption || ""} />
               </div>
             </div>
             {variant.coverText && (
-              <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
+              <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 text-xs">
                 <span className="text-[10px] font-bold uppercase text-zinc-400 block mb-1">Cover Slide Hook</span>
                 <MarkdownRenderer content={variant.coverText} />
+              </div>
+            )}
+            {Array.isArray(variant.hashtags) && variant.hashtags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {variant.hashtags.map((tag: string, i: number) => (
+                  <span key={i} className="text-xs font-medium text-amber-400 bg-amber-950/30 px-2 py-0.5 rounded-md border border-amber-800/40">
+                    {tag.startsWith("#") ? tag : `#${tag}`}
+                  </span>
+                ))}
               </div>
             )}
           </div>
@@ -258,8 +433,9 @@ export default function ContentLibrary() {
 
       default:
         return (
-          <div className="space-y-3">
+          <div className="space-y-3 text-left">
             {Object.entries(variant).map(([key, value]) => {
+              if (key === "platform") return null;
               const text = Array.isArray(value) ? value.join("\n") : String(value ?? "");
               return (
                 <div key={key} className="space-y-1">
@@ -267,7 +443,7 @@ export default function ContentLibrary() {
                     <span className="text-xs font-semibold text-zinc-400 capitalize">{key}</span>
                     {copyButton(`default-${key}`, text)}
                   </div>
-                  <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800">
+                  <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
                     <MarkdownRenderer content={text} />
                   </div>
                 </div>
@@ -361,9 +537,7 @@ export default function ContentLibrary() {
                         <Badge variant="default" className="text-[10px]">
                           {content.source === "phase1" ? "From Ideation" : "Custom Draft"}
                         </Badge>
-                        <Badge variant="secondary" className="text-[10px]">
-                          {content.contentType}
-                        </Badge>
+                        <FormatBadge format={content.contentType} />
                       </div>
                       {getStatusBadge(content.distribution?.status)}
                     </div>
@@ -382,12 +556,7 @@ export default function ContentLibrary() {
                       <div className="flex flex-wrap items-center gap-1.5 pt-1">
                         <span className="text-[11px] text-zinc-500 font-medium mr-1">Platforms:</span>
                         {platforms.map((plat) => (
-                          <span
-                            key={plat}
-                            className="px-2 py-0.5 rounded-md bg-zinc-950 border border-zinc-800 text-[10px] font-semibold text-zinc-300 capitalize"
-                          >
-                            {plat}
-                          </span>
+                          <PlatformBadge key={plat} platform={plat} />
                         ))}
                       </div>
                     )}
@@ -444,19 +613,20 @@ export default function ContentLibrary() {
               </div>
 
               {/* Platform Selector Tabs */}
-              <div className="px-5 pt-3 border-b border-zinc-800 flex items-center gap-2 overflow-x-auto">
+              <div className="px-5 pt-3 border-b border-zinc-800 flex items-center gap-2 overflow-x-auto no-scrollbar">
                 {Object.keys(selectedContent.platformVariants || {}).map((plat) => (
                   <button
                     key={plat}
                     type="button"
                     onClick={() => setSelectedPlatform(plat)}
-                    className={`px-3 py-2 text-xs font-semibold capitalize border-b-2 transition-all shrink-0 ${
+                    className={`inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold border-b-2 transition-all shrink-0 ${
                       selectedPlatform === plat
-                        ? "border-amber-400 text-amber-400"
+                        ? "border-zinc-200 text-zinc-100 bg-zinc-900"
                         : "border-transparent text-zinc-400 hover:text-zinc-200"
                     }`}
                   >
-                    {plat}
+                    {getPlatformIcon(plat)}
+                    <span>{getPlatformDisplayName(plat)}</span>
                   </button>
                 ))}
               </div>

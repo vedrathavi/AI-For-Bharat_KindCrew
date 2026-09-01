@@ -149,7 +149,7 @@ export default function DashboardPage() {
             Welcome back, {getGreetingName(userInfo)}
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400">
-            Here is your active content pipeline status for today.
+            Track your creative pipeline, explore high-impact ideas, and craft multi-platform drafts.
           </p>
         </div>
 

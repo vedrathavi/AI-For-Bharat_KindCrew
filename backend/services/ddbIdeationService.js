@@ -5,6 +5,7 @@ import {
   GetCommand,
   QueryCommand,
   UpdateCommand,
+  DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
@@ -54,6 +55,27 @@ async function getIdeaById(userId, ideaId) {
     return result.Item || null;
   } catch (error) {
     console.error("Error fetching idea:", error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a specific idea by ID (Enforces userId partition key IDOR protection)
+ */
+async function deleteIdea(userId, ideaId) {
+  try {
+    const params = {
+      TableName: IDEATION_TABLE,
+      Key: {
+        userId,
+        ideaId,
+      },
+    };
+
+    await docClient.send(new DeleteCommand(params));
+    return true;
+  } catch (error) {
+    console.error("Error deleting idea:", error);
     throw error;
   }
 }
@@ -113,4 +135,4 @@ async function updateIdeaResearch(
   }
 }
 
-export { saveIdea, getIdeaById, getUserIdeas, updateIdeaResearch };
+export { saveIdea, getIdeaById, deleteIdea, getUserIdeas, updateIdeaResearch };

@@ -4,9 +4,12 @@ import {
   refineIdea,
   evaluateIdea,
   researchIdeaHandler,
+  refreshResearchHandler,
   selectIdea,
   getUserIdeasHandler,
+  deleteIdeaHandler,
   enrichIdeaResearchHandler,
+  getUserSnapshotsHandler,
 } from "../controllers/ideationController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 
@@ -29,6 +32,9 @@ router.post("/evaluate", evaluateIdea);
 // Research an idea
 router.post("/research", researchIdeaHandler);
 
+// Explicit Controlled Refresh of Research Snapshot
+router.post("/refresh-research", refreshResearchHandler);
+
 // Generate and persist research for an existing saved idea
 router.post("/enrich-research", enrichIdeaResearchHandler);
 
@@ -37,5 +43,11 @@ router.post("/select", selectIdea);
 
 // Get user's ideas
 router.get("/my-ideas", getUserIdeasHandler);
+
+// Delete an idea
+router.delete("/ideas/:ideaId", deleteIdeaHandler);
+
+// Get user's past research sessions history
+router.get("/history", getUserSnapshotsHandler);
 
 export default router;

@@ -8,6 +8,7 @@ import { usePublishing } from "@/hooks/usePublishing";
 import { useToast } from "@/hooks/useToast";
 import type { ScheduleRecord, SuggestedTimeSlot } from "@/lib/api/publishing";
 import { ModernContentCalendar } from "@/components/ui/ModernContentCalendar";
+import { getPlatformIcon, PlatformBadge } from "@/lib/platformConfig";
 import {
   FiAlertTriangle,
   FiCalendar,
@@ -486,8 +487,8 @@ export default function PlanningPage() {
         }`}
       >
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-700 text-sm font-bold text-zinc-100 shadow-sm">
-            {schedule.platform.charAt(0).toUpperCase()}
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-700 shadow-sm">
+            {getPlatformIcon(schedule.platform, "w-5 h-5")}
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-zinc-100">
@@ -525,9 +526,7 @@ export default function PlanningPage() {
           <span className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[10px] text-zinc-400 capitalize font-medium">
             {schedule.source}
           </span>
-          <span className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[10px] text-zinc-400 font-medium">
-            {schedule.platform}
-          </span>
+          <PlatformBadge platform={schedule.platform} />
           <span className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[10px] text-zinc-500 font-medium">
             {schedule.timezone || "Asia/Kolkata"}
           </span>

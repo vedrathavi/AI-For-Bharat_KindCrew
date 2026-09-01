@@ -20,6 +20,7 @@ import {
 } from "react-icons/fi";
 import { Badge } from "@/components/ui/Badge";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { getPlatformIcon } from "@/lib/platformConfig";
 
 const availablePlatforms = [
   { id: "linkedin", name: "LinkedIn" },
@@ -296,7 +297,10 @@ function CreateContentForm() {
                       : "bg-zinc-950/60 border-zinc-800/80 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
                   }`}
                 >
-                  <span>{p.name}</span>
+                  <span className="inline-flex items-center gap-2">
+                    {getPlatformIcon(p.id)}
+                    <span>{p.name}</span>
+                  </span>
                   {isSelected ? (
                     <span className="w-4 h-4 rounded-full bg-amber-400/20 text-amber-400 flex items-center justify-center text-[10px]">
                       <FiCheck className="w-3 h-3" />

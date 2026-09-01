@@ -1,205 +1,116 @@
-# KindCrew — Engineering Context
+# KindCrew — Engineering & Architecture Context
 
 ## 1. Product Overview
-KindCrew is an AI-powered content workflow platform built for social media creators. The product is designed to streamline the creator economy lifecycle by offering a modular, sequential four-stage pipeline:
-*   **Research & Ideation:** Researching niche-specific trends (via Google Trends) and generating, evaluating, and refining structured ideas.
-*   **Content Creation:** Generating platform-specific text drafts with tone, hook style, length, and call-to-action (CTA) customization options.
-*   **Publishing & Distribution:** Scheduling content to an automated content calendar (Google Calendar) and rendering copy-ready posts or executing auto-posting.
-*   **Analysis & Feedback:** Recording content performance metrics and feeding heuristic insights back into the ideation/creation layers.
+KindCrew is an AI-powered content workflow platform built for digital creators. It unifies research, ideation, drafting, and distribution across YouTube, LinkedIn, Twitter/X, Instagram, and other major social platforms.
 
-## 2. Current Product Architecture
-KindCrew supports two key workflow modes:
-*   **Guided Pipeline Mode:** Guides the creator step-by-step from niche research to idea generation, content drafting, scheduling, and performance feedback.
-*   **Standalone Mode:** Allows creators to jump directly to any stage (e.g., creating content from an already-known idea, scheduling a draft, or inputting analytics) without executing the preceding steps.
+---
 
-## 3. Repository Architecture
-The codebase is undergoing an incremental migration from a legacy Model-View-Controller (MVC) structure to a modular, feature-based architecture.
+## 2. End-to-End Architecture Flow
 
-*   **Backend:**
-    *   `/backend/src/server.js` and `/backend/src/app.js` form the new backend foundation.
-    *   Legacy entry points (`/backend/server.js` and `/backend/config/app.js`) are temporarily preserved for compatibility.
-    *   `/backend/src/modules/` contains the migrated, modular logic (e.g., `auth/` and `users/`).
-    *   Legacy files in `/backend/services/` (e.g., `user.service.js`) act as adapters that re-export or delegate to the new modular services to preserve backward compatibility.
-*   **Frontend:**
-    *   `/frontend/src/app/` uses Next.js App Router for page layouts and routes.
-    *   `/frontend/src/store/` manages client-side state via Zustand slices (e.g., `authSlice`, `contentSlice`).
-    *   `/frontend/src/lib/` contains the API clients and token storage helpers.
+```text
+USER IDEA / QUERY
+       ↓
+Stage I: Research Orchestrator
+       ↓
+Signal Collection: Tavily Live Search + Google Trends (Fallback: Null Provider)
+       ↓
+AI Synthesis: Google Gemma 3 12B on AWS Bedrock (ap-south-1)
+       ↓
+Multi-Factor Candidate Generation (Distinctness & Hard Platform Constraints)
+       ↓
+Deterministic Scoring & Ranking (Opportunity, Evidence, Novelty, Demand)
+       ↓
+Stage I → Stage II Contract (v2.0 with Full Corpus & Citations)
+       ↓
+Research Enrichment & Persistence (Saved with Idea in DynamoDB)
+       ↓
+Stage II: Content Generation (Master Hook, Sections, Platform Variants)
+       ↓
+Content Studio (25% Blueprint, 75% Platform Copy, Full-Width Draft)
+       ↓
+Content Library (Multi-Platform Cards, Modal Previews, Verified Icons)
+```
 
-## 4. Technology Stack
-*   **Frontend:** Next.js 16 (React 19, TypeScript), Tailwind CSS 4, Zustand 5, Recharts, Radix UI.
-*   **Backend:** Node.js 18+ (ES Modules), Express 5.
-*   **Database:** AWS DynamoDB (Document Client wrapper).
-*   **Authentication & Identity:** AWS Cognito User Pools (OAuth 2.0 / Hosted UI).
-*   **AI Engine:** AWS Bedrock (invoking `google.gemma-3-12b-it` or similar models).
-*   **External Integrations:** Google Trends API (via `google-trends-api`), Google Calendar API (via `googleapis`).
+---
 
-## 5. Authentication Architecture
-The system relies on AWS Cognito User Pools as the authentication authority. Custom JWT token generation was completely removed.
-*   **Flow:**
-    1.  User initiates login `/api/auth/login` → Redirects to Cognito Hosted UI.
-    2.  User logs in (Google OAuth or email/password) → Redirects to `/api/auth/callback`.
-    3.  Backend exchanges authorization code for Cognito tokens (ID token, access token, refresh token).
-    4.  Backend validates the Cognito ID token cryptographically (validating signature, issuer, client ID, audience, expiration, sub, and nonce).
-    5.  Backend establishes/resolves the user profile and updates login details, storing tokens in the server-side Express session.
-    6.  The user's Cognito access token is exposed to the frontend via the `/api/auth/session` bootstrap endpoint.
-*   **Token Lifecycle:**
-    *   **Access Token:** Kept in-memory on the frontend (`/frontend/src/lib/authToken.ts`). Sent with every request in the `Authorization: Bearer <token>` header.
-    *   **Refresh Token:** Stored securely server-side in the Express session. On a 401 error, the frontend calls `/api/auth/refresh` to refresh the session and fetch a new access token.
+## 3. Active Providers & Infrastructure
 
-## 6. User/Identity Model
-*   **Cognito Identity vs. Application Identity:** The stable Cognito identifier is the `sub` claim. However, resources in KindCrew are owned by `userId` (a UUID v4 generated by the application on signup).
-*   **Provider-First Mapping:** Users are resolved based on their auth provider identity (`provider` + `providerUserId`) stored in the `authProviders` list inside the user document.
-*   **Defaults:** New users are registered with `role: "user"` and `status: "active"`, controlled strictly by the backend.
-*   **Same-Email Conflict:** If an incoming verified Cognito email matches an existing application user but with a different authentication provider (e.g., trying to log in via Google when the account was registered with Email/Password), the backend rejects the login with `HTTP 409 (IDENTITY_LINKING_REQUIRED)`. Account linking is not yet implemented.
+### Web Search Provider
+- **Active Primary**: **Tavily Web Search** (`TavilyWebSearchProvider`).
+  - Supports recency-aware news intent (`topic: "news"`) for breaking current events and general queries (`topic: "general"`).
+  - Normalizes and deduplicates external sources with deterministic IDs (`src_1`, `src_2`, `src_3`).
+- **Graceful Fallback**: **Null Provider** (`NullWebSearchProvider`).
+  - Activated when live search is disabled or unavailable; guarantees graceful fallback synthesis without system crashes.
 
-## 7. Database Architecture
-KindCrew uses AWS DynamoDB as the primary data store.
-*   **Core Tables:**
-    *   `KindCrew-Users` (PK: `userId` [String], GSI: `EmailIndex` on `email`).
-    *   `KindCrew-CreatorProfiles` (PK: `creatorId` [String], GSI: `UserIdIndex`, `StatusIndex`, `NicheIndex`).
-    *   `KindCrew-ContentItems` (PK: `contentId`).
-    *   `KindCrew-PublishingSchedules` (PK: `scheduleId`).
-    *   `KindCrew-ScheduledPosts` (PK: `userId`, SK: `eventId`).
-*   **Known Database Limitations:**
-    *   DynamoDB Global Secondary Indexes (GSI) do not enforce uniqueness. The application checks for email uniqueness in the codebase, but atomic uniqueness reservation is unresolved.
+### AI Synthesis Engine
+- **Active Model**: **Google Gemma 3 12B** (`google.gemma-3-12b-it`).
+- **Inference Runtime**: **AWS Bedrock** via Converse API.
+- **Bedrock Region**: `ap-south-1` (Mumbai).
+- **Prompt Defense**: Robust context isolation (`<untrusted_search_evidence>`) preventing external prompt injection from web sources.
 
-## 8. AI Architecture
-AI features are powered by AWS Bedrock using the Converse API.
-*   **Default Model:** `google.gemma-3-12b-it` (configured in `render.yaml` / `.env` variables).
-*   **Resilience:** Incorporates structured input parsing, profile context building, and schema-valid response parameters.
+### Market Trend Provider
+- **Active Provider**: **Google Trends API** (`google-trends-api`).
+- Measures 12-month interest index, trajectory direction, and search momentum.
 
-## 9. External Integrations
-*   **Google Trends:** Retrieves interest-by-region and related queries for trend analysis.
-*   **Google Calendar:** Synchronizes scheduled posts as events directly in the user's calendar.
+### AWS & Identity Stack
+- **Authentication**: AWS Cognito User Pools (OAuth 2.0 / Hosted UI + Google Social Login & Email/Password).
+- **Database**: AWS DynamoDB (Single-table design with Document Client SDK).
+- **AWS Bedrock Web Search / Mantle**: *Disabled / Inactive* (Not part of the production pipeline).
 
-## 10. Completed Checkpoints
-*   **Checkpoint 1:** Backend entry scripts migrated to `/backend/src/server.js` and `/backend/src/app.js`. Native testing commands implemented (`npm run dev` and `npm start` utilizing the new entry points).
-*   **Checkpoint 2A (Auth Revamp):** Complete migration from legacy custom JWTs to verified Cognito identity and access token validation. Cryptographic token verification layer, Express token-parsing middleware, provider-first identity resolution, same-email conflict rejection (409), and fix for the undefined-fields DynamoDB update builder bug were successfully implemented.
+---
 
-## 11. Current Checkpoint
-*   **Deployment Stability & Checkpoint 2B Prep:** Resolving the Render deployment timeout issue and preparing the database/application ownership checks for Creator Profile integration.
+## 4. Key Implemented & Verified Behaviors
 
-## 12. Known Issues
-*   **Render Deployment Timeout:** After the Cognito auth migration, Render builds the backend successfully but times out during deployment reachability checks. The application listens on `PORT` but does not explicitly bind to the interface `0.0.0.0`, which might block Render's health check router.
+1. **Deterministic Source IDs**:
+   - Web search results are indexed deterministically as `src_1`, `src_2`, `src_3`.
+   - Candidate citations (`evidencedBySourceIds`) strictly map to actual discovered evidence, avoiding fabricated citations.
 
-## 13. Known Limitations
-*   **In-Memory Session Store:** The Express session uses an in-memory session store. This will cause users to be logged out whenever the backend service restarts or scales, which is a production limitation.
-*   **Account Linking:** Automatic or manual linking of multiple login methods (e.g. Google and Cognito native password) under the same email is not yet implemented.
+2. **Entity & Context Disambiguation**:
+   - Contextual entity resolution uses query phrasing and search evidence to identify specific organizations, locations, and events.
 
-## 14. Important Decisions / Do Not Revert
-*   **Cognito Authority:** Cognito remains the single source of truth for user authentication. No custom JWTs or external session tokens should be reintroduced.
-*   **Email Conflict Rejection:** Silently linking accounts or creating duplicate users on email matches is prohibited. A 409 conflict with code `IDENTITY_LINKING_REQUIRED` must be returned.
-*   **DynamoDB Update Expressiveness:** The fix in `dynamodb.service.js` which skips undefined fields in updates while keeping explicit null values must not be reverted.
-*   **In-Memory Token Storage:** Access tokens must remain in memory on the client side, and refresh tokens must remain in the Express session. Do not persist tokens in `localStorage`.
+3. **Multi-Factor Candidate Differentiation**:
+   - Evaluates pairwise token overlap on `angle`, `targetPainPoint`, `contentGap`, and `hook` to reject duplicate ideas.
+   - Generates 6 distinct, high-impact candidate opportunities.
 
-## 15. Testing Status
-*   **Unit Tests:** 38 unit tests passing (`node --test tests/*.test.js` from `/backend`).
-    *   Tests cover Cognito token verification, signature checking, kid selection, middleware, identity conflict resolution, DynamoDB update field serialization, validation, creator profile ownership/IDOR, onboarding skip, and auth provider state endpoint (Checkpoint 2D).
-*   **Integration status:** The backend compiles and unit tests successfully. The frontend Next.js application compiles successfully. Live Cognito logins are untested in local test suites because no live AWS credentials/redirects are hardcoded.
+4. **Deterministic Score Calibration**:
+   - Calibrated 10-point scoring algorithm combining Evidence Strength (25%), Novelty (25%), Audience Fit (25%), and Market Demand (25%).
+   - Preserves score variance across candidates without artificial homogenization.
 
-## 16. Deployment Status
-*   **Frontend:** Deployed to AWS Amplify.
-*   **Backend:** Deployed to Render (Singapore region, currently timing out on reachability check).
+5. **Stage I → Stage II Contract (v2.0)**:
+   - Carries structured `corpus` (entities, events, audience pain points, content gaps, keywords) and `enrichedResearch` directly into Stage II content generation.
 
-## 17. Checkpoint 2B — Completed Work & Architecture
-*   **Modular Architecture:** Established `backend/src/modules/creator-profile/` containing repository, service, controller, and route layers. Thin controller pattern delegating validation and logic to services.
-*   **Secure Ownership Model:** Restrict all profile actions to the authenticated Cognito session (`req.userId`). Client-controlled query/body user identifiers are ignored or verified to block parameter tampering.
-*   **Clean REST API:** Implemented session-based `/api/creator-profile` (GET, POST, PUT, DELETE) eliminating the need for `creatorId` parameters for self-management.
-*   **AI CreatorContext Integration:** Centralized profile sanitization in `creatorContext.js` (`buildCreatorContext`). All AI services (`ideationService.js`, `contentGenerationService.js`, `publishingController.js`) consume the sanitized context object, eliminating path mismatch bugs (such as `audience` and `creatorLevel` lookups) and preventing data leaks.
-*   **Security Fixes (IDOR Patches):**
-    *   *Direct Idea Hijacking:* Restricted `POST /api/content/from-idea` to retrieve the source idea strictly via the authenticated user ID (`req.userId`), rejecting external `ideaUserId` inputs.
-    *   *Public Info Leakage:* Removed insecure public routes `GET /creator-profiles/:creatorId`, `/status/:status`, and `/niche/:niche` that exposed creator strategies, competitors, and preferences.
-*   **Test Suite Coverage:** Created `backend/tests/creator-profile.test.js` containing 11+ new regression tests verifying 401 unauthenticated, 403 unauthorized, 409 profile conflict, and context sanitization checks. All 26 backend tests pass successfully.
-*   **Frontend Settings UI:** Replaced `/settings` placeholder page with a tabbed interface allowing full customization of niches, AI tone guidelines, formalities, CTAs, and content strategy metrics.
-*   **Onboarding Alignment:** Aligned Onboarding Zero-Idea generator forms to pre-populate parameters from the saved Creator Profile if available in the Zustand store.
+6. **Automatic Research Enrichment & Persistence**:
+   - Ideas saved or selected in My Ideas automatically carry rich audience pain points, competitor gaps, key insights, and recommended structure.
+   - All research and draft states survive page refreshes and browser restarts.
 
-## 18. Checkpoint 2C — Completed Work & FTUX Architecture
-*   **Onboarding Skip Persistence:** Configured backend route `POST /api/auth/skip-onboarding` mapping to `usersService.updateUserSettings`. Saving `onboardingSkipped = true` directly under user account settings prevents redirect loops when authenticating user accounts without profile records.
-*   **Lightweight 2-Step Onboarding Wizard:** Replaced the 1,500-line vertical questionnaire with a paginated 2-step setup:
-    *   *Step 1 (Focus):* Collects Primary Niche and Target Audience.
-    *   *Step 2 (Channels):* Collects active distribution platforms.
-*   **Progressive Profile Completion:** Derived setup checklist dynamically on dashboard `SetupBanner.tsx` showing progress indicator (e.g. `Account Setup`, `Niche Focus`, `Audience Target`, `Platforms Linked`, `Content Strategy`, `Brand Voice`). Users can complete strategic fields later in settings.
-*   **Actionable Empty States:** Updated empty dashboard cards for content drafts and ideas with explicit calls-to-action (e.g. `Create Content`, `Generate Ideas`, `Explore Ideas`) routing users straight to modules.
-*   **Session Expiration UX Interceptors:** Implemented double-layered token checks:
-    *   *Init failure:* Shows `"Your session has expired. Please sign in again."` toast in `authSlice.ts` and redirects to root.
-    *   *Fetch failure:* Catches 401s during active requests inside `apiClient.ts` to log out and redirect with a clean expired alert.
-*   **Test Suite Extension:** Added new assertions to `creator-profile.test.js` checking skipOnboarding action persistence, dashboard landing redirects, and CreatorContext defaults. All 28 backend test cases pass.
+7. **Responsive Content Studio & Library Layout**:
+   - Top 2-column grid with matching heights: 25% Left Content Blueprint and 75% Right Multi-Platform Copy (neutral platform tabs, warm amber headings, clean markdown).
+   - 100% Full-Width Master Draft positioned below the top grid.
+   - Content Library with verified platform branding and icons (YouTube, LinkedIn, Twitter, Instagram, Reddit).
 
-## 19. Checkpoint 2D — Login Methods Foundation
-*   **Security Settings Tab:** Added a "Security" tab to the existing Settings page (`/settings`) displaying login method connection status. No redesign of the existing Settings UI.
-*   **Provider State Endpoint:** `GET /api/auth/providers` — authenticated endpoint returning the current user's connected login methods as product-facing types (`google`, `password`). Protected by `authMiddleware`; derives user exclusively from `req.userId`. Never accepts client-provided user IDs.
-*   **Provider Detection Logic:** Inspects the existing `User.authProviders` array. Maps internal `cognito` type to product-facing `password` at the API presentation boundary only. Database representation unchanged.
-*   **Frontend Security UI:** Two provider cards (Google Account, Email & Password) showing "Connected" / "Not connected" status. Action buttons are disabled with "Coming Soon" labels.
-*   **Security Guarantees:**
-    *   Endpoint requires authentication (`authMiddleware`).
-    *   Uses `req.userId` exclusively — never trusts client-provided user IDs.
-    *   Never reveals another user's provider information (IDOR-safe).
-    *   Never exposes Cognito sub, provider IDs, access/refresh tokens, email discovery info, or internal database IDs.
-    *   Read-only — no provider state modification possible.
-*   **Account Linking Status:** Deliberately deferred. No `AdminLinkProviderForUser`, `AdminDeleteUser`, `AdminCreateUser`, or `AdminSetUserPassword` calls. No Cognito/AWS resource changes. Current Google/email behavior remains unchanged.
-*   **Test Suite Coverage:** Created `backend/tests/auth-providers.test.js` with 8 targeted tests:
-    1. Authenticated user with Google provider
-    2. Authenticated user with password provider
-    3. Authenticated user with both providers
-    4. Authenticated user with no provider metadata
-    5. Unauthenticated request → 401
-    6. Client cannot request another user's provider state (IDOR)
-    7. Provider IDs (sub) are not exposed
-    8. Tokens are not exposed
-*   All 38 backend tests pass. Frontend builds successfully.
+8. **Frontend Telemetry & Session Management**:
+   - Transparent development API logging (`[API] GET/POST ...`).
+   - Strict `useRef` session guards preventing infinite profile fetch loops.
+   - Automatic setup banner auto-hide at 100% completion.
 
-## 20. Checkpoint 2E — Cognito Account Linking
-*   **Audit & State Machine Architecture**: Modeled recoverable state machines for two distinct account-linking flows: Google → Email/Password (`linkGoogleToPassword`) and Email/Password → Google (`linkPasswordToGoogle`).
-*   **Identity Resolution & Legacy Migration**: Updated `getVerifiedCognitoIdentity` to extract Google-specific numeric IDs from `claims.identities` while carrying `cognitoSub`. Implemented a 2-step lookup in `users.service.js` (primary lookup by Google ID, legacy fallback by Cognito sub with targeted single-record providerId migration).
-*   **No Email Self-Healing**: Enforced strict invariant that email lookups are used strictly for conflict detection (`IDENTITY_LINKING_REQUIRED`), never for automatic account merging or identity repair.
-*   **Backend Endpoints**:
-    *   `POST /api/auth/link-password`: Enables Google-only accounts to create native Cognito credentials and link them securely.
-    *   `GET /api/auth/link-google`: Initiates Hosted UI OAuth redirect with linking session tracking (`req.session.linkingUserId`).
-    *   `GET /api/auth/callback`: Intercepts linking callbacks, executes AdminDeleteUser (ephemeral profile) + AdminLinkProviderForUser, updates `authProviders`, and redirects with state parameters.
-*   **Frontend UI & Modals**: Activated interactive buttons in Settings Security tab, added Password Input Modal overlay, and handled URL search parameter feedback (`?linking=success` / `?linking=error`).
+---
 
-## 21. Checkpoints 2F & 2G — Session Resilience & CreatorProfile Idempotency
-*   **Fast DynamoDB Session Lookup (`authMiddleware.js`)**: Solved 401 Unauthorized API jitter on dashboard/settings by reading active session user IDs directly from Express session and querying DynamoDB directly, eliminating token verification race conditions while keeping cryptographic JWT verification intact for external requests.
-*   **CreatorProfile Idempotent Reconciliation**: Reconciled CreatorProfile 409 Conflict handling without blindly overwriting existing profile data. Idempotent create returns existing profile if duplicate POST is issued, maintaining canonical invariant `KindCrew User.userId === CreatorProfile.userId`.
+## 5. Verification & Test Coverage
 
-## 22. Checkpoint 2H — Logout Routing & Canonical User Identity
-*   **Logout URL Routing**: Fixed frontend logout redirect URL resolution (`buildApiUrl("/api/auth/logout")`) to avoid 404s on port 3000 and cleanly clear server-side session cookies.
-*   **Canonical User Identity Preservation**: Updated `users.service.js` `getLoginUpdates()` to prevent native Cognito password logins from overwriting rich user profile names (e.g. Google-derived `Ved Rathavi`) with email prefix fallbacks (`not.vedrathavi`). Canonical user names and identity attributes in DynamoDB are preserved across both Google and Password logins.
+- **Backend Unit & Integration Tests**: **102 / 102 passing** (`npm test` in `/backend`).
+  - `auth-session.test.js`: Session lifecycle, token verification, CSRF, provider state endpoints.
+  - `cognito-linking.test.js`: Full bidirectional state machines, conflict checks, and idempotency.
+  - `creator-profile.test.js`: Profile CRUD, IDOR authorization barriers, context extraction.
+  - `stage1-hardening.test.js`: Concurrent promise deduplication, prompt injection defenses, IDOR snapshot protection, novelty scoring, fallback chains, trend signal resilience.
+  - `stage1-quality.test.js`: Deterministic source IDs, citation resolution, news vs evergreen queries, candidate distinctness, platform constraints.
+  - `users.identity.test.js`: Provider-first identity resolution, same-email conflict rejection, name attribute preservation.
+- **Frontend Production Build**: **20 / 20 routes passing** (`npm run build` in `/frontend`) with 0 TypeScript or lint errors.
 
-## 23. Checkpoint 2I — Bidirectional Account Linking & Edge Case Fortification
-*   **Direct Google OAuth for Account Linking**: `linkGoogle` invokes `getAuthorizationUrl(state, nonce, "Google")`, redirecting Email/Password users directly to Google's consent screen without Hosted UI login ambiguity.
-*   **Removed Unsupported Parameters**: Removed non-standard `prompt: "select_account"` which caused Cognito User Pool Hosted UI to return `error=invalid_request`.
-*   **Bidirectional Linking Flow**:
-    *   *Google ➔ Add Password*: Works via `POST /api/auth/link-password`.
-    *   *Email/Password ➔ Connect Google*: Works via `GET /api/auth/link-google` and callback orchestration (`linkPasswordToGoogle`).
-    *   *Cross-Account Conflict Handling*: Rejects attempts to link a Google account already owned by another KindCrew user with `GOOGLE_ACCOUNT_CONFLICT` (*"This Google account is already connected to another KindCrew user account"*).
-    *   *Idempotency*: Re-linking already connected accounts returns immediate success with 0 unnecessary AWS calls.
-*   **Cognito Required Attributes Handling**: Automatically populates required `given_name`, `family_name`, and `name` attributes with fallback derivation across all user creation and linking operations, eliminating `attributes required: [family_name]` failures.
-*   **Password Modal UX**: Added live interactive password complexity checklist and independent eye visibility toggles for password and confirmation fields.
+---
 
-## 24. Testing Status
-*   **Unit & Integration Tests**: 68 tests passing (`npm test` from `/backend`):
-    *   `auth-session.test.js`: Session lifecycle, token verification, CSRF, and provider state endpoints.
-    *   `cognito-linking.test.js`: Full bidirectional state machines, prefix stripping, error handling, conflict checks, and idempotency.
-    *   `cognito-token-verifier.test.js`: Cryptographic signature, kid selection, and token claims verification.
-    *   `creator-profile.test.js`: Profile CRUD, IDOR authorization barriers, context extraction, and duplicate idempotency.
-    *   `users.identity.test.js`: Provider-first identity resolution, same-email conflict rejection, and name attribute preservation.
-*   **Frontend Production Build**: `npm run build` passes with 20/20 static and dynamic routes compiling cleanly with 0 TypeScript or lint errors.
+## 6. Known Limitations
 
-## 25. Deployment Status
-*   **Frontend**: Deployed to AWS Amplify.
-*   **Backend**: Deployed to Render.
-
-## 26. Next Recommended Step
-1.  Begin Phase 3: Research / Ideation module expansion and direct platform publishing integrations.
-
-## 27. Change Log
-*   **2026-08-29:** Completed UI/UX Overhaul & Repository Cleanup: Completely redesigned the landing page into a clean Bento Grid layout, unified all settings tabs in the sidebar, integrated MarkdownRenderer across all ideation and content studio views, removed obsolete landing components and dead backend dependencies (`colors`, `openai`, `react-calendar`), created comprehensive `.env.example` templates, updated the root `README.md` into an onboarding guide, and verified all 68 backend tests and Next.js frontend production build.
-*   **2026-08-29:** Completed Checkpoint 2I: Fixed bidirectional account linking (Email/Password ➔ Google), removed invalid `prompt` parameter, resolved required Cognito attribute handling (`family_name`), added live password requirements checklist, and verified all 68 backend tests and Next.js frontend build.
-*   **2026-08-29:** Completed Checkpoint 2H: Fixed logout routing to backend API, fixed identity name preservation between Google and native password logins, and verified both Google and Password logins return identical `userId` and name attributes.
-*   **2026-08-29:** Completed Checkpoints 2F & 2G: Added fast DynamoDB session lookup in `authMiddleware.js`, eliminated dashboard 401 jitter, and made CreatorProfile 409 conflict handling strictly idempotent.
-*   **2026-08-29:** Completed Checkpoint 2E: Implemented secure Cognito Account Linking with state machines, identity resolution update with legacy migration, backend endpoints, password modal UI, and mock SDK test suite. All 46 unit tests passing. Frontend builds cleanly.
-*   **2026-08-28:** Completed Checkpoint 2D: Added Security settings tab with login method connection status, provider-state endpoint (`GET /api/auth/providers`), and 8 targeted auth provider tests. No Cognito/AWS changes. Account linking deferred. All 38 tests passing. Frontend builds successfully.
-*   **2026-08-28:** Completed Checkpoint 2C: Implemented paginated 2-step onboarding wizard, skip persistence settings, dashboard derived progress checklists, actionable empty states, and central session expiration toast alerts. All 28 tests passing.
-*   **2026-08-28:** Completed Checkpoint 2B: Implemented modular Creator Profile system, secured ownership checks, patched IDOR vulnerabilities on content ideas, integrated unified CreatorContext in AI services, and built the frontend Settings management UI. All 26 test cases passing.
-*   **2026-08-28:** Created initial `context.md` verifying the completed Cognito Authentication Revamp (Checkpoint 2A), verified the Next.js compilation, and analyzed the Render deployment timeout.
+1. **In-Memory Express Session**:
+   - Express session tokens use an in-memory session store; backend server restarts clear active server-side sessions. (Planned production enhancement: DynamoDB-backed session store).
+2. **Social Media Auto-Publishing**:
+   - Currently provides copy-ready, platform-optimized formatted drafts and calendar export; native OAuth write-publishing integrations to third-party social APIs are queued for future phases.

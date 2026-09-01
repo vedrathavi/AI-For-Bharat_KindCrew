@@ -1,6 +1,7 @@
 // Phase 1: Ideation & Research API Client
 import { API_URL } from "@/lib/constants";
 import { authenticatedFetch as fetch } from "@/lib/apiClient";
+import { ResearchSnapshot, Keyword, IdeaScore } from "@/types/research";
 
 const API_BASE_URL = API_URL || "";
 
@@ -10,7 +11,7 @@ async function parseErrorMessage(response: Response, fallbackMessage: string) {
     if (data?.error) return data.error;
     if (data?.message) return data.message;
   } catch {
-    // Ignore JSON parse errors and use fallback below.
+    // Ignore JSON parse errors
   }
 
   return `${fallbackMessage} (${response.status} ${response.statusText})`;
@@ -25,12 +26,9 @@ export interface ContentIdea {
   contentType?: string;
   hook?: string;
   hookIdea?: string;
-  scores: {
-    virality: number;
-    clarity: number;
-    competition: number;
-    overall: number;
-  };
+  contentHooks?: string[];
+  differentiation?: string;
+  scores: any;
 }
 
 export interface IdeaBrief {
@@ -43,13 +41,11 @@ export interface IdeaBrief {
   targetAudience: string;
   hookIdea: string;
   keyPoints: string[];
-  scores: {
-    virality: number;
-    clarity: number;
-    competition: number;
-    overall: number;
-  };
-  research?: {
+  keywords?: Keyword[];
+  scores: any;
+  researchSnapshotId?: string;
+  requestHash?: string;
+  research?: ResearchSnapshot | {
     audiencePainPoints?: string[];
     competitorPatterns?: string[];
     recommendedStructure?: string;
@@ -73,13 +69,11 @@ export interface ResearchData {
 export interface IdeaEvaluation {
   improvedTitle?: string;
   suggestedHook?: string;
+  contentHooks?: string[];
   format?: string;
-  scores: {
-    virality: number;
-    clarity: number;
-    competition: number;
-    overall: number;
-  };
+  differentiation?: string;
+  keywords?: Keyword[];
+  scores: any;
 }
 
 /**
@@ -92,11 +86,17 @@ export async function generateIdeas(
     audience: string;
     platforms: string[];
     goal: string;
+    enableLiveWebSearch?: boolean;
+    forceRefresh?: boolean;
   },
 ): Promise<{
   success: boolean;
   ideas: ContentIdea[];
   count?: number;
+  researchSnapshotId?: string;
+  requestHash?: string;
+  researchConfidence?: number;
+  keywords?: Keyword[];
   error?: string;
 }> {
   const response = await fetch(`${API_BASE_URL}/api/ideation/generate`, {
@@ -127,8 +127,18 @@ export async function refineIdea(
     roughIdea: string;
     audience: string;
     platform: string;
+    enableLiveWebSearch?: boolean;
+    forceRefresh?: boolean;
   },
-): Promise<{ success: boolean; ideas: ContentIdea[]; error?: string }> {
+): Promise<{
+  success: boolean;
+  ideas: ContentIdea[];
+  researchSnapshotId?: string;
+  requestHash?: string;
+  researchConfidence?: number;
+  keywords?: Keyword[];
+  error?: string;
+}> {
   const response = await fetch(`${API_BASE_URL}/api/ideation/refine`, {
     method: "POST",
     headers: {
@@ -155,8 +165,16 @@ export async function evaluateIdea(
     idea: string;
     audience: string;
     platform: string;
+    enableLiveWebSearch?: boolean;
+    forceRefresh?: boolean;
   },
-): Promise<{ success: boolean; evaluation: IdeaEvaluation; error?: string }> {
+): Promise<{
+  success: boolean;
+  evaluation: IdeaEvaluation;
+  researchSnapshotId?: string;
+  requestHash?: string;
+  error?: string;
+}> {
   const response = await fetch(`${API_BASE_URL}/api/ideation/evaluate`, {
     method: "POST",
     headers: {
@@ -177,6 +195,35 @@ export async function evaluateIdea(
 }
 
 /**
+ * Delete a saved idea (enforces userId session authentication)
+ */
+export async function deleteIdea(
+  token: string,
+  ideaId: string,
+): Promise<{
+  success: boolean;
+  message?: string;
+  ideaId?: string;
+  error?: string;
+}> {
+  const response = await fetch(`${API_BASE_URL}/api/ideation/ideas/${ideaId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      await parseErrorMessage(response, "Failed to delete idea"),
+    );
+  }
+
+  return response.json();
+}
+
+/**
  * Research an idea
  */
 export async function researchIdea(
@@ -184,8 +231,17 @@ export async function researchIdea(
   data: {
     idea: string;
     audience: string;
+    platform?: string;
+    enableLiveWebSearch?: boolean;
+    forceRefresh?: boolean;
   },
-): Promise<{ success: boolean; research: ResearchData; error?: string }> {
+): Promise<{
+  success: boolean;
+  research: ResearchSnapshot;
+  snapshotId?: string;
+  requestHash?: string;
+  error?: string;
+}> {
   const response = await fetch(`${API_BASE_URL}/api/ideation/research`, {
     method: "POST",
     headers: {

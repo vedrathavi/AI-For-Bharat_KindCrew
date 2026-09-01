@@ -3,15 +3,19 @@ import {
   generateIdeas,
   getUserIdeas,
   refineIdea as refineIdeaApi,
+  researchIdea as researchIdeaApi,
   ContentIdea,
   IdeaBrief,
 } from "@/lib/api/ideation";
+import { refreshResearch as refreshResearchApi } from "@/lib/api/research";
+import { ResearchSnapshot } from "@/types/research";
 
 export interface Idea extends ContentIdea {
   ideaId: string;
   userId: string;
   createdAt: string;
   updatedAt?: string;
+  researchSnapshotId?: string;
 }
 
 export interface IdeationProfile {
@@ -44,11 +48,13 @@ function normalizeSavedIdea(idea: IdeaBrief): Idea {
     format: idea.contentType || "post",
     contentType: idea.contentType,
     hookIdea: idea.hookIdea,
-    scores: {
-      virality: Number(idea.scores?.virality ?? 0),
-      clarity: Number(idea.scores?.clarity ?? 0),
-      competition: Number(idea.scores?.competition ?? 0),
-      overall: Number(idea.scores?.overall ?? 0),
+    researchSnapshotId: idea.researchSnapshotId,
+    scores: idea.scores || {
+      overall: 0,
+      opportunityScore: 0,
+      researchConfidence: 0,
+      scoringVersion: "2.0",
+      dimensions: {},
     },
   };
 }
@@ -60,28 +66,38 @@ export type IdeationSlice = {
   loading: boolean;
   error: string | null;
   profile: IdeationProfile;
+  researchSnapshot: ResearchSnapshot | null;
+  researchSnapshotId: string | null;
+  researchLoading: boolean;
 
   // Actions
   setProfile: (profile: IdeationProfile) => void;
   generateIdeas: (
     userId: string,
-    profile: IdeationProfile,
+    profile: IdeationProfile & { enableLiveWebSearch?: boolean },
   ) => Promise<Idea[] | null>;
   refineIdea: (
     userId: string,
     _legacy?: string,
-    data?: IdeationRefineInput,
+    data?: IdeationRefineInput & { enableLiveWebSearch?: boolean },
   ) => Promise<Idea[] | null>;
+  runResearch: (
+    idea: string,
+    audience: string,
+    forceRefresh?: boolean,
+    enableLiveWebSearch?: boolean,
+    platform?: string,
+  ) => Promise<ResearchSnapshot | null>;
+  refreshResearch: (snapshotId: string, enableLiveWebSearch?: boolean) => Promise<ResearchSnapshot | null>;
   fetchUserIdeas: (userId: string) => Promise<Idea[]>;
+  removeIdeaFromState: (ideaId: string) => void;
   selectIdea: (idea: Idea) => void;
   clearIdeas: () => void;
   clearError: () => void;
   setError: (error: string) => void;
 };
 
-
 function sanitizeIdea(idea: any): any {
-  // convert any object-valued fields to JSON strings to avoid React render errors
   if (!idea || typeof idea !== "object") return idea;
   const clean: any = { ...idea };
   ["title", "description", "angle", "platform", "format"].forEach((key) => {
@@ -102,7 +118,6 @@ export const createIdeationSlice: StateCreator<
   [],
   IdeationSlice
 > = (set, get) => ({
-
   ideas: [],
   selectedIdea: null,
   loading: false,
@@ -113,6 +128,9 @@ export const createIdeationSlice: StateCreator<
     platforms: [],
     goal: "",
   },
+  researchSnapshot: null,
+  researchSnapshotId: null,
+  researchLoading: false,
 
   setProfile: (profile) =>
     set({
@@ -120,15 +138,22 @@ export const createIdeationSlice: StateCreator<
       error: null,
     }),
 
-  generateIdeas: async (userId, profile) => {
+  generateIdeas: async (_userId, profile) => {
     set({ loading: true, error: null });
     try {
-      const result = await generateIdeas(userId, profile);
+      const token = (get() as unknown as AuthState).token;
+      if (!token) {
+        set({ loading: false, error: "No authentication token available" });
+        return null;
+      }
+
+      const result = await generateIdeas(token, profile);
       if (result.success && result.ideas) {
         const cleaned = (result.ideas as any[]).map(sanitizeIdea) as Idea[];
         set({
           ideas: cleaned,
           profile,
+          researchSnapshotId: result.researchSnapshotId || null,
           loading: false,
           error: null,
         });
@@ -152,14 +177,12 @@ export const createIdeationSlice: StateCreator<
       const token = (get() as unknown as AuthState).token;
 
       if (!token) {
-        const errorMsg = "No authentication token available";
-        set({ loading: false, error: errorMsg });
+        set({ loading: false, error: "No authentication token available" });
         return null;
       }
 
       if (!data?.roughIdea?.trim() || !data.audience?.trim() || !data.platform?.trim()) {
-        const errorMsg = "Missing required fields for refining idea";
-        set({ loading: false, error: errorMsg });
+        set({ loading: false, error: "Missing required fields for refining idea" });
         return null;
       }
 
@@ -173,6 +196,7 @@ export const createIdeationSlice: StateCreator<
         const cleaned = (result.ideas as any[]).map(sanitizeIdea) as Idea[];
         set({
           ideas: cleaned,
+          researchSnapshotId: result.researchSnapshotId || null,
           loading: false,
           error: null,
         });
@@ -186,6 +210,70 @@ export const createIdeationSlice: StateCreator<
       const errorMsg =
         error instanceof Error ? error.message : "Failed to refine idea";
       set({ loading: false, error: errorMsg });
+      return null;
+    }
+  },
+
+  runResearch: async (idea, audience, forceRefresh = false, enableLiveWebSearch = false, platform = "") => {
+    set({ researchLoading: true, error: null });
+    try {
+      const token = (get() as unknown as AuthState).token;
+      if (!token) {
+        set({ researchLoading: false, error: "No authentication token available" });
+        return null;
+      }
+
+      const result = await researchIdeaApi(token, {
+        idea,
+        audience,
+        platform,
+        enableLiveWebSearch,
+        forceRefresh,
+      });
+      if (result.success && result.research) {
+        set({
+          researchSnapshot: result.research,
+          researchSnapshotId: result.snapshotId || result.research.snapshotId,
+          researchLoading: false,
+          error: null,
+        });
+        return result.research;
+      }
+
+      set({ researchLoading: false, error: result.error || "Failed to conduct research" });
+      return null;
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to conduct research";
+      set({ researchLoading: false, error: errorMsg });
+      return null;
+    }
+  },
+
+  refreshResearch: async (snapshotId) => {
+    set({ researchLoading: true, error: null });
+    try {
+      const token = (get() as unknown as AuthState).token;
+      if (!token) {
+        set({ researchLoading: false, error: "No authentication token available" });
+        return null;
+      }
+
+      const result = await refreshResearchApi(token, snapshotId);
+      if (result.success && result.research) {
+        set({
+          researchSnapshot: result.research,
+          researchSnapshotId: result.newSnapshotId || result.research.snapshotId,
+          researchLoading: false,
+          error: null,
+        });
+        return result.research;
+      }
+
+      set({ researchLoading: false, error: result.error || "Failed to refresh research" });
+      return null;
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to refresh research";
+      set({ researchLoading: false, error: errorMsg });
       return null;
     }
   },
@@ -215,6 +303,12 @@ export const createIdeationSlice: StateCreator<
     }
   },
 
+  removeIdeaFromState: (ideaId: string) =>
+    set((state) => ({
+      ideas: state.ideas.filter((i) => i.ideaId !== ideaId),
+      selectedIdea: state.selectedIdea?.ideaId === ideaId ? null : state.selectedIdea,
+    })),
+
   selectIdea: (idea) =>
     set({
       selectedIdea: idea,
@@ -225,6 +319,8 @@ export const createIdeationSlice: StateCreator<
     set({
       ideas: [],
       selectedIdea: null,
+      researchSnapshot: null,
+      researchSnapshotId: null,
       profile: {
         niche: "",
         audience: "",

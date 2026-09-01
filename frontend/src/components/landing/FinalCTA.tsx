@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FiArrowRight, FiShield, FiZap } from "react-icons/fi";
+import { FiArrowRight, FiCreditCard, FiShield, FiZap } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 
 interface FinalCTAProps {
@@ -47,7 +47,10 @@ export function FinalCTA({ onLogin, loading }: FinalCTAProps) {
             <FiZap className="w-3.5 h-3.5 text-amber-400" />
             Instant Google & Password Linking
           </span>
-          <span>Zero Credit Card Required</span>
+          <span className="flex items-center gap-1.5">
+            <FiCreditCard className="w-3.5 h-3.5 text-amber-400" />
+            Zero Credit Card Required
+          </span>
         </div>
       </div>
     </section>

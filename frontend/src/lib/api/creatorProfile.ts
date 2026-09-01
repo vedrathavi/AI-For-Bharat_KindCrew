@@ -77,13 +77,6 @@ export async function createCreatorProfile(
   profileData: CreatorProfileData,
 ): Promise<CreatorProfile> {
   try {
-    console.log("🌐 [API] Creating profile - sending to backend:", {
-      competitors: profileData.competitors,
-      platforms: profileData.platforms,
-      niche: profileData.niche,
-      fullData: JSON.stringify(profileData),
-    });
-
     const response = await fetch(`${API_BASE}/creator-profile`, {
       method: "POST",
       headers: {
@@ -121,10 +114,6 @@ export async function createCreatorProfile(
     }
 
     const data = await response.json();
-    console.log("🌐 [API] Create response received:", {
-      competitors: data.data?.competitors,
-      platforms: data.data?.platforms,
-    });
     return data.data;
   } catch (error: unknown) {
     if (error instanceof TypeError) {
@@ -170,13 +159,6 @@ export async function updateCreatorProfile(
   _creatorId: string, // Kept for TS signature compatibility but unused
   profileData: Partial<CreatorProfileData>,
 ): Promise<CreatorProfile> {
-  console.log("🌐 [API] Updating profile - sending to backend:", {
-    competitors: profileData.competitors,
-    platforms: profileData.platforms,
-    niche: profileData.niche,
-    fullData: JSON.stringify(profileData),
-  });
-
   const response = await fetch(`${API_BASE}/creator-profile`, {
     method: "PUT",
     headers: {

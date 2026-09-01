@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useIdeation } from "@/hooks/useIdeation";
+import { useCreatorProfile } from "@/hooks/useCreatorProfile";
 import { MarkdownRenderer } from "@/components/ui/MarkdownRenderer";
-import { Badge } from "@/components/ui/Badge";
+import { interpretScore } from "@/lib/scoring/scoreInterpreter";
+import { PlatformBadge, FormatBadge, getPlatformIcon, getPlatformDisplayName } from "@/lib/platformConfig";
 import {
   FiArrowLeft,
   FiArrowRight,
@@ -18,15 +20,11 @@ import {
   FiAlertCircle,
 } from "react-icons/fi";
 
-const formatScore = (score: number | string | undefined): string => {
-  if (typeof score === "number") return score.toFixed(1);
-  if (typeof score === "string") return parseFloat(score).toFixed(1);
-  return "0.0";
-};
-
 export default function SomeIdeaPage() {
   const router = useRouter();
-  const { userInfo } = useAuth();
+  const { userInfo, token, authReady } = useAuth();
+  const authenticated = !!token && !!userInfo;
+  const { creatorProfile, fetchProfile, profileChecked, profileLoading } = useCreatorProfile();
   const {
     ideas,
     selectedIdea,
@@ -37,15 +35,31 @@ export default function SomeIdeaPage() {
     clearIdeas,
   } = useIdeation();
 
+  const [enableLiveWebSearch, setEnableLiveWebSearch] = useState(false);
   const [formData, setFormData] = useState({
     roughIdea: "",
-    audience: "startup founders",
+    audience: "",
     platform: "linkedin",
   });
 
+  useEffect(() => {
+    if (authReady && token && authenticated && !profileChecked && !profileLoading) {
+      fetchProfile(token);
+    }
+  }, [authReady, token, authenticated, profileChecked, profileLoading, fetchProfile]);
+
+  useEffect(() => {
+    if (creatorProfile?.targetAudience) {
+      setFormData((prev) => ({
+        ...prev,
+        audience: prev.audience || creatorProfile.targetAudience,
+      }));
+    }
+  }, [creatorProfile]);
+
   const handleRefine = async () => {
     if (!userInfo?.userId || !formData.roughIdea.trim()) return;
-    await refineIdeaAction(userInfo.userId, "", formData);
+    await refineIdeaAction(userInfo.userId, "", { ...formData, enableLiveWebSearch });
   };
 
   const handleSelectIdea = (idea: (typeof ideas)[0]) => {
@@ -93,7 +107,7 @@ export default function SomeIdeaPage() {
             Refine Your Rough Idea
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400">
-            Transform a raw concept into 5 high-converting strategic angles tailored for your audience.
+            Transform a raw concept into 6 high-converting strategic angles tailored for your audience.
           </p>
         </div>
 
@@ -151,6 +165,28 @@ export default function SomeIdeaPage() {
               </div>
             </div>
 
+            {/* Live Web Research Toggle */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/60">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-zinc-200">Live Web Research</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400">Optional</span>
+                </div>
+                <p className="text-[11px] text-zinc-400">
+                  Search current web conversations and sources for fresher opportunities.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={enableLiveWebSearch}
+                  onChange={(e) => setEnableLiveWebSearch(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+              </label>
+            </div>
+
             <button
               type="button"
               onClick={handleRefine}
@@ -158,7 +194,7 @@ export default function SomeIdeaPage() {
               className="w-full py-3 px-6 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs sm:text-sm font-semibold transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center justify-center gap-2"
             >
               <FiEdit3 className="w-4 h-4" />
-              {loading ? "Generating 5 Strategic Angles..." : "Refine into 5 Angles"}
+              {loading ? "Generating 6 Strategic Angles..." : "Refine into 6 Angles"}
             </button>
           </div>
         )}
@@ -177,7 +213,7 @@ export default function SomeIdeaPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold text-zinc-100">
-                  5 Refined Strategic Angles
+                  6 Refined Strategic Angles
                 </h2>
                 <p className="text-xs text-zinc-400 mt-0.5">
                   Select your strongest angle to advance into automated research and drafting.
@@ -194,8 +230,17 @@ export default function SomeIdeaPage() {
             </div>
 
             <div className="space-y-4">
-              {ideas.map((idea, index) => {
+              {[...ideas]
+                .sort((a, b) => {
+                  const scoreA = Number(a.scores?.opportunityScore ?? a.scores?.overall ?? 0);
+                  const scoreB = Number(b.scores?.opportunityScore ?? b.scores?.overall ?? 0);
+                  return scoreB - scoreA;
+                })
+                .map((idea, index) => {
                 const isSelected = selectedIdea === idea;
+                const oppScore = Number(idea.scores?.opportunityScore || idea.scores?.overall || 0);
+                const scoreInterpretation = interpretScore(oppScore);
+
                 return (
                   <div
                     key={index}
@@ -209,71 +254,35 @@ export default function SomeIdeaPage() {
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                       <div className="space-y-2 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="default" className="text-[10px]">
-                            {idea.platform}
-                          </Badge>
-                          <Badge variant="secondary" className="text-[10px]">
-                            {idea.format}
-                          </Badge>
+                          <PlatformBadge platform={idea.platform} />
+                          {idea.format && <FormatBadge format={idea.format} />}
                         </div>
                         <h3 className="text-base font-bold text-zinc-100">
                           {idea.title}
                         </h3>
                         <div className="text-xs text-zinc-300">
-                          <span className="font-semibold text-zinc-400">Angle: </span>
+                          <span className="font-semibold text-zinc-200">Angle: </span>
                           <MarkdownRenderer content={idea.angle || ""} className="inline" />
                         </div>
                         {idea.hook && (
                           <div className="p-3 rounded-xl border border-zinc-800/80 bg-zinc-950/80 flex items-start gap-2.5">
                             <FiTarget className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                             <div className="text-xs text-zinc-300 flex-1">
-                              <span className="font-semibold text-amber-400">Hook: </span>
+                              <span className="font-semibold text-zinc-200">Hook: </span>
                               <MarkdownRenderer content={idea.hook} className="inline" />
                             </div>
                           </div>
                         )}
                       </div>
 
-                      {/* Overall Score Meter */}
-                      <div className="flex sm:flex-col items-center justify-between sm:justify-center p-3 rounded-xl bg-zinc-950 border border-zinc-800 shrink-0 min-w-[90px]">
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-500">
-                          Overall Score
+                      {/* Opportunity Score Badge */}
+                      <div className="flex sm:flex-col items-center justify-between sm:justify-center p-3 rounded-xl bg-zinc-950 border border-zinc-800 shrink-0 min-w-[110px] space-y-1 text-center">
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${scoreInterpretation.badgeColor}`}>
+                          {scoreInterpretation.label}
                         </span>
-                        <span
-                          className={`text-2xl font-black ${getScoreColor(
-                            Number(idea.scores?.overall || 0),
-                          )}`}
-                        >
-                          {formatScore(idea.scores?.overall)}
+                        <span className="text-2xl font-bold text-zinc-100">
+                          {oppScore > 0 ? oppScore.toFixed(1) : "—"}
                         </span>
-                      </div>
-                    </div>
-
-                    {/* Sub-Scores Matrix */}
-                    <div className="grid grid-cols-3 gap-2 pt-3 border-t border-zinc-800/60 text-center">
-                      <div className="p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/60">
-                        <p className="text-[10px] font-semibold text-zinc-500 uppercase">
-                          Virality
-                        </p>
-                        <p className={`text-sm font-bold mt-0.5 ${getScoreColor(Number(idea.scores?.virality || 0))}`}>
-                          {formatScore(idea.scores?.virality)}
-                        </p>
-                      </div>
-                      <div className="p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/60">
-                        <p className="text-[10px] font-semibold text-zinc-500 uppercase">
-                          Clarity
-                        </p>
-                        <p className={`text-sm font-bold mt-0.5 ${getScoreColor(Number(idea.scores?.clarity || 0))}`}>
-                          {formatScore(idea.scores?.clarity)}
-                        </p>
-                      </div>
-                      <div className="p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/60">
-                        <p className="text-[10px] font-semibold text-zinc-500 uppercase">
-                          Comp Edge
-                        </p>
-                        <p className={`text-sm font-bold mt-0.5 ${getScoreColor(10 - Number(idea.scores?.competition || 0))}`}>
-                          {formatScore(idea.scores?.competition)}
-                        </p>
                       </div>
                     </div>
 

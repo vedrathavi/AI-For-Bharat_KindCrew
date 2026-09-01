@@ -69,6 +69,10 @@ class ContentIdea {
       keyInsights: [],
     };
     this.status = data.status || "draft";
+    this.schemaVersion = data.schemaVersion || "1.0";
+    this.researchSnapshotId = data.researchSnapshotId || null;
+    this.requestHash = data.requestHash || null;
+    this.contract = data.contract || null;
     this.createdAt = data.createdAt || new Date().toISOString();
     this.updatedAt = data.updatedAt || null;
   }
@@ -110,6 +114,10 @@ class ContentIdea {
       scores: this.scores,
       research: this.research,
       status: this.status,
+      schemaVersion: this.schemaVersion,
+      researchSnapshotId: this.researchSnapshotId,
+      requestHash: this.requestHash,
+      contract: this.contract,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };
