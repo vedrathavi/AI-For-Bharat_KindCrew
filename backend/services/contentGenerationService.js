@@ -20,7 +20,7 @@ function getWebResearchProvider() {
 /**
  * Execute live Tavily web research for content drafting and fact grounding
  */
-export async function performContentWebSearch(topic, audience = "") {
+async function performContentWebSearch(topic, audience = "") {
   try {
     const cleanTopic = String(topic || "").trim();
     if (!cleanTopic) return { sources: [], webResearch: { enabled: false } };
@@ -52,7 +52,7 @@ export async function performContentWebSearch(topic, audience = "") {
 /**
  * Format verified web sources into structured prompt context
  */
-export function formatWebResearchContext(sources = []) {
+function formatWebResearchContext(sources = []) {
   if (!Array.isArray(sources) || sources.length === 0) return "";
   const lines = sources.slice(0, 5).map((s, idx) => {
     const id = s.sourceId || `src_${idx + 1}`;
