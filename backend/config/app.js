@@ -4,6 +4,7 @@ import session from "express-session";
 import errorHandler from "../middleware/errorHandler.js";
 import authRoutes from "../routes/authRoutes.js";
 import creatorProfileRoutes from "../routes/creatorProfileRoutes.js";
+import creatorProfileSessionRoutes from "../src/modules/creator-profile/creatorProfile.routes.js";
 import publishingRoutes from "../routes/publishingRoutes.js";
 import bedrockRoutes from "../routes/bedrockRoutes.js";
 import ideationRoutes from "../routes/ideationRoutes.js";
@@ -78,6 +79,7 @@ app.use("/api/auth", authRoutes);
 
 // Creator Profile routes
 app.use("/api", creatorProfileRoutes);
+app.use("/api", creatorProfileSessionRoutes);
 
 // Publishing routes (scheduling / posting)
 app.use("/api", publishingRoutes);

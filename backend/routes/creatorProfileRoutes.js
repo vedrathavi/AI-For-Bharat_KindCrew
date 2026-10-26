@@ -20,17 +20,17 @@ const router = express.Router();
  * Derives authenticated context strictly from req.userId, preventing IDOR.
  */
 
-// Create profile
-router.post("/creator-profiles", authMiddleware, createProfile);
+// Create profile (supports both singular /creator-profile and plural /creator-profiles)
+router.post(["/creator-profile", "/creator-profiles"], authMiddleware, createProfile);
 
 // Get profile
-router.get("/creator-profiles/me/profile", authMiddleware, getProfile);
+router.get(["/creator-profile", "/creator-profiles/me/profile"], authMiddleware, getProfile);
 
 // Update profile (ignores creatorId parameter and updates req.userId profile)
-router.put("/creator-profiles/:creatorId", authMiddleware, updateProfile);
+router.put(["/creator-profile", "/creator-profiles/:creatorId"], authMiddleware, updateProfile);
 
 // Delete profile
-router.delete("/creator-profiles/:creatorId", authMiddleware, deleteProfile);
+router.delete(["/creator-profile", "/creator-profiles/:creatorId"], authMiddleware, deleteProfile);
 
 // Competitor and Platform updates (sub-resource routes)
 router.post(
