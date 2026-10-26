@@ -3,9 +3,71 @@ import {
   ConverseCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 import { buildCreatorContext } from "../src/modules/creator-profile/creatorContext.js";
+import { CompositeWebResearchProvider } from "../src/modules/ideation/research/providers/webSearch.provider.js";
 
 const client = new BedrockRuntimeClient({ region: process.env.AWS_REGION });
 const MODEL_ID = process.env.BEDROCK_DEFAULT_MODEL;
+
+let webResearchProviderInstance = null;
+
+function getWebResearchProvider() {
+  if (!webResearchProviderInstance) {
+    webResearchProviderInstance = new CompositeWebResearchProvider();
+  }
+  return webResearchProviderInstance;
+}
+
+/**
+ * Execute live Tavily web research for content drafting and fact grounding
+ */
+export async function performContentWebSearch(topic, audience = "") {
+  try {
+    const cleanTopic = String(topic || "").trim();
+    if (!cleanTopic) return { sources: [], webResearch: { enabled: false } };
+
+    const provider = getWebResearchProvider();
+    const queries = [
+      `${cleanTopic} facts statistics data`.trim(),
+      `${cleanTopic} key insights developments`.trim(),
+    ];
+
+    console.log(`[CONTENT_TAVILY] Executing live web search for: "${cleanTopic}"`);
+    const research = await provider.executeResearch(queries, {
+      enableLiveWebSearch: true,
+      maxResults: 5,
+      topic: "general",
+    });
+
+    return {
+      sources: research.sources || [],
+      webResearch: research.webResearch || {},
+      researchAvailability: research.researchAvailability || {},
+    };
+  } catch (err) {
+    console.warn("[CONTENT_TAVILY] Live web search fallback:", err.message);
+    return { sources: [], webResearch: { enabled: false } };
+  }
+}
+
+/**
+ * Format verified web sources into structured prompt context
+ */
+export function formatWebResearchContext(sources = []) {
+  if (!Array.isArray(sources) || sources.length === 0) return "";
+  const lines = sources.slice(0, 5).map((s, idx) => {
+    const id = s.sourceId || `src_${idx + 1}`;
+    const title = s.title || "Live Web Source";
+    const domain = s.domain || "web";
+    const snippet = s.snippet || "";
+    return `  [${id}] "${title}" (${domain}): ${snippet}`;
+  });
+
+  return `\n\n<verified_live_web_research>
+Live Verified Facts & Evidence (from Tavily Web Search):
+${lines.join("\n")}
+</verified_live_web_research>
+Instruction: Ground your output with factual accuracy using the concrete data points, metrics, and insights discovered from live web search above.`;
+}
 
 /**
  * Generate content outline from idea
@@ -13,6 +75,16 @@ const MODEL_ID = process.env.BEDROCK_DEFAULT_MODEL;
 async function generateOutline(ideaInput, creatorProfile = null) {
   const { topic, targetAudience, contentType, hookIdea, keyPoints, platforms } =
     ideaInput;
+
+  let verifiedSources = ideaInput.verifiedSources || ideaInput.research?.verifiedSources || [];
+  if (verifiedSources.length === 0 && topic && process.env.TAVILY_API_KEY) {
+    const searchRes = await performContentWebSearch(topic, targetAudience);
+    verifiedSources = searchRes.sources;
+    ideaInput.verifiedSources = verifiedSources;
+    if (ideaInput.research) {
+      ideaInput.research.verifiedSources = verifiedSources;
+    }
+  }
 
   const primaryPlatform = Array.isArray(platforms) ? platforms[0] : platforms;
   const keyPointsList = Array.isArray(keyPoints)
@@ -30,12 +102,14 @@ async function generateOutline(ideaInput, creatorProfile = null) {
 - Voice Tone: ${ctx.tone}`;
   }
 
+  const webResearchContext = formatWebResearchContext(verifiedSources);
+
   const prompt = `Create a structured content outline for a ${contentType} post.
 
 Topic: ${topic}
 Platform: ${primaryPlatform}
 Target Audience: ${targetAudience}
-Hook Idea: ${hookIdea || "Create an engaging hook"}${profileContext}
+Hook Idea: ${hookIdea || "Create an engaging hook"}${profileContext}${webResearchContext}
 
 Key Points:
 ${keyPointsList}
@@ -50,7 +124,7 @@ Return ONLY valid JSON with this structure:
   "estimatedWordCount": 150
 }
 
-Make the outline engaging and optimized for ${primaryPlatform}.`;
+Make the outline engaging, factually grounded with real-time data, and optimized for ${primaryPlatform}.`;
 
   const params = {
     modelId: MODEL_ID,
@@ -86,6 +160,18 @@ async function generateDraft(ideaInput, outline, creatorProfile = null) {
   const { targetAudience, contentType, platforms, preferences } = ideaInput;
   const primaryPlatform = Array.isArray(platforms) ? platforms[0] : platforms;
 
+  let verifiedSources = ideaInput.verifiedSources || ideaInput.research?.verifiedSources || [];
+  if (verifiedSources.length === 0 && ideaInput.topic && process.env.TAVILY_API_KEY) {
+    const searchRes = await performContentWebSearch(ideaInput.topic, targetAudience);
+    verifiedSources = searchRes.sources;
+    ideaInput.verifiedSources = verifiedSources;
+    if (ideaInput.research) {
+      ideaInput.research.verifiedSources = verifiedSources;
+    }
+  }
+
+  const webResearchContext = formatWebResearchContext(verifiedSources);
+
   const ctx = buildCreatorContext(creatorProfile);
   const tone = preferences?.tone || (creatorProfile ? ctx.tone : "professional");
   const length = preferences?.length || "medium";
@@ -110,7 +196,7 @@ async function generateDraft(ideaInput, outline, creatorProfile = null) {
 
 Target Audience: ${targetAudience}
 Tone: ${tone}
-Length: ${length}${profileContext}
+Length: ${length}${profileContext}${webResearchContext}
 
 Hook:
 ${outline.hook}
@@ -128,6 +214,7 @@ Guidelines:
 - Use emojis sparingly if appropriate for ${primaryPlatform}
 - Make it conversational and engaging
 - Focus on value for ${targetAudience}
+- Incorporate specific facts, data points, or examples from the live web research evidence when relevant
 
 Return ONLY the complete post text, ready to publish.`;
 
@@ -612,4 +699,6 @@ export {
   generateYouTubeVariant,
   generateMediumVariant,
   generateVideoScript,
+  performContentWebSearch,
+  formatWebResearchContext,
 };

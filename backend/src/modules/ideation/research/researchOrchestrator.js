@@ -40,7 +40,7 @@ export class ResearchOrchestrator {
     platform,
     creatorProfile = null,
     previousItems = [],
-    enableLiveWebSearch = false,
+    enableLiveWebSearch = Boolean(process.env.TAVILY_API_KEY),
     forceRefresh = false,
     parentSnapshotId = null,
   }) {

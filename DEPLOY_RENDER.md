@@ -89,6 +89,9 @@ CONTENT_TABLE=KindCrew-ContentItems
 # AWS Bedrock
 BEDROCK_DEFAULT_MODEL=google.gemma-3-12b-it
 
+# Live Web Search (Tavily API)
+TAVILY_API_KEY=YOUR_TAVILY_API_KEY
+
 # Frontend URL (update after deploying frontend)
 FRONTEND_URL=http://localhost:3000
 ```

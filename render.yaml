@@ -55,6 +55,10 @@ services:
       - key: BEDROCK_DEFAULT_MODEL
         value: google.gemma-3-12b-it
 
+      # Tavily Web Search API (Live Grounding for all stages)
+      - key: TAVILY_API_KEY
+        sync: false # Set in Render dashboard from your Tavily API key
+
       # Frontend URL - IMPORTANT: Update this with your deployed Amplify URL
       # Example: https://main.d1234567890.amplifyapp.com
       - key: FRONTEND_URL

@@ -172,13 +172,29 @@ class PublishingService {
       platformGuide[platform?.toLowerCase()] ||
       `Analyse ${platform} audience behaviour to pick the best days and times.`;
 
+    let liveWebInsight = "";
+    if (process.env.TAVILY_API_KEY) {
+      try {
+        const { performContentWebSearch } = await import("./contentGenerationService.js");
+        const searchResult = await performContentWebSearch(`${platform} best time to post algorithm engagement ${new Date().getFullYear()}`);
+        if (searchResult?.sources?.length > 0) {
+          const topSnippets = searchResult.sources.slice(0, 2).map((s) => s.snippet).filter(Boolean).join(" ");
+          if (topSnippets) {
+            liveWebInsight = `\nReal-Time Platform Web Research (from Tavily):\n${topSnippets}\n`;
+          }
+        }
+      } catch (_err) {
+        // Non-blocking fallback
+      }
+    }
+
     const prompt = `You are a data-driven social media strategist.
 
 A creator needs the 3 best times to post on ${platform}.
 Use the details below to give personalised, platform-specific suggestions.
 
 Platform: ${platform}
-Platform insight: ${platformHint}
+Platform insight: ${platformHint}${liveWebInsight}
 Audience: ${audience || "general"}
 Creator level: ${creatorLevel || "beginner"}
 Timezone: ${timezone || "Asia/Kolkata"}

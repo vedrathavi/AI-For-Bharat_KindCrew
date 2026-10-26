@@ -4,6 +4,7 @@ import {
   generateDraft,
   generateAllPlatformVariants,
   generateScriptsForPlatforms,
+  performContentWebSearch,
 } from "../services/contentGenerationService.js";
 import {
   saveContent,
@@ -70,6 +71,8 @@ function normalizeContentInput(input) {
     platforms: normalizedPlatforms,
     hookIdea: input.hookIdea || null,
     keyPoints: input.keyPoints || [],
+    verifiedSources: Array.isArray(input.verifiedSources) ? input.verifiedSources : [],
+    research: input.research || null,
     preferences: {
       tone: input.preferences?.tone || input.tone || "professional",
       length: input.preferences?.length || input.length || "medium",
@@ -116,6 +119,11 @@ async function createFromIdeaHandler(req, res) {
       });
     }
 
+    const verifiedSources =
+      idea.research?.verifiedSources ||
+      idea.verifiedSources ||
+      (Array.isArray(idea.sources) ? idea.sources : []);
+
     // Normalize the idea into content input format
     const contentInput = normalizeContentInput({
       source: "phase1",
@@ -134,6 +142,8 @@ async function createFromIdeaHandler(req, res) {
       hookIdea: idea.hook,
       keyPoints: idea.keyPoints || [],
       preferences,
+      verifiedSources,
+      research: idea.research,
     });
 
     // Generate content package
@@ -210,10 +220,21 @@ async function generateCompleteContent(userId, contentInput) {
     // No creator profile found, continuing without profile context
   }
 
-  // Step 1: Generate outline
+  // Live Tavily Web Search Grounding for Content Creation Stage
+  let verifiedSources = contentInput.verifiedSources || contentInput.research?.verifiedSources || [];
+  let webResearch = contentInput.research?.webResearch || null;
+
+  if (verifiedSources.length === 0 && contentInput.topic && process.env.TAVILY_API_KEY) {
+    const searchRes = await performContentWebSearch(contentInput.topic, contentInput.targetAudience);
+    verifiedSources = searchRes.sources || [];
+    webResearch = searchRes.webResearch || null;
+    contentInput.verifiedSources = verifiedSources;
+  }
+
+  // Step 1: Generate outline with Tavily research
   const outline = await generateOutline(contentInput, creatorProfile);
 
-  // Step 2: Generate draft content
+  // Step 2: Generate draft content grounded in Tavily research
   const draft = await generateDraft(contentInput, outline, creatorProfile);
 
   // Step 3: Generate platform variants
@@ -231,6 +252,24 @@ async function generateCompleteContent(userId, contentInput) {
     contentInput.platforms
   );
 
+  // Assemble full research blueprint for Content Studio
+  const research = {
+    verifiedSources,
+    webResearch,
+    audiencePainPoints: contentInput.research?.audiencePainPoints || [
+      `Seeking actionable clarity, proven frameworks, and real-time guidance on ${contentInput.topic}`,
+      `Need to navigate conflicting information with validated real-world evidence`,
+    ],
+    competitorPatterns: contentInput.research?.competitorPatterns || [
+      `Competitor content remains surface-level and lacks verified live statistics`,
+    ],
+    recommendedStructure:
+      contentInput.research?.recommendedStructure ||
+      `## Framework\n1. Hook & Tension\n2. Evidence & In-Depth Analysis\n3. Actionable Takeaway for ${contentInput.targetAudience}`,
+    keywords: contentInput.research?.keywords || [contentInput.topic],
+    provider: verifiedSources.length > 0 ? "tavily" : "none",
+  };
+
   // Step 5: Create complete content package
   const contentPackage = {
     contentId,
@@ -246,6 +285,8 @@ async function generateCompleteContent(userId, contentInput) {
     draft,
     platformVariants,
     scripts: Object.keys(scripts).length > 0 ? scripts : undefined,
+    research,
+    verifiedSources,
     distribution: {
       status: "draft",
       platformTargets: contentInput.platforms,

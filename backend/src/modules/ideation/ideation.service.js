@@ -39,6 +39,9 @@ async function getPreviousItems(userId) {
   }
 }
 
+const resolveLiveSearch = (val) =>
+  val !== undefined ? Boolean(val) : Boolean(process.env.TAVILY_API_KEY);
+
 /**
  * Zero Idea Flow: Generate 3-7 evidence-backed opportunities from profile
  */
@@ -59,7 +62,7 @@ export async function generateIdeasFlow(userId, payload) {
     platform: primaryPlatform,
     creatorProfile,
     previousItems,
-    enableLiveWebSearch,
+    enableLiveWebSearch: resolveLiveSearch(enableLiveWebSearch),
     forceRefresh,
   });
 
@@ -90,7 +93,7 @@ export async function refineIdeaFlow(userId, payload) {
     platform,
     creatorProfile,
     previousItems,
-    enableLiveWebSearch,
+    enableLiveWebSearch: resolveLiveSearch(enableLiveWebSearch),
     forceRefresh,
   });
 
@@ -121,7 +124,7 @@ export async function evaluateIdeaFlow(userId, payload) {
     platform,
     creatorProfile,
     previousItems,
-    enableLiveWebSearch,
+    enableLiveWebSearch: resolveLiveSearch(enableLiveWebSearch),
     forceRefresh,
   });
 
@@ -167,7 +170,7 @@ export async function researchIdeaFlow(userId, payload) {
     platform: targetPlatform,
     creatorProfile,
     previousItems,
-    enableLiveWebSearch,
+    enableLiveWebSearch: resolveLiveSearch(enableLiveWebSearch),
     forceRefresh,
   });
 
